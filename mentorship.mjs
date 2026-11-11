@@ -3,12 +3,27 @@ export const ROLE_STYLES = Object.freeze({
   focus: {color:'#111111',fill:'#eef5fb',label:'当前人物'},
   mentor: {color:'#c4473d',fill:'#ffffff',label:'上游指导者 · 已确认'},
   student: {color:'#c87816',fill:'#ffffff',label:'下游受指导者 · 已确认'},
+  'phd-supervisor': {color:'#c4473d',fill:'#ffffff',label:'PhD supervisor · confirmed'},
+  'postdoc-supervisor': {color:'#c87816',fill:'#ffffff',label:'Postdoc supervisor · confirmed'},
+  'dual-supervisor': {color:'#c4473d',secondaryColor:'#c87816',fill:'#ffffff',label:'PhD + Postdoc supervisor · confirmed'},
   other: {color:'#8ba2b7',fill:'#ffffff',label:'普通关联 / 指导关系未确认'},
   conflict: {color:'#8ba2b7',fill:'#ffffff',label:'指导链存在方向冲突 · 待核'}
 });
 
 export function isVerifiedMentorship(edge){
   return edge.directed===true && edge.verification?.status==='confirmed' && ['phd','postdoc'].includes(edge.type);
+}
+
+// Border color identifies the verified supervision stage, not graph generation.
+// Students never inherit an orange border just because they are downstream.
+export function classifySupervisors(edges){
+  const stages=new Map();
+  for(const edge of edges){
+    if(!isVerifiedMentorship(edge)||!edge.source||edge.source===edge.target)continue;
+    if(!stages.has(edge.source))stages.set(edge.source,new Set());
+    stages.get(edge.source).add(edge.type);
+  }
+  return new Map([...stages].map(([id,types])=>[id,types.size>1?'dual-supervisor':types.has('phd')?'phd-supervisor':'postdoc-supervisor']));
 }
 
 export function applyVerifiedMentorships(data,records){
