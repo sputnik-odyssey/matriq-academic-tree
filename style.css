@@ -591,3 +591,14 @@ dialog.modal::backdrop { background: #202f3b5c; backdrop-filter: blur(3px); }
   .import-actions { align-items: stretch; }
   .import-actions button { flex: 1 1 140px; }
 }
+
+/* Compact project summary for the research workspace. */
+.compact-intro { margin-bottom: 18px; gap: 20px; }
+.compact-intro .project-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.compact-intro h1 { font-size: 22px; line-height: 1.35; }
+.compact-intro .badge { margin: 0; }
+.compact-intro .metrics { padding-top: 0; }
+@media (max-width: 600px) {
+  .compact-intro { gap: 14px; }
+  .compact-intro h1 { font-size: 20px; }
+}
