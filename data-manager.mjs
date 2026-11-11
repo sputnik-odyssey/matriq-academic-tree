@@ -1,8 +1,8 @@
-import {parseUpload} from './importer.mjs?v=linkedin-history-20261111';
-import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=linkedin-history-20261111';
-import {enrichPerson} from './people.mjs?v=linkedin-history-20261111';
-import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=linkedin-history-20261111';
-import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=linkedin-history-20261111';
+import {parseUpload} from './importer.mjs?v=author-alias-20261111';
+import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=author-alias-20261111';
+import {enrichPerson} from './people.mjs?v=author-alias-20261111';
+import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=author-alias-20261111';
+import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=author-alias-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const format=value=>Number(value||0).toLocaleString('en-US');
@@ -94,6 +94,9 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     counts.textContent='新增论文 '+format(preview.summary.papersAdded)+' · 更新论文 '+format(preview.summary.papersUpdated)+' · 合作关系为青色无向连线。';section.append(counts);
     for(const paper of upload.papers){
       const p=document.createElement('p');p.textContent=paper.title+' · '+paper.authors.map(author=>author.name).join(', ');section.append(p);
+      const resolved=(preview.graph.papers||[]).find(item=>item.id===paper.id||item.doi&&item.doi===paper.doi);
+      const matches=(resolved?.authors||[]).map(author=>({author,node:preview.graph.nodes.find(node=>node.id===author.nodeId)})).filter(({author,node})=>node&&author.name!==node.name);
+      if(matches.length){const list=document.createElement('ul');list.className='paper-author-matches';for(const {author,node} of matches){const item=document.createElement('li');item.textContent=author.name+' → '+node.name+'（'+(node.affiliation||'机构未提供')+' · '+node.id+'）';list.append(item);}section.append(list);}
     }
     $('#import-preview').append(section);
   }

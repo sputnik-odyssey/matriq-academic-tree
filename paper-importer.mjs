@@ -1,9 +1,11 @@
 // Public bibliographic data only. Paper content never supplies executable instructions.
-import {normalizeMappingEdges} from './mentorship.mjs?v=linkedin-history-20261111';
-import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory} from './academic-history.mjs?v=linkedin-history-20261111';
+import {normalizeMappingEdges} from './mentorship.mjs?v=author-alias-20261111';
+import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory} from './academic-history.mjs?v=author-alias-20261111';
+import {nameMatchKind} from './name-matching.mjs?v=author-alias-20261111';
+import {sanitizeNameAliases,serializeNameAliases} from './public-aliases.mjs?v=author-alias-20261111';
 
 export const COAUTHOR_EDGE_TYPE=Object.freeze({id:'coauthor',label:'论文合著',color:'#80d8ff'});
-const PUBLIC_KEYS=new Set('A B C D E G H I N O P Q R T U V W X AB affiliationType academicStatus jobTitle expectedGraduation academicHistory'.split(' '));
+const PUBLIC_KEYS=new Set('A B C D E G H I N O P Q R T U V W X AB affiliationType academicStatus jobTitle expectedGraduation academicHistory nameAliases'.split(' '));
 const MAX_AUTHORS=100,MAX_DOCUMENT_PAPERS=20,MAX_PAPERS=2000,MAX_PAIRS=100000;
 const text=(value,max=40000)=>String(value??'').replace(/\u0000/g,'').trim().slice(0,max);
 const norm=value=>text(value).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
@@ -64,33 +66,79 @@ export function sanitizePaperDocument(document){
   return{kind:'paper',sourceFile:fileName(document.sourceFile||'paper-import.json'),sheet:'Paper metadata',papers:document.papers.map(p=>sanitizePaper(p)),matches,warnings:[]};
 }
 function existingORCID(node){return normalizeORCID(node.orcid)||(node.records||[]).map(r=>normalizeORCID(r.fields?.Q)).find(Boolean)||'';}
-function guardChanged(node,guard){return Object.hasOwn(guard,'orcid')&&guard.orcid!==existingORCID(node)||Boolean(guard.name&&!names(node).includes(norm(guard.name)));}
+function isReviewedChoice(selected){return Boolean(selected&&typeof selected==='object'&&selected.identity&&typeof selected.identity.name==='string'&&selected.identity.name&&Object.hasOwn(selected.identity,'orcid'));}
+function priorReviewProof(node,author,paper,prior,knownPapers=[]){
+  const current=existingORCID(node);
+  if(!prior||!samePaper(prior,paper)||!current||author.orcid&&author.orcid!==current)return false;
+  const assigned=(prior.authors||[]).find(a=>a.nodeId===node.id&&norm(a.name)===norm(author.name)&&(!a.orcid||normalizeORCID(a.orcid)===current));
+  const record=(node.records||[]).find(r=>r.sourceFile===`paper-${hash(prior.id)}.json`&&norm(r.fields?.A)===norm(author.name)&&(!r.fields?.Q||normalizeORCID(r.fields.Q)===current));
+  if(!assigned||!record||!names(node).includes(norm(author.name)))return false;
+  if(author.orcid)return normalizeORCID(assigned.orcid)===current&&normalizeORCID(record.fields?.Q)===current;
+  // An earlier reviewed paper may lack ORCID. Replay it only when a separately
+  // resolved paper and its exact source record jointly support the learned ID.
+  return knownPapers.some(known=>(known.authors||[]).some(a=>a.nodeId===node.id&&normalizeORCID(a.orcid)===current&&(node.records||[]).some(r=>r.sourceFile===`paper-${hash(known.id)}.json`&&norm(r.fields?.A)===norm(a.name)&&normalizeORCID(r.fields?.Q)===current)));
+}
+function guardChanged(node,guard,author,paper,prior,knownPapers){
+  if(guard.name&&norm(guard.name)!==norm(node.name))return true;
+  if(!Object.hasOwn(guard,'orcid')||guard.orcid===existingORCID(node))return false;
+  return !(guard.orcid===''&&priorReviewProof(node,author,paper,prior,knownPapers));
+}
+function orcidConflict(node,author){const old=existingORCID(node);return Boolean(old&&author.orcid&&old!==author.orcid);}
 function compatible(node,author){
-  if(!person(node))return false;
-  const old=existingORCID(node);if(old&&author.orcid&&old!==author.orcid)return false;
-  return Boolean(old&&author.orcid&&old===author.orcid)||names(node).includes(norm(author.name));
+  if(!person(node)||orcidConflict(node,author))return false;
+  return Boolean(existingORCID(node)&&author.orcid&&existingORCID(node)===author.orcid)||names(node).includes(norm(author.name));
 }
 function candidatesFor(graph,author){
-  const profiles=graph.nodes.filter(person),strong=author.orcid?profiles.filter(n=>existingORCID(n)===author.orcid):[];
-  const byName=profiles.filter(n=>names(n).includes(norm(author.name))&&(!author.orcid||!existingORCID(n)||existingORCID(n)===author.orcid));
-  return{strong,byName};
+  const profiles=graph.nodes.filter(person),allowed=profiles.filter(n=>!orcidConflict(n,author));
+  const strong=author.orcid?allowed.filter(n=>existingORCID(n)===author.orcid):[];
+  const byName=allowed.filter(n=>names(n).includes(norm(author.name)));
+  const variants=allowed.filter(n=>!byName.includes(n)&&[n.name,n.nameZh,...(n.aliases||[])].some(value=>nameMatchKind(value,author.name)==='variant'));
+  return{strong,byName,variants};
+}
+function candidateReason(node,author){
+  if(orcidConflict(node,author))return'ORCID 冲突，不能合并';
+  if(author.orcid&&existingORCID(node)===author.orcid)return'ORCID 一致';
+  if(norm(node.name)===norm(author.name)||norm(node.nameZh)===norm(author.name))return'姓名一致，请核对';
+  if((node.aliases||[]).some(value=>norm(value)===norm(author.name)))return'已确认的姓名别名';
+  if([node.name,node.nameZh,...(node.aliases||[])].some(value=>nameMatchKind(value,author.name)==='variant'))return'姓名变体候选，请核对';
+  return'手动检索候选，请核对';
+}
+/** Search exposes candidates for review; it never makes an identity decision. */
+export function searchProfilesForAuthor(graph,author={},query,{limit=20}={}){
+  author={...author,orcid:normalizeORCID(author.orcid)};
+  const input=norm(query),words=text(query,300).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().split(/\s+/).filter(Boolean);
+  const profiles=(graph?.nodes||[]).filter(person),ranked=[];
+  for(const node of profiles){
+    const nodeNames=[node.name,node.nameZh,...(node.aliases||[])].filter(Boolean),nameKeys=nodeNames.map(norm),affiliation=norm(node.affiliation),id=norm(node.id),reason=candidateReason(node,author);
+    let score=0;
+    if(!input){if(reason==='ORCID 一致')score=100;else if(reason==='已确认的姓名别名'||reason==='姓名一致，请核对')score=90;else if(reason==='姓名变体候选，请核对')score=70;}
+    else if(nameKeys.includes(input)||id===input)score=100;
+    else if(nameKeys.some(value=>value.startsWith(input)))score=90;
+    else if(nameKeys.some(value=>value.includes(input)))score=80;
+    else if(words.every(word=>norm([node.name,node.nameZh,...(node.aliases||[]),node.affiliation,node.id].join(' ')).includes(norm(word))))score=60;
+    else if(affiliation.includes(input))score=30;
+    if(score)ranked.push({id:node.id,name:node.name,affiliation:node.affiliation||'',reason,conflict:orcidConflict(node,author),score});
+  }
+  return ranked.sort((a,b)=>Number(a.conflict)-Number(b.conflict)||b.score-a.score||a.name.localeCompare(b.name)).slice(0,Math.max(1,Math.min(100,Number(limit)||20))).map(({score,...candidate})=>candidate);
 }
 function samePaper(a,b){return a.id===b.id||Boolean(a.doi&&b.doi&&a.doi===b.doi)||Boolean(a.arxivId&&b.arxivId&&a.arxivId===b.arxivId);}
 export function previewAuthorMatches(graph,input){
   const paper=sanitizePaper(input),prior=(graph.papers||[]).find(p=>samePaper(p,paper)),issues=[];
   const authors=paper.authors.map((author,index)=>{
-    const {strong,byName}=candidatesFor(graph,author),previous=(prior?.authors||[]).filter(a=>norm(a.name)===norm(author.name)&&(!author.orcid||!a.orcid||author.orcid===normalizeORCID(a.orcid))).map(a=>graph.nodes.find(n=>n.id===a.nodeId)).filter(n=>compatible(n,author));
-    const unique=[...new Map(previous.map(n=>[n.id,n])).values()];
-    const exact=strong.length===1?strong[0]:!strong.length&&unique.length===1?unique[0]:null;
-    const candidateIds=[...new Set([...strong,...byName,...unique].map(n=>n.id))];
-    return{index,...author,candidateIds,matchId:exact?.id||null,status:exact?'exact':candidateIds.length>1?'ambiguous':candidateIds.length?'suggested':'new',reason:exact?(strong.length?'Exact ORCID':'Previously reviewed paper author'):candidateIds.length?'Name matches require review':'No existing exact identity match'};
+    const {strong,byName,variants}=candidatesFor(graph,author),previous=(prior?.authors||[]).filter(a=>norm(a.name)===norm(author.name)&&(!author.orcid||!a.orcid||author.orcid===normalizeORCID(a.orcid))).map(a=>graph.nodes.find(n=>n.id===a.nodeId)).filter(n=>compatible(n,author));
+    const unique=[...new Map(previous.map(n=>[n.id,n])).values()],aliases=byName.filter(n=>norm(n.name)!==norm(author.name)&&(n.aliases||[]).some(value=>norm(value)===norm(author.name)));
+    const exact=strong.length===1?strong[0]:!strong.length&&unique.length===1?unique[0]:!strong.length&&!unique.length&&aliases.length===1&&byName.length===1?aliases[0]:null;
+    const candidateIds=[...new Set([...strong,...byName,...unique,...variants].map(n=>n.id))],variantCandidateIds=variants.map(n=>n.id),candidateReasons=Object.fromEntries(candidateIds.map(id=>[id,candidateReason(graph.nodes.find(n=>n.id===id),author)]));
+    const onlyVariants=!strong.length&&!byName.length&&!unique.length&&variants.length>0;
+    return{index,...author,candidateIds,variantCandidateIds,candidateReasons,matchId:exact?.id||null,requiresReview:!exact&&(candidateIds.length>1||onlyVariants),status:exact?'exact':candidateIds.length>1?'ambiguous':onlyVariants?'variant':candidateIds.length?'suggested':'new',reason:exact?(strong.length?'Exact ORCID':unique.length?'Previously reviewed paper author':'Confirmed name alias'):onlyVariants?'Name variant requires review':candidateIds.length?'Name matches require review':'No existing exact identity match'};
   });
   return{paper,authors,warnings:[],issues};
 }
 function safeNode(node,sourceFile){
   const out={};for(const key of ['id','name','nameZh','kind','entityType','affiliation','role','location','phd','bachelor','research','website','scholar','orcid','linkedin','affiliationType','academicStatus','jobTitle','expectedGraduation','identityNote'])if(typeof node[key]==='string')out[key]=text(node[key]);
   out.stub=Boolean(node.stub);out.degree=0;out.aliases=(node.aliases||[]).filter(v=>typeof v==='string').map(v=>text(v,300));out.publications=(node.publications||[]).filter(v=>typeof v==='string').map(v=>text(v));
-  out.records=(node.records||[]).filter(r=>Number.isInteger(r?.row)&&r.row>0).map(r=>({row:r.row,sourceFile:fileName(r.sourceFile||sourceFile||'previous-dataset'),...(r.referenceOnly?{referenceOnly:true}:{}),fields:Object.fromEntries(Object.entries(r.fields||{}).filter(([key,val])=>PUBLIC_KEYS.has(key)&&(key==='academicHistory'||['string','number','boolean'].includes(typeof val))).map(([key,val])=>[key,key==='academicHistory'?serializeAcademicHistory(val):text(val)]).filter(([,val])=>val))}));
+  out.records=(node.records||[]).filter(r=>Number.isInteger(r?.row)&&r.row>0).map(r=>({row:r.row,sourceFile:fileName(r.sourceFile||sourceFile||'previous-dataset'),...(r.referenceOnly?{referenceOnly:true}:{}),fields:Object.fromEntries(Object.entries(r.fields||{}).filter(([key,val])=>PUBLIC_KEYS.has(key)&&(['academicHistory','nameAliases'].includes(key)||['string','number','boolean'].includes(typeof val))).map(([key,val])=>[key,key==='academicHistory'?serializeAcademicHistory(val):key==='nameAliases'?serializeNameAliases(val):text(val)]).filter(([,val])=>val))}));
+  out.aliases=sanitizeNameAliases([out.name,...out.aliases,...out.records.flatMap(r=>sanitizeNameAliases(r.fields?.nameAliases))]);
   out.academicHistory=mergeAcademicHistory(out.records.flatMap(r=>sanitizeAcademicHistory(r.fields?.academicHistory)),node.academicHistory);
   out.rows=[...new Set(out.records.map(r=>r.row))].sort((a,b)=>a-b);return out;
 }
@@ -136,43 +184,41 @@ export function previewPaperImport(base,rawDocument){
     const incoming=document.papers[pi],prior=[...paperMap.values()].find(p=>samePaper(p,incoming));
     const paper=prior?sanitizePaper({...prior,...incoming,id:prior.id,doi:incoming.doi||prior.doi,arxivId:incoming.arxivId||prior.arxivId,year:incoming.year||prior.year,sources:[...(prior.sources||[]),...incoming.sources]}):incoming;
     const review=previewAuthorMatches({...graph,papers:[...paperMap.values()]},paper),resolved=[];let blocked=false;
-    // Validate every reviewed choice before changing any author in this paper.
+    // Resolve and validate every reviewed choice before changing any author in this paper.
+    const decisions=[],prospectiveORCIDs=new Map(),prospectiveOwners=new Map();
     for(const author of review.authors){
       const selected=choiceFor(document,pi,author.index),choice=typeof selected==='object'?selected.nodeId:selected;
-      const node=choice&&choice!=='new'?nodeMap.get(choice):null;
       const strong=author.orcid?graph.nodes.filter(n=>person(n)&&existingORCID(n)===author.orcid):[];
-      let message='';
-      if(choice&&choice!=='new'&&!compatible(node,author))message=`Review the identity match for ${author.name}; the selected person is missing or has conflicting identity data.`;
+      let node=choice&&choice!=='new'?nodeMap.get(choice):choice==='new'&&strong.length===1?strong[0]:!choice&&author.matchId?nodeMap.get(author.matchId):null;
+      const reviewed=isReviewedChoice(selected);let message='';
+      if(choice&&choice!=='new'&&(!person(node)||orcidConflict(node,author)||!compatible(node,author)&&!reviewed))message=`Review the identity match for ${author.name}; the selected person is missing or has conflicting identity data.`;
       else if(choice==='new'&&strong.length>1)message=`Multiple profiles carry the ORCID for ${author.name}; select the intended existing profile.`;
       else if(!choice&&!author.matchId&&author.candidateIds.length){ambiguous++;message=`Review ${author.name}: select an existing person or create a separate profile.`;}
-      else if(node&&selected?.identity&&guardChanged(node,selected.identity))message=`The reviewed identity for ${author.name} changed. Review it again.`;
+      else if(node&&reviewed&&!author.orcid&&!compatible(node,author)&&!sanitizeNameAliases([node.name,...(node.aliases||[]),author.name]).some(value=>norm(value)===norm(author.name)))message=`The reviewed name for ${author.name} cannot be retained as a public alias; check the name or profile alias limit.`;
+      else if(node&&selected?.identity&&guardChanged(node,selected.identity,author,paper,prior,[...paperMap.values()]))message=`The reviewed identity for ${author.name} changed. Review it again.`;
+      else if(node&&author.orcid&&!existingORCID(node)&&strong.some(n=>n.id!==node.id))message=`The ORCID for ${author.name} already belongs to another profile; review that existing profile.`;
+      if(!message&&node&&author.orcid){const previous=prospectiveORCIDs.get(node.id);if(previous&&previous!==author.orcid)message=`Conflicting author ORCIDs were assigned to ${node.name}; review the matches.`;else prospectiveORCIDs.set(node.id,author.orcid);}
+      if(!message&&author.orcid){const owner=node?.id||'new:'+author.orcid,previous=prospectiveOwners.get(author.orcid);if(previous&&previous!==owner)message=`The same author ORCID was assigned to different people; review ${author.name}.`;else prospectiveOwners.set(author.orcid,owner);}
       if(message){issues.push({level:'error',paperIndex:pi,authorIndex:author.index,message});blocked=true;}
+      decisions.push({author,selected,node,reviewed});
     }
     if(blocked){excluded++;continue;}
-    for(const author of review.authors){
-      const selected=choiceFor(document,pi,author.index),choice=typeof selected==='object'?selected.nodeId:selected;
-      let node=null;
-      if(choice&&choice!=='new'){
-        node=nodeMap.get(choice);
-        if(!compatible(node,author)){issues.push({level:'error',paperIndex:pi,authorIndex:author.index,message:`Review the identity match for ${author.name}; the selected person is missing or has conflicting identity data.`});blocked=true;continue;}
-        if(selected?.identity&&guardChanged(node,selected.identity)){issues.push({level:'error',paperIndex:pi,authorIndex:author.index,message:`The reviewed identity for ${author.name} changed. Review it again.`});blocked=true;continue;}
-      }else if(choice==='new'&&author.orcid){const strong=graph.nodes.filter(n=>person(n)&&existingORCID(n)===author.orcid);if(strong.length===1)node=strong[0];}
-      else if(!choice&&author.matchId)node=nodeMap.get(author.matchId);
-      else if(!choice&&author.candidateIds.length){ambiguous++;issues.push({level:'error',paperIndex:pi,authorIndex:author.index,message:`Review ${author.name}: select an existing person or create a separate profile.`});blocked=true;continue;}
+    for(const decision of decisions){
+      const {author,selected,reviewed}=decision;let node=decision.node;
       if(!node){
         let id='pa'+hash(author.orcid?'orcid:'+author.orcid:paper.id+'|'+author.index+'|'+norm(author.name));
         if(nodeMap.has(id)&&compatible(nodeMap.get(id),author))node=nodeMap.get(id);
         else{while(nodeMap.has(id))id+='x';node=makeAuthorNode(author,id);nodeMap.set(id,node);graph.nodes.push(node);changed.add(id);}
       }
-      const before=JSON.stringify(node);if(!original.has(node.id)&&!node.orcid&&author.orcid)node.orcid=author.orcid;
-      node.aliases=[...new Set([...(node.aliases||[]),author.name])];node.publications=[...new Set([...(node.publications||[]),paper.title])];
-      const fields={A:author.name,V:paper.title,...(author.orcid&&(!original.has(node.id)||existingORCID(node))?{Q:author.orcid}:{}),...(paper.url?{AB:paper.url}:{})};
+      const before=JSON.stringify(node);
+      if(author.orcid&&!existingORCID(node)&&(!original.has(node.id)||reviewed))node.orcid=author.orcid;
+      node.aliases=sanitizeNameAliases([node.name,...(node.aliases||[]),author.name]);node.publications=[...new Set([...(node.publications||[]),paper.title])];
+      const fields={A:author.name,V:paper.title,...(author.orcid&&existingORCID(node)===author.orcid?{Q:author.orcid}:{}),...(paper.url?{AB:paper.url}:{}),...(node.aliases.length>1?{nameAliases:serializeNameAliases(node.aliases)}:{})};
       const record={row:author.index+1,sourceFile:`paper-${hash(paper.id)}.json`,fields};
       if(!node.records.some(r=>r.row===record.row&&r.sourceFile===record.sourceFile&&JSON.stringify(r.fields)===JSON.stringify(fields)))node.records.push(record);
       node.rows=[...new Set(node.records.map(r=>r.row))].sort((a,b)=>a-b);if(JSON.stringify(node)!==before)changed.add(node.id);subjects.add(node.id);
-      const {index,candidateIds,matchId,status,reason,...publicAuthor}=author;resolved.push({...publicAuthor,nodeId:node.id});
+      resolved.push({name:author.name,...(author.orcid?{orcid:author.orcid}:{}),...(author.affiliation?{affiliation:author.affiliation}:{}),...(author.externalId?{externalId:author.externalId}:{}),nodeId:node.id});
     }
-    if(blocked){excluded++;continue;}
     const resolvedPaper={...paper,authors:resolved},previous=paperMap.get(paper.id);if(!previous)papersAdded++;else if(JSON.stringify(previous)!==JSON.stringify(resolvedPaper))papersUpdated++;
     paperMap.set(paper.id,resolvedPaper);focusPersonId=focusPersonId||resolved[0]?.nodeId||null;
   }

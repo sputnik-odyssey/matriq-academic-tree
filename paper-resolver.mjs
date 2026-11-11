@@ -1,6 +1,6 @@
 // Public bibliographic lookup only. Fetches are restricted to fixed metadata APIs.
 // A listed author/coauthor is not evidence of a PhD or Postdoc relationship.
-import {normalizeORCID} from './paper-importer.mjs?v=linkedin-history-20261111';
+import {normalizeORCID} from './paper-importer.mjs?v=author-alias-20261111';
 const CROSSREF = 'https://api.crossref.org';
 const DATACITE = 'https://api.datacite.org';
 const CATALOG_URL = new URL('./paper-catalog.json', import.meta.url);

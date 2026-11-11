@@ -1,12 +1,12 @@
 /* MatriQ Academic Tree — dependency-free, source-backed relationship explorer. */
-import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=linkedin-history-20261111';
-import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=linkedin-history-20261111';
-import {enrichPeople} from './people.mjs?v=linkedin-history-20261111';
-import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=linkedin-history-20261111';
-import {setupDataManager} from './data-manager.mjs?v=linkedin-history-20261111';
-import {setupPaperManager} from './paper-manager.mjs?v=linkedin-history-20261111';
-import {setupLinkedInManager} from './linkedin-manager.mjs?v=linkedin-history-20261111';
-import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=linkedin-history-20261111';
+import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=author-alias-20261111';
+import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=author-alias-20261111';
+import {enrichPeople} from './people.mjs?v=author-alias-20261111';
+import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=author-alias-20261111';
+import {setupDataManager} from './data-manager.mjs?v=author-alias-20261111';
+import {setupPaperManager} from './paper-manager.mjs?v=author-alias-20261111';
+import {setupLinkedInManager} from './linkedin-manager.mjs?v=author-alias-20261111';
+import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=author-alias-20261111';
 'use strict';
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -34,7 +34,7 @@ async function init(){
     const response=await fetch('data.json.gz',{cache:'no-cache'});
     if(!response.ok)throw Error('数据文件未能载入');
     publishedGraph=await decodeGraphBytes(await response.arrayBuffer());
-    try{const evidenceResponse=await fetch('mentorships.json?v=linkedin-history-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
+    try{const evidenceResponse=await fetch('mentorships.json?v=author-alias-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
     let active=publishedGraph,info={source:'published'};
     try{
       const local=await loadLocalGraph();
@@ -210,6 +210,7 @@ function renderMappingRecords(person){
 
 function renderDetail(){
   const n=nodes.get(state.focus),edges=adjacency.get(n.id)||[];
+  const nameAliases=[...new Set(n.aliases||[])].filter(a=>norm(a)!==norm(n.name)&&norm(a)!==norm(n.nameZh));
   const linkedPapers=(data.papers||[]).filter(paper=>paper.authors?.some(author=>author.nodeId===n.id));
   const profileSourceCount=(n.rows?.length||0)+linkedPapers.length;
   const field=(name,value)=>value?`<div class="info-row"><dt>${esc(name)}</dt><dd>${esc(value)}</dd></div>`:'';
@@ -217,7 +218,7 @@ function renderDetail(){
   const ambiguous=data.meta.ambiguousReferences?.find(r=>r.referenceId===n.id);
   const expected=n.expectedGraduationRelevant?`<p class="graduation-label">${esc(n.expectedGraduationLabel==='Not provided'?'Expected graduation: Not provided':n.expectedGraduationLabel)}</p>`:'';
   const notes=(n.profileNotes||[]).map(note=>`<p class="source-note">${esc(note)}</p>`).join('');
-  $('#detail').innerHTML=`<div class="profile-top"><p class="profile-kicker">${esc(kindLabel(n))} <span>↗</span></p><div class="avatar" aria-hidden="true">${esc(n.entityType==='person'?n.name.split(' ').filter(Boolean).map(x=>x[0]).slice(0,2).join(''):'⌘')}</div><h2>${esc(n.name)}</h2>${n.nameZh&&n.nameZh!==n.name?`<p class="chinese-name">${esc(n.nameZh)}</p>`:''}<p class="profile-affiliation">${esc(n.displayAffiliation)}</p><span class="career-badge">${esc(n.displayRole)}</span><span class="badge">${esc(n.affiliationTypeLabel)}</span>${expected}</div>
+  $('#detail').innerHTML=`<div class="profile-top"><p class="profile-kicker">${esc(kindLabel(n))} <span>↗</span></p><div class="avatar" aria-hidden="true">${esc(n.entityType==='person'?n.name.split(' ').filter(Boolean).map(x=>x[0]).slice(0,2).join(''):'⌘')}</div><h2>${esc(n.name)}</h2>${nameAliases.length?`<p class="person-aliases">署名与别名：${nameAliases.map(esc).join(' · ')}</p>`:''}${n.nameZh&&n.nameZh!==n.name?`<p class="chinese-name">${esc(n.nameZh)}</p>`:''}<p class="profile-affiliation">${esc(n.displayAffiliation)}</p><span class="career-badge">${esc(n.displayRole)}</span><span class="badge">${esc(n.affiliationTypeLabel)}</span>${expected}</div>
   <div class="profile-metrics"><div><b>${fmt(edges.length)}</b><span>直接关联</span></div><div><b>${fmt(profileSourceCount)}</b><span>${n.stub?'引用行':'来源记录'}</span></div></div>
   ${n.stub?'<div class="notice compact">此对象仅在关系字段出现；未记录的机构和履历不会自动补全。</div>':''}
   ${ambiguous?`<section class="detail-section"><h3>同名候选档案</h3><p class="source-note">Multiple same-name profiles remain separate.</p>${ambiguous.candidateIds.filter(id=>nodes.has(id)).map(id=>{const c=nodes.get(id);return`<button class="relation-item" data-person="${id}"><b>${esc(c.name)}</b><small>${esc(c.displayAffiliation||c.phd||'第 '+c.rows[0]+' 行')}</small></button>`}).join('')}</section>`:''}

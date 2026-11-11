@@ -1,6 +1,6 @@
-import {sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=linkedin-history-20261111';
-import {previewImport,sanitizePublicImportFields} from './importer.mjs?v=linkedin-history-20261111';
-import {previewPaperImport,sanitizePaper,sanitizePaperDocument} from './paper-importer.mjs?v=linkedin-history-20261111';
+import {sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=author-alias-20261111';
+import {previewImport,sanitizePublicImportFields} from './importer.mjs?v=author-alias-20261111';
+import {previewPaperImport,sanitizePaper,sanitizePaperDocument} from './paper-importer.mjs?v=author-alias-20261111';
 
 export function queueUpload(parsed,staged=[]){
   const rows=parsed.kind==='linkedin'?(parsed.rows||[]).map(row=>({row:row.row,fields:sanitizePublicImportFields(Object.fromEntries(Object.entries(row.fields||{}).filter(([key])=>['A','B','R','academicHistory'].includes(key))))})):structuredClone(parsed.rows);

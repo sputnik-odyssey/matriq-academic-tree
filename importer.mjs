@@ -1,7 +1,8 @@
 /* Local-only structured-file import. Uploaded text is data, never executable instructions. */
-import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory,sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=linkedin-history-20261111';
-import {normalizeMappingEdges} from './mentorship.mjs?v=linkedin-history-20261111';
-import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=linkedin-history-20261111';
+import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory,sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=author-alias-20261111';
+import {sanitizeNameAliases,serializeNameAliases} from './public-aliases.mjs?v=author-alias-20261111';
+import {normalizeMappingEdges} from './mentorship.mjs?v=author-alias-20261111';
+import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=author-alias-20261111';
 export const PUBLIC_COLUMNS=Object.freeze([
   {key:'A',label:'Legal Name'},{key:'B',label:'中文名'},{key:'C',label:'PhD'},
   {key:'D',label:'Bachelor location'},{key:'E',label:'Bachelor'},
@@ -12,7 +13,7 @@ export const PUBLIC_COLUMNS=Object.freeze([
   {key:'W',label:'Paper Citation Count'},{key:'X',label:'Year Cited'},{key:'AB',label:'Source'},
   {key:'affiliationType',label:'Affiliation Type'},{key:'academicStatus',label:'Academic Status'},
   {key:'jobTitle',label:'Job Title'},{key:'expectedGraduation',label:'Expected Graduation'},
-  {key:'academicHistory',label:'Academic History'}
+  {key:'academicHistory',label:'Academic History'},{key:'nameAliases',label:'Name Aliases'}
 ]);
 const PUBLIC_KEYS=new Set(PUBLIC_COLUMNS.map(c=>c.key));
 const MAX_FILE=20*1024*1024,MAX_XML=64*1024*1024,MAX_ROWS=100000,MAX_COLUMNS=512,MAX_CELL=40000;
@@ -29,11 +30,11 @@ const nameOf=fields=>useful(fields.A)?fields.A:useful(fields.B)?fields.B:'';
 
 function hash(value){let a=2166136261,b=2246822519;for(let i=0;i<value.length;i++){a=Math.imul(a^value.charCodeAt(i),16777619);b=Math.imul(b^value.charCodeAt(i),3266489917);}return(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
 function stableJSON(value){return JSON.stringify(Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b))));}
-function cleanedFields(fields){return Object.fromEntries(Object.entries(fields||{}).filter(([key,value])=>PUBLIC_KEYS.has(key)&&useful(value)).map(([key,value])=>[key,text(value)]));}
+function cleanedFields(fields){return sanitiseFields(Object.fromEntries(Object.entries(fields||{}).filter(([key,value])=>PUBLIC_KEYS.has(key)&&useful(value))));}
 function sanitiseFields(fields){
   const result={};
   for(const [key,value] of Object.entries(fields||{}))if(PUBLIC_KEYS.has(key)&&value!==null&&value!==undefined){
-    const str=key==='academicHistory'?serializeAcademicHistory(value):text(value);if(str&&!((key==='N'||key==='O')&&!useful(str)))result[key]=str;
+    const str=key==='academicHistory'?serializeAcademicHistory(value):key==='nameAliases'?serializeNameAliases(value):text(value);if(str&&!((key==='N'||key==='O')&&!useful(str)))result[key]=str;
   }
   return result;
 }
@@ -53,6 +54,7 @@ for(const [key,names] of Object.entries({
   academicStatus:['AcademicStatus','Student Status','PhD Status','Career Status'],
   jobTitle:['JobTitle','Employment Title','Current Job Title','Actual Job Title'],
   academicHistory:['AcademicHistory','Academic Timeline','博士与博后履历','学术履历'],
+  nameAliases:['NameAliases','Known Names','Name Variants','姓名别名','姓名變體','姓名变体'],
   expectedGraduation:['ExpectedGraduation','Expected Graduation Date','Expected Graduation Year','Anticipated Graduation','预计毕业时间','预计毕业日期','预计毕业年份']
 }))for(const name of names)HEADER_ALIASES.set(norm(name),key);
 
@@ -205,6 +207,7 @@ function objectFields(value){
   for(const [key,val] of Object.entries(value||{})){
     const mapped=PUBLIC_KEYS.has(key)?key:/^affiliation\s+type$/i.test(key)?'affiliationType':HEADER_ALIASES.get(norm(key));
     if(mapped==='academicHistory'){const history=serializeAcademicHistory(val);if(history)result[mapped]=history;}
+    else if(mapped==='nameAliases'){const aliases=serializeNameAliases(val);if(aliases)result[mapped]=aliases;}
     else if(mapped&&val!==null&&val!==undefined&&['string','number','boolean'].includes(typeof val))result[mapped]=text(val);
   }
   return sanitiseFields(result);
@@ -232,6 +235,9 @@ function parseJSONUpload(value,file){
           if(['string','number','boolean'].includes(typeof supplied)&&useful(supplied)&&!mapped.some(r=>useful(r.fields[key])))mapped[0].fields[key]=text(supplied);
         }
         if(mapped.length){
+          const aliases=serializeNameAliases([node.name,...(Array.isArray(node.aliases)?node.aliases:[]),...mapped.flatMap(r=>sanitizeNameAliases(r.fields.nameAliases))]);
+          if(aliases)mapped[0].fields.nameAliases=aliases;
+          if(typeof node.orcid==='string'&&useful(node.orcid)&&!mapped.some(r=>useful(r.fields.Q)))mapped[0].fields.Q=text(node.orcid);
           const history=mergeAcademicHistory(mapped.flatMap(r=>sanitizeAcademicHistory(r.fields.academicHistory)),node.academicHistory);
           // The node chronology is the current reviewed snapshot. Apply it after
           // older source rows so a graph roundtrip cannot revive superseded dates.
@@ -239,7 +245,7 @@ function parseJSONUpload(value,file){
         }
         records.push(...mapped);
       }
-      else records.push({personKey:text(node.id).slice(0,200),fields:{A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation,academicHistory:serializeAcademicHistory(node.academicHistory)}});
+      else records.push({personKey:text(node.id).slice(0,200),fields:{A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation,academicHistory:serializeAcademicHistory(node.academicHistory),nameAliases:serializeNameAliases([node.name,...(Array.isArray(node.aliases)?node.aliases:[])])}});
     }
   }
   if(!records)throw Error('JSON must contain an array of named people rows or an exported graph.');
@@ -288,14 +294,24 @@ function urlIdentity(value,type){
 }
 
 function nodeFields(node){
-  const result={A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation,academicHistory:serializeAcademicHistory(mergeAcademicHistory((node.records||[]).flatMap(r=>sanitizeAcademicHistory(r.fields?.academicHistory)),node.academicHistory))};
+  const result={A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation,academicHistory:serializeAcademicHistory(mergeAcademicHistory((node.records||[]).flatMap(r=>sanitizeAcademicHistory(r.fields?.academicHistory)),node.academicHistory)),nameAliases:serializeNameAliases([node.name,...(Array.isArray(node.aliases)?node.aliases:[]),...(node.records||[]).flatMap(r=>sanitizeNameAliases(r.fields?.nameAliases))])};
   for(const record of node.records||[])for(const [key,value] of Object.entries(record.fields||{}))if(PUBLIC_KEYS.has(key)&&useful(value)&&!useful(result[key]))result[key]=value;
   return sanitiseFields(result);
 }
 function identityConflict(a,b){return['Q','R','T'].some(key=>urlIdentity(a[key],key)&&urlIdentity(b[key],key)&&urlIdentity(a[key],key)!==urlIdentity(b[key],key));}
 function sameName(a,b){const namesA=[a.A,a.B].filter(useful).map(norm),namesB=[b.A,b.B].filter(useful).map(norm);return namesA.some(n=>namesB.includes(n));}
 function provenanceMatch(node,fields,record,sourceFile){
-  return!identityConflict(nodeFields(node),fields)&&(node.records||[]).some(r=>r.row===record.row&&(r.sourceFile||sourceFile)===sourceFile&&stableJSON(cleanedFields(r.fields))===stableJSON(cleanedFields(fields)));
+  if(identityConflict(nodeFields(node),fields))return false;
+  const incoming=cleanedFields(fields);
+  return(node.records||[]).some(r=>{
+    if(r.row!==record.row||(r.sourceFile||sourceFile)!==sourceFile)return false;
+    const previous=cleanedFields(r.fields);
+    // Graph snapshots can add reviewed aliases or identifiers to an existing row.
+    // Retain its full public source anchor: a named row and every prior value
+    // must still match. File/row coordinates alone never establish identity.
+    const anchored=['A','B'].some(key=>useful(previous[key])&&previous[key]===incoming[key]);
+    return anchored&&Object.entries(previous).filter(([key])=>key!=='nameAliases').every(([key,value])=>incoming[key]===value);
+  });
 }
 function identityMatch(node,fields,record,sourceFile){
   const existing=nodeFields(node);if(identityConflict(existing,fields))return false;
@@ -310,13 +326,13 @@ function identityMatch(node,fields,record,sourceFile){
 
 function makePerson(fields,id){
   const name=nameOf(fields),nameZh=useful(fields.B)&&norm(fields.B)!==norm(name)?fields.B:'';
-  return{id,name,nameZh,kind:'person',entityType:'person',affiliation:useful(fields.G)?fields.G:'',role:useful(fields.H)?fields.H:'',location:useful(fields.I)?fields.I:'',phd:useful(fields.C)?fields.C:'',bachelor:useful(fields.E)?fields.E:'',research:'',website:useful(fields.P)?fields.P:'',scholar:useful(fields.T)?fields.T:'',orcid:useful(fields.Q)?fields.Q:'',linkedin:useful(fields.R)?fields.R:'',affiliationType:useful(fields.affiliationType)?fields.affiliationType:'',academicStatus:useful(fields.academicStatus)?fields.academicStatus:'',jobTitle:useful(fields.jobTitle)?fields.jobTitle:'',expectedGraduation:useful(fields.expectedGraduation)?fields.expectedGraduation:'',academicHistory:sanitizeAcademicHistory(fields.academicHistory),rows:[],records:[],stub:false,aliases:[name],identityNote:'',degree:0,publications:useful(fields.V)?[fields.V]:[]};
+  return{id,name,nameZh,kind:'person',entityType:'person',affiliation:useful(fields.G)?fields.G:'',role:useful(fields.H)?fields.H:'',location:useful(fields.I)?fields.I:'',phd:useful(fields.C)?fields.C:'',bachelor:useful(fields.E)?fields.E:'',research:'',website:useful(fields.P)?fields.P:'',scholar:useful(fields.T)?fields.T:'',orcid:useful(fields.Q)?fields.Q:'',linkedin:useful(fields.R)?fields.R:'',affiliationType:useful(fields.affiliationType)?fields.affiliationType:'',academicStatus:useful(fields.academicStatus)?fields.academicStatus:'',jobTitle:useful(fields.jobTitle)?fields.jobTitle:'',expectedGraduation:useful(fields.expectedGraduation)?fields.expectedGraduation:'',academicHistory:sanitizeAcademicHistory(fields.academicHistory),rows:[],records:[],stub:false,aliases:sanitizeNameAliases([name,...sanitizeNameAliases(fields.nameAliases)]),identityNote:'',degree:0,publications:useful(fields.V)?[fields.V]:[]};
 }
 
 function sanitiseNode(node,sourceFile){
   const out=makePerson(nodeFields(node),text(node.id));
   out.entityType=['person','institution','group','publication'].includes(node.entityType)?node.entityType:'person';out.kind=out.entityType==='institution'?'organization':out.entityType;
-  out.stub=Boolean(node.stub);out.aliases=[...new Set([node.name,...(Array.isArray(node.aliases)?node.aliases:[])].filter(v=>typeof v==='string').map(text))];
+  out.stub=Boolean(node.stub);out.aliases=sanitizeNameAliases([node.name,...(Array.isArray(node.aliases)?node.aliases:[]),...sanitizeNameAliases(nodeFields(node).nameAliases)]);
   out.records=(node.records||[]).filter(r=>Number.isInteger(r.row)&&r.row>0).map(r=>({row:r.row,fields:sanitiseFields(r.fields),sourceFile:basename(r.sourceFile||sourceFile),...(r.referenceOnly?{referenceOnly:true}:{})}));
   out.rows=[...new Set(out.records.map(r=>r.row))].sort((a,b)=>a-b);
   out.publications=[...new Set([...(Array.isArray(node.publications)?node.publications:[]),...out.records.map(r=>r.fields.V)].filter(useful).map(text))];
@@ -344,7 +360,7 @@ function updatePerson(node,fields,record,sourceFile,{preserveName=false}={}){
   const mapping={A:'name',B:'nameZh',C:'phd',E:'bachelor',G:'affiliation',H:'role',I:'location',P:'website',Q:'orcid',R:'linkedin',T:'scholar',affiliationType:'affiliationType',academicStatus:'academicStatus',jobTitle:'jobTitle',expectedGraduation:'expectedGraduation'};
   for(const [key,property] of Object.entries(mapping))if(useful(fields[key])&&!(preserveName&&key==='A'))node[property]=key==='B'&&norm(fields.B)===norm(node.name)?'':patch[property];
   node.academicHistory=mergeAcademicHistory(node.academicHistory,fields.academicHistory);
-  node.aliases=[...new Set([...node.aliases,nameOf(fields)].filter(useful))];
+  node.aliases=sanitizeNameAliases([node.name,...node.aliases,nameOf(fields),...sanitizeNameAliases(fields.nameAliases)]);
   if(useful(fields.V))node.publications=[...new Set([...node.publications,fields.V])];
   const safeRecord={row:record.row,fields:sanitiseFields(fields),sourceFile};
   if(!node.records.some(r=>r.row===safeRecord.row&&r.sourceFile===sourceFile&&stableJSON(r.fields)===stableJSON(safeRecord.fields)))node.records.push(safeRecord);
@@ -412,7 +428,9 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
       while(usedIDs.has(id))id='i'+hash(signature)+'_'+suffix++;
       node=makePerson(fields,id);nodes.push(node);nodeMap.set(id,node);usedIDs.add(id);profileNodes.push(node);affected.set(id,'added');
     }
-    const changed=updatePerson(node,fields,{row},rowSource,{preserveName:grouped.some(n=>n.id===node.id)&&!sameName(nodeFields(node),fields)});indexNode(node);
+    const knownAlias=sanitizeNameAliases(node.aliases).some(alias=>norm(alias)===norm(name));
+    const preserveName=grouped.some(n=>n.id===node.id)&&!sameName(nodeFields(node),fields)||exactIdentifiers.some(n=>n.id===node.id)&&knownAlias&&text(node.name)!==text(name);
+    const changed=updatePerson(node,fields,{row},rowSource,{preserveName});indexNode(node);
     if(personKey){if(!sourceGroups.has(personKey))sourceGroups.set(personKey,new Set());sourceGroups.get(personKey).add(node.id);}
     if(affected.get(node.id)!=='added')affected.set(node.id,changed?'updated':affected.get(node.id)||'unchanged');
     rowTargets.push({row,fields,target:node.id,sourceFile:rowSource,personKey:text(record.personKey).slice(0,200)});

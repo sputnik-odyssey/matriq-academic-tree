@@ -711,3 +711,16 @@ dialog.paper-modal[open], dialog.data-modal[open], dialog.linkedin-modal[open] {
   .history-card-head { gap: 10px; }
   .history-card-head select { min-width: 0; width: 100%; max-width: none; }
 }
+
+/* Reviewed author identity matching. */
+.author-match-search { margin-top: 9px; font-size: 11px; line-height: 1.7; }
+.author-match-search summary { cursor: pointer; color: #2e6d99; }
+.author-match-search input { display: block; width: 100%; min-width: 0; margin: 8px 0; padding: 8px 9px; border: 1px solid #bfd3e2; border-radius: 4px; background: #fff; color: #315d7b; font-size: 12px; }
+.author-search-result { display: block; width: 100%; text-align: left; padding: 8px 9px; border: 1px solid #d4e2ec; border-radius: 4px; margin: 5px 0; background: #f6f9fc; color: #315d7b; }
+.author-search-result b, .author-search-result small { display: block; overflow-wrap: anywhere; }
+.author-search-result b { font-size: 12px; font-weight: 500; }
+.author-search-result small { color: #718fa6; font-size: 10px; }
+.author-search-result:hover { border-color: #8fb6d2; background: #edf5fb; }
+.author-search-result:disabled { cursor: not-allowed; opacity: .55; }
+.person-aliases { font-size: 11px; line-height: 1.7; color: #6b879e; margin-top: 7px; overflow-wrap: anywhere; }
+.paper-author-matches { padding-left: 18px; color: #355e7b; font-size: 12px; line-height: 1.8; }
