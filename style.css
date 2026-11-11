@@ -607,3 +607,31 @@ dialog.modal::backdrop { background: #202f3b5c; backdrop-filter: blur(3px); }
   .compact-intro { gap: 14px; }
   .compact-intro h1 { font-size: 20px; }
 }
+
+/* Paper lookup and author review. */
+.paper-entry { border: 1px solid #a9c5d9; color: #245d89; background: #edf5fb; padding: 5px 10px; font-size: 11px; white-space: nowrap; }
+.paper-modal { width: min(920px, calc(100vw - 36px)); max-width: 920px; }
+.paper-modal .modal-body { max-height: calc(88vh - 70px); overflow-y: auto; }
+.paper-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.paper-result-list { border: 0; padding: 0; margin: 18px 0; }
+.paper-result-list legend { font-size: 12px; color: #315f7e; margin-bottom: 8px; }
+.paper-result { display: flex; gap: 10px; padding: 12px; border: 1px solid #cedde8; border-radius: 5px; background: #f6f9fc; margin: 7px 0; cursor: pointer; }
+.paper-result input { flex-shrink: 0; margin-top: 4px; }
+.paper-result b, .paper-result small { display: block; overflow-wrap: anywhere; }
+.paper-result b { font-size: 13px; font-weight: 500; color: #294d68; }
+.paper-result small { font-size: 11px; color: #66859d; margin-top: 4px; }
+#paper-authors h3 { font-size: 15px; color: #294d68; margin: 18px 0 8px; }
+.paper-author-table { min-width: 580px; }
+.paper-author-table select { width: 100%; max-width: 330px; padding: 7px; border: 1px solid #bfd3e2; border-radius: 4px; color: #315d7b; background: #fff; }
+.paper-author-table td { vertical-align: top; }
+.paper-source-links { margin-top: 12px; }
+.paper-import-list { padding: 12px; border-top: 1px solid #d7e3ed; }
+.paper-profile-list { margin: 0; padding: 0; list-style: none; }
+.paper-profile-list li { margin: 10px 0; padding: 10px; background: #f1f6fa; border: 1px solid #d8e3ec; border-radius: 4px; }
+.paper-profile-list small { display: block; margin-top: 5px; color: #7291a9; }
+.coauthor-tag { border-color: #acd1df; color: #25758e; background: #edf8fc; }
+@media (max-width: 600px) {
+  .paper-entry { padding: 4px 8px; font-size: 10px; }
+  .paper-modal { width: calc(100vw - 22px); }
+  .paper-modal .modal-body { padding: 16px; }
+}

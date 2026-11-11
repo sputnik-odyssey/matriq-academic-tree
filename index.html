@@ -7,8 +7,8 @@
   <meta name="description" content="量子物理人物、机构、职业信息与学术关系数据库。">
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=edge-colors-20261111">
-  <script type="module" src="app.js?v=column-rules-20261111"></script>
+  <link rel="stylesheet" href="style.css?v=paper-collaboration-20261111">
+  <script type="module" src="app.js?v=paper-collaboration-20261111"></script>
 </head>
 <body>
 <header class="topbar">
@@ -18,7 +18,7 @@
 </header>
 <main>
   <section class="intro compact-intro">
-    <div class="project-heading"><h1>量子学术图谱</h1><span id="database-state" class="badge">Published database</span></div>
+    <div class="project-heading"><h1>量子学术图谱</h1><span id="database-state" class="badge">Published database</span><button class="paper-entry" data-open-paper aria-label="导入论文">＋ 论文</button></div>
     <div class="metrics" aria-label="数据概况"><div class="metric"><b id="people-count">—</b><span>人物</span></div><div class="metric"><b id="edge-count">—</b><span>关联</span></div><div class="metric"><b id="institution-count">—</b><span>机构名称</span></div></div>
   </section>
   <div class="workspace">
@@ -50,7 +50,7 @@
 <dialog id="path-modal" class="modal"><div class="modal-head"><h2>关系路径</h2><button class="icon-button" data-close aria-label="关闭">×</button></div><div class="modal-body"><p>沿当前勾选的关系类型，查找最短无向路径。</p><div class="form-field"><label for="path-start">起点人物</label><input id="path-start" type="search" list="person-options" placeholder="输入并选择完整姓名"></div><div class="form-field"><label for="path-end">终点人物</label><input id="path-end" type="search" list="person-options" placeholder="输入并选择完整姓名"></div><datalist id="person-options"></datalist><button class="primary-button" id="find-path">查找路径</button><div id="path-result" aria-live="polite"></div></div></dialog>
 <dialog id="edge-modal" class="modal"><div class="modal-head"><h2>这条关系来自哪里</h2><button class="icon-button" data-close aria-label="关闭">×</button></div><div class="modal-body" id="edge-content"></div></dialog>
 <dialog id="data-modal" class="modal import-modal data-modal"><div class="modal-head"><h2>Upload & update database</h2><button class="icon-button" data-close aria-label="Close data upload">×</button></div><div class="modal-body">
-  <p>Import an Excel <b>Mapping</b> sheet, CSV or JSON. Review a merge before applying it. Recruitment assessments, contact status and internal notes are excluded.</p>
+  <p><button class="secondary-button" data-open-paper>通过论文标题或链接导入共同作者</button></p><p>Import an Excel <b>Mapping</b> sheet, CSV or JSON. Review a merge before applying it. Recruitment assessments, contact status and internal notes are excluded.</p>
   <label class="file-drop" for="data-file">Choose a document<input id="data-file" type="file" accept=".xlsx,.csv,.tsv,.json"></label>
   <p><a class="evidence-link" href="import-template.csv" download>Download public-field template ↗</a></p>
   <details><summary>Or paste CSV / JSON</summary><div class="form-field"><label for="import-text">Structured data</label><textarea id="import-text" rows="5" placeholder="Legal Name,CurrentAffiliation,Affiliation Type,Academic Status,Job Title,Expected Graduation"></textarea></div><button class="secondary-button" id="preview-pasted">Preview pasted data</button></details>
@@ -63,6 +63,18 @@
     <label class="publish-confirmation"><input id="publish-reviewed" type="checkbox">I reviewed this file’s public-data merge and want to publish it for all visitors.</label>
     <button class="primary-button" id="publish-import" disabled>Publish approved update</button>
   </details>
+</div></dialog>
+<dialog id="paper-modal" class="modal paper-modal"><div class="modal-head"><h2>导入论文与合作关系</h2><button class="icon-button" data-close aria-label="关闭论文导入">×</button></div><div class="modal-body">
+  <form id="paper-lookup">
+    <div class="form-field"><label for="paper-query">论文标题、DOI、arXiv 或 Google Scholar 链接</label><input id="paper-query" type="search" autocomplete="off" maxlength="2000" placeholder="输入论文标题或链接"></div>
+    <details id="paper-fallback"><summary>补充论文标题</summary><div class="form-field"><label for="paper-title-hint">Google Scholar 无法读取时，用标题定位公开论文记录</label><input id="paper-title-hint" type="text" maxlength="2000" placeholder="完整论文标题"></div></details>
+    <div class="paper-actions"><button class="primary-button" id="find-paper" type="submit">识别论文作者</button><button class="secondary-button" id="paper-example" type="button">载入本次论文示例</button></div>
+  </form>
+  <p class="source-note">标题、DOI 和 arXiv 通过公开论文记录检索。Google Scholar 限制自动读取时，可补填标题；作者匹配和合作关系均先预览。</p>
+  <div id="paper-status" class="sync-status" role="status">输入论文信息后开始检索。合作关系使用青色无向连线。</div>
+  <div id="paper-candidates" hidden></div>
+  <section id="paper-authors" hidden></section>
+  <div class="paper-actions"><button class="primary-button" id="preview-paper" disabled>预览合作关系</button></div>
 </div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 </body></html>

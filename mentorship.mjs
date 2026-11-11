@@ -14,6 +14,7 @@ function evidenceColumn(evidence){
 }
 
 function mappingColumns(edge,legacy=false){
+  if(['coauthor','collaboration'].includes(edge.type))return [];
   const columns=new Set((edge.evidence||[]).map(evidenceColumn).filter(Boolean));
   if(!columns.size&&edge.definition?.basis==='mapping_column'&&COLUMN_STAGES[edge.definition.column])columns.add(edge.definition.column);
   if(!columns.size&&legacy){
@@ -53,6 +54,9 @@ export function isMentorship(edge){
 export function normalizeMappingEdges(edges){
   const input=(edges||[]).map(clone),reserved=new Set(input.map(edge=>edge.id)),result=[];
   for(const edge of input){
+    // Shared authorship is independent of Mapping columns, even if a legacy
+    // import retained unrelated column evidence or association metadata.
+    if(['coauthor','collaboration'].includes(edge.type)){edge.type='coauthor';edge.directed=false;result.push(edge);continue;}
     const columns=mappingColumns(edge,true);
     if(!columns.length){result.push(edge);continue;}
     for(let index=0;index<columns.length;index++){

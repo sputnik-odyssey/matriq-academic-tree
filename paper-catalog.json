@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-11",
+  "notes": "Small verified examples only. Scholar citation aliases are user-supplied identifiers; metadata is verified against primary sources, not scraped from Scholar.",
+  "papers": [
+    {
+      "id": "arxiv:2608.17023",
+      "title": "Hardware-Aware Compilation and Execution of Bivariate Bicycle Codes on Neutral-Atom Systems",
+      "authors": [
+        {"name": "Jason Ludmir"},
+        {"name": "Aditya Ranjan"},
+        {"name": "Nicholas S. DiBrita"},
+        {"name": "Jason Han"},
+        {"name": "Tirthak Patel"}
+      ],
+      "doi": "10.48550/arxiv.2608.17023",
+      "arxivId": "2608.17023",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2608.17023",
+      "sources": [
+        {"name": "arXiv · primary paper record", "url": "https://arxiv.org/abs/2608.17023"},
+        {"name": "DataCite · repository DOI metadata", "url": "https://api.datacite.org/dois/10.48550/arXiv.2608.17023"}
+      ],
+      "aliases": {
+        "titles": [],
+        "scholarCitationIds": ["rPCT_loAAAAJ:eQOLeE2rZwMC"]
+      },
+      "verification": {
+        "checkedAt": "2026-11-11",
+        "metadataSource": "The arXiv title, ordered author list, submission year and DOI agree with the public DataCite record.",
+        "scholarAliasProvenance": "User-provided citation identifier; no generic Scholar scraping is performed."
+      }
+    }
+  ]
+}

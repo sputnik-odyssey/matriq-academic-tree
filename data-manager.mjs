@@ -1,7 +1,7 @@
-import {parseUpload} from './importer.mjs?v=column-rules-20261111';
-import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=column-rules-20261111';
-import {enrichPerson} from './people.mjs?v=column-rules-20261111';
-import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=column-rules-20261111';
+import {parseUpload} from './importer.mjs?v=paper-collaboration-20261111';
+import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=paper-collaboration-20261111';
+import {enrichPerson} from './people.mjs?v=paper-collaboration-20261111';
+import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=paper-collaboration-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const format=value=>Number(value||0).toLocaleString('en-US');
@@ -11,7 +11,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
   const $=selector=>document.querySelector(selector),dialog=$('#data-modal');
   let upload=null,preview=null,previewDocuments=[],previewBaseFingerprint='',busy=false,previewGeneration=0;
   const status=(message,error=false)=>{const element=$('#import-status');element.textContent=message;element.className=error?'notice import-error':'sync-status';};
-  function setBusy(value){busy=value;const errors=preview?.issues?.some(issue=>typeof issue==='object'&&issue.level==='error');for(const id of ['preview-pasted','apply-import','download-import','publish-import','restore-published']){const button=$('#'+id);if(button)button.disabled=value||((!preview||errors)&&['apply-import','download-import','publish-import'].includes(id));}$('#data-file').disabled=value;}
+  function setBusy(value){busy=value;const errors=preview?.issues?.some(issue=>typeof issue==='object'&&issue.level==='error');for(const id of ['preview-pasted','apply-import','download-import','publish-import','restore-published']){const button=$('#'+id);if(button)button.disabled=value||((!preview||errors)&&['apply-import','download-import','publish-import'].includes(id));}$('#data-file').disabled=value;dialog.querySelectorAll('[data-open-paper]').forEach(button=>button.disabled=value);}
   function closeCredentials(){ $('#owner-token').value='';$('#publish-reviewed').checked=false; }
   dialog.addEventListener('close',closeCredentials);
   $('#upload-data').addEventListener('click',()=>dialog.showModal());
@@ -33,6 +33,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     $('#download-import').disabled=busy||errors.length>0;
     $('#publish-import').disabled=busy||errors.length>0;
     $('#publish-reviewed').checked=false;
+    renderPaperSummary();
   }
   async function makePreview(parsed,base,documents=null){
     const generation=++previewGeneration;
@@ -42,7 +43,27 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     const fingerprint=await graphFingerprint(base);
     if(generation!==previewGeneration)return;
     upload=parsed;preview=next;previewDocuments=queued;previewBaseFingerprint=fingerprint;renderPreview(base);
-    status(`Ready to review: ${parsed.sourceFile} · ${parsed.sheet||'data'} · ${format(parsed.rows.length)} source rows. Nothing has been published.`);
+    const count=parsed.kind==='paper'?format(parsed.papers.length)+' papers':format(parsed.rows?.length||0)+' source rows';
+    status('Ready to review: '+parsed.sourceFile+' · '+(parsed.sheet||'data')+' · '+count+'. Nothing has been published.');
+  }
+  function renderPaperSummary(){
+    if(!(upload?.papers?.length)||!preview)return;
+    const section=document.createElement('section');section.className='paper-import-list';
+    const heading=document.createElement('h3');heading.textContent='论文与共同作者';section.append(heading);
+    const counts=document.createElement('p');counts.className='source-note';
+    counts.textContent='新增论文 '+format(preview.summary.papersAdded)+' · 更新论文 '+format(preview.summary.papersUpdated)+' · 合作关系为青色无向连线。';section.append(counts);
+    for(const paper of upload.papers){
+      const p=document.createElement('p');p.textContent=paper.title+' · '+paper.authors.map(author=>author.name).join(', ');section.append(p);
+    }
+    $('#import-preview').append(section);
+  }
+  async function openParsed(parsed){
+    if(busy)return;
+    if(!dialog.open)dialog.showModal();
+    setBusy(true);status('Preparing the reviewed merge…');
+    try{await makePreview(parsed,getBaseGraph());return preview;}
+    catch(error){preview=null;$('#import-preview').hidden=true;status(error.message||'This update could not be prepared.',true);return null;}
+    finally{setBusy(false);}
   }
   async function readFile(file){
     if(!file||busy)return;
@@ -59,7 +80,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
   $('#apply-import').addEventListener('click',async()=>{
     if(!preview||busy)return;setBusy(true);
     try{
-      const info={source:'local',sourceFile:upload.sourceFile,baseFingerprint:previewBaseFingerprint,pendingUploads:previewDocuments};
+      const info={source:'local',sourceFile:upload.sourceFile,baseFingerprint:previewBaseFingerprint,pendingUploads:previewDocuments,focusPersonId:preview.summary.focusPersonId||null};
       await saveLocalGraph(preview.graph,info);await onActivateGraph(preview.graph,info);
       status('Local database updated. This browser will keep the sanitized preview after reload. Other visitors still see the published database.');
     }catch(error){status(error.message,true);}finally{setBusy(false);}
@@ -88,10 +109,10 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
         status('The shared database differs from this preview. The merge has been refreshed against the latest shared data. Review it, tick the confirmation and publish again.');
         return;
       }
-      if(!(Number(preview.summary.added)+Number(preview.summary.updated)+Number(preview.summary.newRelationships))){status('This document does not change the shared database. Nothing was published.');return;}
+      if(!(Number(preview.summary.added)+Number(preview.summary.updated)+Number(preview.summary.newRelationships)+Number(preview.summary.papersAdded||0)+Number(preview.summary.papersUpdated||0))){status('This document does not change the shared database. Nothing was published.');return;}
       status('Publishing the reviewed public data to GitHub…');
       const result=await publishGitHubGraph(preview.graph,token,latest.sha);
-      const info={source:'published_pending',sourceFile:upload.sourceFile,commit:result.commit,baseFingerprint:await graphFingerprint(preview.graph),pendingUploads:[]};
+      const info={source:'published_pending',sourceFile:upload.sourceFile,commit:result.commit,baseFingerprint:await graphFingerprint(preview.graph),pendingUploads:[],focusPersonId:preview.summary.focusPersonId||null};
       await saveLocalGraph(preview.graph,info);await onActivateGraph(preview.graph,info);
       closeCredentials();
       status('Shared database updated. GitHub Pages is publishing the new version; other visitors receive it after deployment completes.');
@@ -99,4 +120,5 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     }catch(error){status(error.message||'The update was not published.',true);}
     finally{setBusy(false);}
   });
+  return{openParsed};
 }

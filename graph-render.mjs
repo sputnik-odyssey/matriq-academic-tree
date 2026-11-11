@@ -1,13 +1,19 @@
-import {ROLE_STYLES,MENTORSHIP_COLORS,isMentorship,isVerifiedMentorship} from './mentorship.mjs?v=column-rules-20261111';
+import {ROLE_STYLES,MENTORSHIP_COLORS,isMentorship,isVerifiedMentorship} from './mentorship.mjs?v=paper-collaboration-20261111';
 
 export const NODE_WIDTH=196;
 export const NODE_HEIGHT=70;
 export const GRAPH_BACKGROUND='#496275';
+export const COLLABORATION_COLOR='#80d8ff';
 const EDGE_OUTLINE='#213848';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const short=(value,max)=>{const chars=[...String(value||'')];return chars.length>max?chars.slice(0,max-1).join('')+'…':chars.join('');};
 const entityLabel=node=>({person:node.stub?'关系引用':'人物档案',institution:'机构',group:'课题组',publication:'论文'}[node.entityType]||'关联对象');
+const isCoauthor=edge=>['coauthor','collaboration'].includes(edge.type);
+const evidenceSummary=evidence=>(evidence||[]).map(item=>{
+  if(item.kind==='publication'||item.paperId)return ['论文：'+(item.title||item.paperId||'共同署名'),item.url].filter(Boolean).join(' · ');
+  return [item.column,item.row].filter(value=>value!==undefined&&value!==null&&value!=='').join('')||item.field||item.title||'';
+}).filter(Boolean).join('；');
 
 function anchor(from,to){
   const dx=to.x-from.x,dy=to.y-from.y;
@@ -20,23 +26,30 @@ export function renderGraphSVG({model,focus,nodes,layout}){
   let svg=`<defs>${Object.entries(MENTORSHIP_COLORS).map(([type,color])=>`<marker id="arrow-${type}" viewBox="-1 -1 10 10" refX="7" refY="4" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L8 4 L0 8 Z" fill="${color}" stroke="${EDGE_OUTLINE}" stroke-width=".6" paint-order="stroke"/></marker>`).join('')}</defs>`;
   const pairs=new Map();
   for(const edge of model.edges){const key=[edge.source,edge.target].sort().join('|');if(!pairs.has(key))pairs.set(key,[]);pairs.get(key).push(edge.id);}
-  const orderedEdges=[...model.edges].sort((a,b)=>Number(isMentorship(a))-Number(isMentorship(b)));
+  const priority=edge=>isMentorship(edge)?2:isCoauthor(edge)?1:0;
+  const orderedEdges=[...model.edges].sort((a,b)=>priority(a)-priority(b));
   for(const edge of orderedEdges){
     const a=model.positions.get(edge.source),b=model.positions.get(edge.target);
     const start=anchor(a,b),end=anchor(b,a),pair=pairs.get([edge.source,edge.target].sort().join('|'));
     const offset=(pair.indexOf(edge.id)-(pair.length-1)/2)*32;
-    const confirmed=isMentorship(edge);
-    const color=confirmed?MENTORSHIP_COLORS[edge.type]:'#b2c2cf';
-    const displayType=confirmed?edge.type:['research','followup','institution'].includes(edge.type)?edge.type:'unverified';
-    let d;
-    if((layout==='tree'&&!model.path)||pair.length>1){
+    const confirmed=isMentorship(edge),collaboration=isCoauthor(edge),emphasized=confirmed||collaboration;
+    const color=confirmed?MENTORSHIP_COLORS[edge.type]:collaboration?COLLABORATION_COLOR:'#b2c2cf';
+    const displayType=collaboration?'coauthor':confirmed?edge.type:['research','followup','institution'].includes(edge.type)?edge.type:'unverified';
+    let d,labelX=(start.x+end.x)/2,labelY=(start.y+end.y)/2;
+    if(pair.length>1){
+      const dx=end.x-start.x,dy=end.y-start.y,length=Math.hypot(dx,dy)||1,orientation=edge.source<edge.target?1:-1;
+      const bendX=-dy/length*offset*orientation,bendY=dx/length*offset*orientation;
+      d=`M ${start.x} ${start.y} Q ${labelX+bendX*2} ${labelY+bendY*2}, ${end.x} ${end.y}`;
+      labelX+=bendX;labelY+=bendY;
+    }else if(layout==='tree'&&!model.path){
       const midY=(start.y+end.y)/2;
       d=`M ${start.x} ${start.y} C ${start.x+offset} ${midY}, ${end.x+offset} ${midY}, ${end.x} ${end.y}`;
     }else d=`M ${start.x} ${start.y} L ${end.x} ${end.y}`;
     const dash=confirmed?(edge.type==='postdoc'?'7 4':'none'):edge.type==='followup'?'4 5':'none';
-    const description=`${nodes.get(edge.source).name} ${confirmed?'→':'与'} ${nodes.get(edge.target).name} · ${edge.relationshipLabel||edge.label}`;
+    const description=`${nodes.get(edge.source).name} ${confirmed?'→':'与'} ${nodes.get(edge.target).name} · ${collaboration?'共同作者':edge.relationshipLabel||edge.label}`;
     const marker=confirmed?` marker-end="url(#arrow-${edge.type})"`:'';
-    svg+=`<g class="edge edge-${displayType}" data-edge="${edge.id}" data-relationship-type="${confirmed?edge.type:'unverified'}" role="button" tabindex="0" aria-label="${esc(description)}"><title>${esc(description)} · ${(edge.evidence||[]).map(v=>`${v.column}${v.row}`).join('、')} · 点击查看${isVerifiedMentorship(edge)?'公开指导证据与':confirmed?'字段定义与':''}原文</title>${confirmed?`<path class="edge-underlay" d="${d}" fill="none" stroke="${EDGE_OUTLINE}" stroke-width="5.2" stroke-dasharray="${dash}" pointer-events="none"/>`:''}<path class="edge-line" d="${d}" fill="none" stroke="${color}" stroke-width="${confirmed?2.7:1.3}" stroke-dasharray="${dash}"${marker}/><path class="edge-hit" d="${d}" fill="none" stroke="transparent" stroke-width="14"/>${confirmed?`<text class="edge-label edge-type-label" x="${(start.x+end.x)/2+offset+(offset<0?-10:12)}" y="${(start.y+end.y)/2-5}" text-anchor="${offset<0?'end':'start'}" fill="${color}" font-family="Times New Roman, Times, serif" font-size="12" font-weight="600" stroke="${EDGE_OUTLINE}" stroke-width="4" paint-order="stroke">${edge.type==='phd'?'PhD':'Postdoc'}</text>`:''}</g>`;
+    const provenance=evidenceSummary(edge.evidence),action=collaboration?'点击查看共同论文':`点击查看${isVerifiedMentorship(edge)?'公开指导证据与':confirmed?'字段定义与':''}原文`;
+    svg+=`<g class="edge edge-${displayType}" data-edge="${edge.id}" data-relationship-type="${emphasized?displayType:'unverified'}" role="button" tabindex="0" aria-label="${esc(description)}"><title>${esc([description,provenance,action].filter(Boolean).join(' · '))}</title>${emphasized?`<path class="edge-underlay" d="${d}" fill="none" stroke="${EDGE_OUTLINE}" stroke-width="5.2" stroke-dasharray="${dash}" pointer-events="none"/>`:''}<path class="edge-line" d="${d}" fill="none" stroke="${color}" stroke-width="${emphasized?2.7:1.3}" stroke-dasharray="${dash}"${marker}/><path class="edge-hit" d="${d}" fill="none" stroke="transparent" stroke-width="14"/>${emphasized?`<text class="edge-label edge-type-label" x="${labelX+(offset<0?-10:12)}" y="${labelY-5}" text-anchor="${offset<0?'end':'start'}" fill="${color}" font-family="Times New Roman, Times, serif" font-size="12" font-weight="600" stroke="${EDGE_OUTLINE}" stroke-width="4" paint-order="stroke">${collaboration?'共同作者':edge.type==='phd'?'PhD':'Postdoc'}</text>`:''}</g>`;
   }
   for(const id of model.ids){
     const selected=id===focus;

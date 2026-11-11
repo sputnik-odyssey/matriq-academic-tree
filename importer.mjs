@@ -1,5 +1,6 @@
 /* Local-only structured-file import. Uploaded text is data, never executable instructions. */
-import {normalizeMappingEdges} from './mentorship.mjs?v=column-rules-20261111';
+import {normalizeMappingEdges} from './mentorship.mjs?v=paper-collaboration-20261111';
+import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=paper-collaboration-20261111';
 export const PUBLIC_COLUMNS=Object.freeze([
   {key:'A',label:'Legal Name'},{key:'B',label:'中文名'},{key:'C',label:'PhD'},
   {key:'D',label:'Bachelor location'},{key:'E',label:'Bachelor'},
@@ -206,6 +207,8 @@ function objectFields(value){
 
 function parseJSONUpload(value,file){
   if(!value||typeof value!=='object')throw Error('JSON must contain structured people rows.');
+  if(Array.isArray(value.papers)&&value.papers.length>2000)throw Error('The public graph exceeds the 2,000 paper limit.');
+  if(Array.isArray(value.papers)&&!Array.isArray(value.nodes)&&!Array.isArray(value.rows))return sanitizePaperDocument({...value,sourceFile:basename(file.name)});
   let records=Array.isArray(value)?value:Array.isArray(value.rows)?value.rows:null;
   const warnings=[];
   const graphExport=!records&&Array.isArray(value.nodes);
@@ -216,7 +219,7 @@ function parseJSONUpload(value,file){
       if(node?.stub||node?.entityType&&node.entityType!=='person')continue;
       if(Array.isArray(node.records)&&node.records.length){
         const sourceRecords=node.records.filter(r=>r&&typeof r==='object'&&!Array.isArray(r));
-        const mapped=sourceRecords.map(r=>({...r,fields:objectFields(r.fields||r.cells||{}),sourceFile:basename(r.sourceFile||value.meta?.sourceFile||file.name)}));
+        const mapped=sourceRecords.map(r=>({...r,fields:objectFields(r.fields||r.cells||{}),sourceFile:basename(r.sourceFile||value.meta?.sourceFile||file.name),personKey:text(node.id).slice(0,200)}));
         // Career fields may be explicitly supplied on a public graph node. A recorded
         // value always wins; only absent extras are filled, once, on its first row.
         if(mapped.length)for(const key of ['affiliationType','academicStatus','jobTitle','expectedGraduation']){
@@ -225,7 +228,7 @@ function parseJSONUpload(value,file){
         }
         records.push(...mapped);
       }
-      else records.push({fields:{A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation}});
+      else records.push({personKey:text(node.id).slice(0,200),fields:{A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation}});
     }
   }
   if(!records)throw Error('JSON must contain an array of named people rows or an exported graph.');
@@ -236,9 +239,9 @@ function parseJSONUpload(value,file){
     const fields=objectFields(record.fields||record.cells||record);
     if(/^\d{5,}(?:\.\d+)?$/.test(fields.expectedGraduation||'')){delete fields.expectedGraduation;warnings.push(`Row ${index+2}: an invalid numeric expected-graduation value was excluded. Use a four-digit year or an ISO date.`);}
     if(['legalname','name','fullname'].includes(norm(fields.A))&&norm(fields.G)==='currentaffiliation')return;
-    if(Object.keys(fields).length)rows.push({row:Number.isInteger(record.row)&&record.row>0&&record.row<=1048576?record.row:index+2,fields,...(graphExport?{sourceFile:basename(record.sourceFile||value.meta?.sourceFile||file.name)}:{})});
+    if(Object.keys(fields).length)rows.push({row:Number.isInteger(record.row)&&record.row>0&&record.row<=1048576?record.row:index+2,fields,...(graphExport?{sourceFile:basename(record.sourceFile||value.meta?.sourceFile||file.name),personKey:text(record.personKey).slice(0,200)}:{})});
   });
-  return{sourceFile:basename(file.name),...(graphExport?{sourceIdentity:basename(value.meta?.sourceFile||file.name)}:{}),sheet:text(value.sheet||value.meta?.sheet||'Mapping'),rows,warnings};
+  return{sourceFile:basename(file.name),...(graphExport?{sourceIdentity:basename(value.meta?.sourceFile||file.name)}:{}),sheet:text(value.sheet||value.meta?.sheet||'Mapping'),rows,warnings,...(Array.isArray(value.papers)?{papers:value.papers.map(p=>sanitizePaper(p,{keepNodeIds:true}))}:{})};
 }
 
 export async function parseUpload(file){
@@ -323,12 +326,12 @@ function relationshipParts(value,knownInstitutions){
   return unqualified.split(/\s*[/、;；]\s*/).map(text).filter(useful);
 }
 
-function updatePerson(node,fields,record,sourceFile){
+function updatePerson(node,fields,record,sourceFile,{preserveName=false}={}){
   if(node.records.some(r=>r.row===record.row&&r.sourceFile===sourceFile&&stableJSON(cleanedFields(r.fields))===stableJSON(cleanedFields(fields))))return false;
   const before=stableJSON({fields:nodeFields(node),records:node.records,publications:node.publications});
   const patch=makePerson(fields,node.id);
   const mapping={A:'name',B:'nameZh',C:'phd',E:'bachelor',G:'affiliation',H:'role',I:'location',P:'website',Q:'orcid',R:'linkedin',T:'scholar',affiliationType:'affiliationType',academicStatus:'academicStatus',jobTitle:'jobTitle',expectedGraduation:'expectedGraduation'};
-  for(const [key,property] of Object.entries(mapping))if(useful(fields[key]))node[property]=key==='B'&&norm(fields.B)===norm(node.name)?'':patch[property];
+  for(const [key,property] of Object.entries(mapping))if(useful(fields[key])&&!(preserveName&&key==='A'))node[property]=key==='B'&&norm(fields.B)===norm(node.name)?'':patch[property];
   node.aliases=[...new Set([...node.aliases,nameOf(fields)].filter(useful))];
   if(useful(fields.V))node.publications=[...new Set([...node.publications,fields.V])];
   const safeRecord={row:record.row,fields:sanitiseFields(fields),sourceFile};
@@ -338,6 +341,7 @@ function updatePerson(node,fields,record,sourceFile){
 }
 
 export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
+  if(upload?.kind==='paper')return previewPaperImport(baseGraph,upload);
   if(!['merge','replace'].includes(mode))throw Error('Choose merge or replace.');
   if(!baseGraph||!Array.isArray(baseGraph.nodes)||!Array.isArray(baseGraph.edges))throw Error('The existing graph is invalid.');
   if(!upload||!Array.isArray(upload.rows)||upload.rows.length>MAX_ROWS)throw Error('The uploaded rows are invalid.');
@@ -353,7 +357,7 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
     const f=nodeFields(node);for(const key of ['Q','R','T']){const value=urlIdentity(f[key],key);if(value){const id=key+':'+value;if(!byIdentifier.has(id))byIdentifier.set(id,new Set());byIdentifier.get(id).add(node.id);}}
   }
   profileNodes.forEach(indexNode);
-  const affected=new Map(),rowTargets=[],inputRows=upload.rows.filter(r=>r&&typeof r==='object');let excluded=0,ambiguous=0,sourceRecordRows=0;
+  const affected=new Map(),rowTargets=[],sourceGroups=new Map(),inputRows=upload.rows.filter(r=>r&&typeof r==='object');let excluded=0,ambiguous=0,sourceRecordRows=0;
   for(const record of inputRows){
     const fields=sanitiseFields(record.fields),row=Number(record.row);
     const rowSource=basename(record.sourceFile||sourceFile);
@@ -361,10 +365,12 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
     const name=nameOf(fields);if(!useful(name)){excluded++;continue;}sourceRecordRows++;
     const candidateIDs=new Set();for(const alias of [fields.A,fields.B].filter(useful))for(const id of byName.get(norm(alias))||[])candidateIDs.add(id);
     for(const key of ['Q','R','T']){const value=urlIdentity(fields[key],key);for(const id of byIdentifier.get(key+':'+value)||[])candidateIDs.add(id);}
+    const personKey=text(record.personKey).slice(0,200);
+    const grouped=[...(sourceGroups.get(personKey)||[])].map(id=>nodeMap.get(id)).filter(n=>!identityConflict(nodeFields(n),fields));
     const candidates=[...candidateIDs].map(id=>nodeMap.get(id));
     const exactProvenance=candidates.filter(n=>provenanceMatch(n,fields,{row},rowSource));
     const exactIdentifiers=candidates.filter(n=>!identityConflict(nodeFields(n),fields)&&['Q','R','T'].some(key=>urlIdentity(fields[key],key)&&urlIdentity(fields[key],key)===urlIdentity(nodeFields(n)[key],key)));
-    const matched=exactProvenance.length?exactProvenance:exactIdentifiers.length?exactIdentifiers:candidates.filter(n=>identityMatch(n,fields,{row},rowSource));
+    const matched=exactProvenance.length?exactProvenance:exactIdentifiers.length?exactIdentifiers:grouped.length?grouped:candidates.filter(n=>identityMatch(n,fields,{row},rowSource));
     let node;
     if(matched.length===1)node=matched[0];
     else{
@@ -373,13 +379,14 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
       while(usedIDs.has(id))id='i'+hash(signature)+'_'+suffix++;
       node=makePerson(fields,id);nodes.push(node);nodeMap.set(id,node);usedIDs.add(id);profileNodes.push(node);affected.set(id,'added');
     }
-    const changed=updatePerson(node,fields,{row},rowSource);indexNode(node);
+    const changed=updatePerson(node,fields,{row},rowSource,{preserveName:grouped.some(n=>n.id===node.id)&&!sameName(nodeFields(node),fields)});indexNode(node);
+    if(personKey){if(!sourceGroups.has(personKey))sourceGroups.set(personKey,new Set());sourceGroups.get(personKey).add(node.id);}
     if(affected.get(node.id)!=='added')affected.set(node.id,changed?'updated':affected.get(node.id)||'unchanged');
-    rowTargets.push({row,fields,target:node.id,sourceFile:rowSource});
+    rowTargets.push({row,fields,target:node.id,sourceFile:rowSource,personKey:text(record.personKey).slice(0,200)});
   }
   if(!rowTargets.length)throw Error('The document contains no usable named people. No update was applied.');
 
-  let edges=mode==='merge'?normalizeMappingEdges(baseGraph.edges.filter(e=>nodeMap.has(e.source)&&nodeMap.has(e.target)).map(e=>{
+  let edges=mode==='merge'?normalizeMappingEdges(baseGraph.edges.filter(e=>!['coauthor','collaboration'].includes(e.type)&&nodeMap.has(e.source)&&nodeMap.has(e.target)).map(e=>{
     const type=['research','followup','institution','phd','postdoc'].includes(e.type)?e.type:'institution';
     const column=e.definition?.basis==='mapping_column'&&['N','O'].includes(e.definition.column)?e.definition.column:null;
     return{id:text(e.id),source:e.source,target:e.target,type,directed:['phd','postdoc'].includes(type),
@@ -435,6 +442,21 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
     notes:['Public professional fields only; recruitment evaluations, contact status and internal notes are excluded.','Mapping column definitions: Research Line (N) lists PhD supervisors and Industry Line (O) lists Postdoc supervisors. Directed links run from supervisor to student; this classification uses the user-defined column meaning, without claiming independent external verification.','Names alone do not establish identity. Ambiguous people remain separate and keep source records.','Merge mode retains existing profiles and links; non-empty supplied public fields update matched profiles.']};
   if(ambiguous)warnings.push(`${ambiguous} ambiguous identities or relationship references were retained separately.`);
   if(excluded)warnings.push(`${excluded} rows without a usable name or valid row number were excluded.`);
-  const graph={meta,nodes,edges,edgeTypes:EDGE_TYPES.map(t=>({...t}))};
-  return{graph,summary:{added,updated,unchanged,newRelationships,retained:mode==='merge'?profiles.filter(n=>oldIDs.has(n.id)&&!affected.has(n.id)).length:0,ambiguous,excluded,processedRows:sourceRecordRows,totalPeople:profiles.length,totalRelationships:edges.length,totalNodes:nodes.length,changedIds:[...affected].filter(([,kind])=>kind!=='unchanged').map(([id])=>id),subjectIds:[...affected.keys()],mode},warnings,issues};
+  let graph={meta,nodes,edges,edgeTypes:EDGE_TYPES.map(t=>({...t}))};
+  if(mode==='merge'&&baseGraph.papers?.length)graph=rebuildPaperGraph(graph,baseGraph.papers);
+  const summary={added,updated,unchanged,newRelationships,retained:mode==='merge'?profiles.filter(n=>oldIDs.has(n.id)&&!affected.has(n.id)).length:0,ambiguous,excluded,processedRows:sourceRecordRows,totalPeople:profiles.length,totalRelationships:graph.edges.length,totalNodes:nodes.length,changedIds:[...affected].filter(([,kind])=>kind!=='unchanged').map(([id])=>id),subjectIds:[...affected.keys()],mode,papersAdded:0,papersUpdated:0,totalPapers:graph.papers?.length||0};
+  if(upload.papers?.length){
+    const bindings=new Map();for(const r of rowTargets)if(r.personKey){if(!bindings.has(r.personKey))bindings.set(r.personKey,new Set());bindings.get(r.personKey).add(r.target);}
+    const changed=new Set(summary.changedIds),subjects=new Set(summary.subjectIds);
+    for(let offset=0;offset<upload.papers.length;offset+=20){
+      const papers=upload.papers.slice(offset,offset+20),matches={};
+      papers.forEach((paper,pi)=>paper.authors.forEach((author,ai)=>{const bound=bindings.get(author.nodeId);if(bound?.size===1)matches[`${pi}:${ai}`]=[...bound][0];}));
+      const result=previewPaperImport(graph,{kind:'paper',sourceFile:basename(upload.sourceFile),papers,matches});graph=result.graph;
+      warnings.push(...result.warnings);issues.push(...result.issues);for(const id of result.summary.changedIds)changed.add(id);for(const id of result.summary.subjectIds)subjects.add(id);
+      summary.newRelationships+=result.summary.newRelationships;summary.papersAdded+=result.summary.papersAdded;summary.papersUpdated+=result.summary.papersUpdated;summary.ambiguous+=result.summary.ambiguous;summary.excluded+=result.summary.excluded;summary.focusPersonId=summary.focusPersonId||result.summary.focusPersonId;
+    }
+    const finalProfiles=graph.nodes.filter(n=>n.entityType==='person'&&!n.stub);
+    Object.assign(summary,{added:finalProfiles.filter(n=>!oldIDs.has(n.id)).length,updated:finalProfiles.filter(n=>oldIDs.has(n.id)&&changed.has(n.id)).length,unchanged:finalProfiles.filter(n=>subjects.has(n.id)&&!changed.has(n.id)).length,totalPeople:finalProfiles.length,totalRelationships:graph.edges.length,totalNodes:graph.nodes.length,totalPapers:graph.papers?.length||0,changedIds:[...changed],subjectIds:[...subjects]});
+  }
+  return{graph,summary,warnings,issues};
 }
