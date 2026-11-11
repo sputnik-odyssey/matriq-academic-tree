@@ -24,6 +24,1525 @@
           }
         ]
       }
+    },
+    {
+      "edgeId": "e1327",
+      "mentorId": "p5304",
+      "studentId": "p6244",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1328",
+      "mentorId": "p5304",
+      "studentId": "p6245",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e213",
+      "mentorId": "p5304",
+      "studentId": "p5195",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "The separate N-field association is not evidence of PhD supervision.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          },
+          {
+            "title": "University of Maryland RQS · Bichen Zhang",
+            "url": "https://rqs.umd.edu/people/bichen-zhang",
+            "summary": "Princeton postdoctoral alumnus; Thompson Research Group."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1329",
+      "mentorId": "p5304",
+      "studentId": "p6246",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1330",
+      "mentorId": "p5304",
+      "studentId": "p6247",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1332",
+      "mentorId": "p5304",
+      "studentId": "p6248",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1338",
+      "mentorId": "p5304",
+      "studentId": "p6252",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e296",
+      "mentorId": "p5304",
+      "studentId": "p5263",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          },
+          {
+            "title": "Rice University · Songtao Chen",
+            "url": "https://profiles.rice.edu/faculty/songtao-chen",
+            "summary": "Princeton postdoctoral appointment, 2018–2021."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e90",
+      "mentorId": "p5304",
+      "studentId": "p5066",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          },
+          {
+            "title": "University of Michigan ECE · Faculty appointments",
+            "url": "https://ece.engin.umich.edu/stories/ece-welcomes-four-new-faculty-for-2022-23",
+            "summary": "Postdoctoral work at Princeton with Jeff Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e235",
+      "mentorId": "p5304",
+      "studentId": "p5212",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the public postdoc roster, not the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Jeff Thompson is PI; person listed under Postdocs or Postdoc alumni."
+          },
+          {
+            "title": "Chicago Quantum Exchange · 2023 Quantum Creators",
+            "url": "https://chicagoquantum.org/education-and-training/2023-boeing-quantum-creators-prize-winners",
+            "summary": "PQI postdoc working with Jeff Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e779",
+      "mentorId": "p5304",
+      "studentId": "p5704",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Princeton ECE · Xiao Chai",
+            "url": "https://ece.princeton.edu/people/xiao-chai",
+            "summary": "Postdoctoral Research Associate; adviser: Jeff Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1034",
+      "mentorId": "p5304",
+      "studentId": "p5999",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Princeton ECE · Yicheng Bao",
+            "url": "https://ece.princeton.edu/people/yicheng-bao-pqi",
+            "summary": "Postdoctoral Research Associate; adviser: Jeff Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1339",
+      "mentorId": "p5304",
+      "studentId": "p6253",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Listed among graduate alumni with an explicit PhD year."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1340",
+      "mentorId": "p5304",
+      "studentId": "p6254",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Listed among graduate alumni with an explicit PhD year."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1342",
+      "mentorId": "p5304",
+      "studentId": "p6255",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Listed among graduate alumni with an explicit PhD year."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1343",
+      "mentorId": "p5304",
+      "studentId": "p6256",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Listed among graduate alumni with an explicit PhD year."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1344",
+      "mentorId": "p5304",
+      "studentId": "p6257",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Thompson Lab · People",
+            "url": "https://sites.google.com/site/thompsonlabq/people",
+            "summary": "Listed among graduate alumni with an explicit PhD year."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e569",
+      "mentorId": "p5304",
+      "studentId": "p5519",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Princeton ECE · 2025–2026 PhD recipients",
+            "url": "https://ece.princeton.edu/news/age-abundant-intelligence-graduate-commencement-speaker-stresses-service-and-wisdom",
+            "summary": "Genyue Liu is listed as a PhD recipient, adviser Jeffrey Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e343",
+      "mentorId": "p5368",
+      "studentId": "p5304",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "Jeff Thompson is listed under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e421",
+      "mentorId": "r9bb5355ac26d",
+      "studentId": "p5368",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=2",
+            "summary": "Graduate advisor: Marlan O. Scully."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1333",
+      "mentorId": "p5304",
+      "studentId": "p6249",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "sources": [
+          {
+            "title": "Princeton ECE · PhD supervision record",
+            "url": "https://ece.princeton.edu/news/yan-huo-94-fellowship-powers-advances-machine-learning-wireless-communication-and-quantum",
+            "summary": "PhD student Mehmet (Tuna) Uysal is explicitly advised by Jeff Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1335",
+      "mentorId": "p5304",
+      "studentId": "p6250",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "sources": [
+          {
+            "title": "Princeton ECE · PhD supervision record",
+            "url": "https://ece.princeton.edu/news/age-abundant-intelligence-graduate-commencement-speaker-stresses-service-and-wisdom",
+            "summary": "PhD recipient Adam Turflinger, adviser Jeffrey Thompson."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e364",
+      "mentorId": "p5368",
+      "studentId": "p5321",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e272",
+      "mentorId": "p5368",
+      "studentId": "p5243",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e1016",
+      "mentorId": "p5368",
+      "studentId": "p5985",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e273",
+      "mentorId": "p5368",
+      "studentId": "p5244",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e304",
+      "mentorId": "p5368",
+      "studentId": "p5269",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e776",
+      "mentorId": "p5368",
+      "studentId": "p5703",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e372",
+      "mentorId": "p5368",
+      "studentId": "p5327",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e378",
+      "mentorId": "p5368",
+      "studentId": "p5332",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e398",
+      "mentorId": "p5368",
+      "studentId": "p5345",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e390",
+      "mentorId": "p5368",
+      "studentId": "p5341",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e282",
+      "mentorId": "p5368",
+      "studentId": "p5250",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e329",
+      "mentorId": "p5368",
+      "studentId": "p5290",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e409",
+      "mentorId": "p5368",
+      "studentId": "p5354",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e420",
+      "mentorId": "p5368",
+      "studentId": "p5367",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e410",
+      "mentorId": "p5368",
+      "studentId": "p5355",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e283",
+      "mentorId": "p5368",
+      "studentId": "p5251",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e411",
+      "mentorId": "p5368",
+      "studentId": "p5356",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e412",
+      "mentorId": "p5368",
+      "studentId": "p5357",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e332",
+      "mentorId": "p5368",
+      "studentId": "p5293",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e413",
+      "mentorId": "p5368",
+      "studentId": "p5358",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e416",
+      "mentorId": "p5368",
+      "studentId": "p5361",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e417",
+      "mentorId": "p5368",
+      "studentId": "p5363",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e418",
+      "mentorId": "p5368",
+      "studentId": "p5365",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e419",
+      "mentorId": "p5368",
+      "studentId": "p5366",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e287",
+      "mentorId": "p5368",
+      "studentId": "p5255",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e290",
+      "mentorId": "p5368",
+      "studentId": "p5259",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e422",
+      "mentorId": "p5368",
+      "studentId": "p5369",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e334",
+      "mentorId": "p5368",
+      "studentId": "p5295",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e336",
+      "mentorId": "p5368",
+      "studentId": "p5297",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e444",
+      "mentorId": "p5368",
+      "studentId": "p5389",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e335",
+      "mentorId": "p5368",
+      "studentId": "p5296",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e240",
+      "mentorId": "p5368",
+      "studentId": "p5218",
+      "stage": "phd",
+      "label": "PhD 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=3",
+            "summary": "CV lists this person under PhD Advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e241",
+      "mentorId": "p5368",
+      "studentId": "p5218",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e460",
+      "mentorId": "p5368",
+      "studentId": "p5404",
+      "stage": "postdoc",
+      "label": "Postdoc · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column. The CV asterisk denotes co-supervision.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e346",
+      "mentorId": "p5368",
+      "studentId": "p5307",
+      "stage": "postdoc",
+      "label": "Postdoc · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column. The CV asterisk denotes co-supervision.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e319",
+      "mentorId": "p5368",
+      "studentId": "p5280",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e519",
+      "mentorId": "p5368",
+      "studentId": "p5465",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e466",
+      "mentorId": "p5368",
+      "studentId": "p5410",
+      "stage": "postdoc",
+      "label": "Postdoc · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column. The CV asterisk denotes co-supervision.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e523",
+      "mentorId": "p5368",
+      "studentId": "p5469",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e321",
+      "mentorId": "p5368",
+      "studentId": "p5282",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e357",
+      "mentorId": "p5368",
+      "studentId": "p5314",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e322",
+      "mentorId": "p5368",
+      "studentId": "p5283",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e297",
+      "mentorId": "p5368",
+      "studentId": "p5264",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e467",
+      "mentorId": "p5368",
+      "studentId": "p5411",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e471",
+      "mentorId": "p5368",
+      "studentId": "p5414",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e313",
+      "mentorId": "p5368",
+      "studentId": "p5275",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e314",
+      "mentorId": "p5368",
+      "studentId": "p5276",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e478",
+      "mentorId": "p5368",
+      "studentId": "p5420",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e479",
+      "mentorId": "p5368",
+      "studentId": "p5421",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e491",
+      "mentorId": "p5368",
+      "studentId": "p5434",
+      "stage": "postdoc",
+      "label": "Postdoc · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column. The CV asterisk denotes co-supervision.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e496",
+      "mentorId": "p5368",
+      "studentId": "p5440",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e504",
+      "mentorId": "p5368",
+      "studentId": "p5449",
+      "stage": "postdoc",
+      "label": "Postdoc · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column. The CV asterisk denotes co-supervision.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e362",
+      "mentorId": "p5368",
+      "studentId": "p5319",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e271",
+      "mentorId": "p5368",
+      "studentId": "p5242",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e323",
+      "mentorId": "p5368",
+      "studentId": "p5285",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e315",
+      "mentorId": "p5368",
+      "studentId": "p5277",
+      "stage": "postdoc",
+      "label": "Postdoc 指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
+    },
+    {
+      "edgeId": "e453",
+      "mentorId": "p5368",
+      "studentId": "p5400",
+      "stage": "postdoc",
+      "label": "Postdoc · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "Stage comes from the explicit advisor list in the public Harvard CV, not from the spreadsheet column. The CV asterisk denotes co-supervision.",
+        "sources": [
+          {
+            "title": "Harvard Physics · Mikhail Lukin CV",
+            "url": "https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf#page=4",
+            "summary": "CV lists this person under Postdoctoral advisor."
+          }
+        ]
+      }
     }
   ]
 }

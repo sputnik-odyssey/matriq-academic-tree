@@ -31,7 +31,7 @@ async function init(){
     const response=await fetch('data.json.gz',{cache:'no-cache'});
     if(!response.ok)throw Error('数据文件未能载入');
     publishedGraph=await decodeGraphBytes(await response.arrayBuffer());
-    try{const evidenceResponse=await fetch('mentorships.json?v=profiles-upload-20261111');if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
+    try{const evidenceResponse=await fetch('mentorships.json?v=guidance-coverage-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
     let active=publishedGraph,info={source:'published'};
     try{
       const local=await loadLocalGraph();
@@ -168,7 +168,10 @@ function layoutGraph(model){
 function renderGraph(){
   if(!state.focus)return;const model=collectGraph();model.positions=layoutGraph(model);graphModel=model;
   const root=nodes.get(state.focus);$('#graph-context').textContent=model.path?'最短关系路径':`${root.name} 的关联网络`;
-  $('#graph-status').textContent=model.path?`${model.ids.length-1} 步连接`:`显示 ${model.ids.length} / ${fmt(model.total)} 个对象`;
+  const visiblePhd=model.edges.filter(edge=>edge.type==='phd'&&isVerifiedMentorship(edge)).length;
+  const visiblePostdoc=model.edges.filter(edge=>edge.type==='postdoc'&&isVerifiedMentorship(edge)).length;
+  const graphStatus=model.path?`${model.ids.length-1} 步连接`:`显示 ${model.ids.length} / ${fmt(model.total)} 个对象`;
+  $('#graph-status').textContent=`${graphStatus} · PhD ${visiblePhd} · Postdoc ${visiblePostdoc}`;
   $('#graph-empty').hidden=model.path||model.ids.length>1;$('#graph-empty').innerHTML=!model.path&&model.total===1?`<b>暂无符合条件的关联</b><p>${state.institution||state.location||state.types.size<types.length?'调整左侧筛选，或搜索其他人物。':'此人物已收录档案，原表尚未记录其人物关系。'}</p>`:'';
   $('#show-more').hidden=model.path||model.ids.length>=model.total;$('#show-more').textContent=`展开更多 · 还有 ${fmt(model.total-model.ids.length)} 个对象`;
   $('#graph-world').innerHTML=renderGraphSVG({model,focus:state.focus,nodes,types,layout:state.layout});
