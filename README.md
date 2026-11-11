@@ -48,6 +48,18 @@ Faculty 显示所在机构及 Faculty，明确的教授职级可作为职位保�
 
 发布前仍会重新读取 GitHub 的最新共享数据库并重新合并待处理更新；若共享版本变化，需要复核刷新后的预览及作者身份后再发布。后续合并 CSV、XLSX 或 JSON 人物数据时，已保存的论文及共同作者关系会保留。恢复共享版本会撤销尚未发布的本地论文导入。
 
+## LinkedIn 博士与博后履历
+
+点击 **＋ LinkedIn**，或人物档案内的 **导入 LinkedIn 履历**。输入人物的 `/in/…` 链接和 [Apify API Token](https://console.apify.com/settings/integrations)，即可调用 [HarvestAPI LinkedIn Profile Scraper](https://apify.com/harvestapi/linkedin-profile-scraper)。首次使用需在 Apify 账户中启用该 Actor；受限令牌需 Actor Run 权限及读取该任务默认存储的权限。每次仅查询一位人物，设置每任务 US$0.10 的费用上限，实际计费及可用额度以 Apify 为准。
+
+服务接口使用已验证的 `0.0.141` 构建，输入模式为不补充邮箱的 Profile details no email。网站直接从浏览器调用 Apify；Token 仅位于当前窗口内存和对 `api.apify.com` 的 Authorization 请求头中，关闭即清空，不写入 URL、浏览器数据库、GitHub 或履历记录。LinkedIn 登录凭据和 Cookie 不需要提供。第三方服务对提交的链接和任务数据按其自身政策处理。
+
+识别范围为 Education 中明确的博士学位，以及 Education 或 Experience 中明确的 Postdoc 职位，保留机构、学位／职称、开始和结束日期。支持多段博后；日期只有年份时不补造月份；未提供的日期保持为空；Present 标为至今，未来结束时间标为预计，不据日期范围认定已授予学位。抓取结果可在确认前逐条修改、取消或补充。已有 LinkedIn 链接作为身份匹配线索，同名人物需手动核对。若原库中多个档案共用同一 LinkedIn 链接，需明确选择要补充的档案。
+
+点击 **下一步：确认导入** 后，沿用本地确认、公开 JSON 下载及所有者共享发布流程。博士与博后时间线显示在人物详情中，并在后续论文或表格导入、导出及共享发布中保留。履历数据不自动覆盖当前机构和职位，也不会因读过某校就生成导师连线。
+
+API 任务创建后，超时或停止等待不会自动再发起计费任务。可点击 **继续读取本次任务**；若首次创建响应丢失，先在 Apify 控制台查找 Run ID，在“继续已有 Apify 任务”中填入后读取。只有明确点击 **创建新的抓取任务** 并再次抓取才新建任务。抓取只覆盖服务能获取的公开履历，缺失信息不代表该经历不存在。备用入口支持粘贴 Education / Experience 文字，在本地提取并核对，不调用计费 API。
+
 ## 上传与更新数据
 
 支持以下结构化文件，单次上传最大 20 MB：

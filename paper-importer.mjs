@@ -1,8 +1,9 @@
 // Public bibliographic data only. Paper content never supplies executable instructions.
-import {normalizeMappingEdges} from './mentorship.mjs?v=paper-collaboration-20261111';
+import {normalizeMappingEdges} from './mentorship.mjs?v=linkedin-history-20261111';
+import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory} from './academic-history.mjs?v=linkedin-history-20261111';
 
 export const COAUTHOR_EDGE_TYPE=Object.freeze({id:'coauthor',label:'论文合著',color:'#80d8ff'});
-const PUBLIC_KEYS=new Set('A B C D E G H I N O P Q R T U V W X AB affiliationType academicStatus jobTitle expectedGraduation'.split(' '));
+const PUBLIC_KEYS=new Set('A B C D E G H I N O P Q R T U V W X AB affiliationType academicStatus jobTitle expectedGraduation academicHistory'.split(' '));
 const MAX_AUTHORS=100,MAX_DOCUMENT_PAPERS=20,MAX_PAPERS=2000,MAX_PAIRS=100000;
 const text=(value,max=40000)=>String(value??'').replace(/\u0000/g,'').trim().slice(0,max);
 const norm=value=>text(value).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
@@ -89,7 +90,8 @@ export function previewAuthorMatches(graph,input){
 function safeNode(node,sourceFile){
   const out={};for(const key of ['id','name','nameZh','kind','entityType','affiliation','role','location','phd','bachelor','research','website','scholar','orcid','linkedin','affiliationType','academicStatus','jobTitle','expectedGraduation','identityNote'])if(typeof node[key]==='string')out[key]=text(node[key]);
   out.stub=Boolean(node.stub);out.degree=0;out.aliases=(node.aliases||[]).filter(v=>typeof v==='string').map(v=>text(v,300));out.publications=(node.publications||[]).filter(v=>typeof v==='string').map(v=>text(v));
-  out.records=(node.records||[]).filter(r=>Number.isInteger(r?.row)&&r.row>0).map(r=>({row:r.row,sourceFile:fileName(r.sourceFile||sourceFile||'previous-dataset'),...(r.referenceOnly?{referenceOnly:true}:{}),fields:Object.fromEntries(Object.entries(r.fields||{}).filter(([key,val])=>PUBLIC_KEYS.has(key)&&['string','number','boolean'].includes(typeof val)).map(([key,val])=>[key,text(val)]))}));
+  out.records=(node.records||[]).filter(r=>Number.isInteger(r?.row)&&r.row>0).map(r=>({row:r.row,sourceFile:fileName(r.sourceFile||sourceFile||'previous-dataset'),...(r.referenceOnly?{referenceOnly:true}:{}),fields:Object.fromEntries(Object.entries(r.fields||{}).filter(([key,val])=>PUBLIC_KEYS.has(key)&&(key==='academicHistory'||['string','number','boolean'].includes(typeof val))).map(([key,val])=>[key,key==='academicHistory'?serializeAcademicHistory(val):text(val)]).filter(([,val])=>val))}));
+  out.academicHistory=mergeAcademicHistory(out.records.flatMap(r=>sanitizeAcademicHistory(r.fields?.academicHistory)),node.academicHistory);
   out.rows=[...new Set(out.records.map(r=>r.row))].sort((a,b)=>a-b);return out;
 }
 function safeBase(base){

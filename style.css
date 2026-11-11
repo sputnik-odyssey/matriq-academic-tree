@@ -610,15 +610,15 @@ dialog.modal::backdrop { background: #202f3b5c; backdrop-filter: blur(3px); }
 
 /* Paper lookup and author review. */
 .paper-entry { border: 1px solid #a9c5d9; color: #245d89; background: #edf5fb; padding: 5px 10px; font-size: 11px; white-space: nowrap; }
-dialog.modal.paper-modal { width: min(920px, calc(100vw - 36px)); max-width: 920px; }
-dialog.paper-modal[open], dialog.data-modal[open] { display: flex; flex-direction: column; max-height: min(90dvh, 920px); overflow: hidden; }
-.paper-modal .modal-head, .data-modal .modal-head { position: static; flex: 0 0 auto; }
-.paper-modal .modal-body, .data-modal .modal-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
+dialog.modal.paper-modal, dialog.modal.linkedin-modal { width: min(920px, calc(100vw - 36px)); max-width: 920px; }
+dialog.paper-modal[open], dialog.data-modal[open], dialog.linkedin-modal[open] { display: flex; flex-direction: column; max-height: min(90dvh, 920px); overflow: hidden; }
+.paper-modal .modal-head, .data-modal .modal-head, .linkedin-modal .modal-head { position: static; flex: 0 0 auto; }
+.paper-modal .modal-body, .data-modal .modal-body, .linkedin-modal .modal-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
 .workflow-footer { flex: 0 0 auto; padding: 14px 24px 17px; border-top: 1px solid #d5e2ec; background: #f6f9fc; }
 .workflow-footer > p { color: #5d7b92; font-size: 11px; line-height: 1.7; margin-bottom: 10px; }
 .workflow-buttons { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 9px; }
 .workflow-buttons button { font-size: 12px; min-height: 37px; }
-.workflow-buttons #back-paper { margin-right: auto; }
+.workflow-buttons #back-paper, .workflow-buttons #back-linkedin { margin-right: auto; }
 .import-step { color: #2e6187; font-size: 11px; font-weight: 600; letter-spacing: .25px; margin-bottom: 14px; }
 #data-source-controls { border: 1px solid #d7e3ed; border-radius: 5px; padding: 11px 13px; margin-bottom: 15px; }
 #data-source-controls > summary { color: #426e8d; cursor: pointer; font-size: 12px; }
@@ -659,13 +659,13 @@ dialog.paper-modal[open], dialog.data-modal[open] { display: flex; flex-directio
 .coauthor-tag { border-color: #acd1df; color: #25758e; background: #edf8fc; }
 @media (max-width: 600px) {
   .paper-entry { padding: 4px 8px; font-size: 10px; }
-  dialog.modal.paper-modal, dialog.modal.data-modal { width: calc(100vw - 22px); max-height: calc(100dvh - 22px); }
-  .paper-modal .modal-body, .data-modal .modal-body { padding: 16px; }
+  dialog.modal.paper-modal, dialog.modal.data-modal, dialog.modal.linkedin-modal { width: calc(100vw - 22px); max-height: calc(100dvh - 22px); }
+  .paper-modal .modal-body, .data-modal .modal-body, .linkedin-modal .modal-body { padding: 16px; }
   .workflow-footer { padding: 11px 16px 14px; }
   .workflow-footer > p { font-size: 10px; margin-bottom: 8px; }
   .workflow-buttons { align-items: stretch; gap: 8px; }
   .workflow-buttons button { flex: 1 1 135px; font-size: 11px; padding: 9px 10px; }
-  .workflow-buttons #back-paper { flex-basis: 100%; margin-right: 0; }
+  .workflow-buttons #back-paper, .workflow-buttons #back-linkedin { flex-basis: 100%; margin-right: 0; }
   .paper-author-table, .paper-author-table tbody, .paper-author-table tr, .paper-author-table td { display: block; width: 100%; min-width: 0; }
   .paper-author-table thead { display: none; }
   .paper-author-table tr { border: 1px solid #d5e3ed; border-radius: 5px; background: #f8fafc; padding: 10px 12px; margin: 10px 0; }
@@ -675,4 +675,39 @@ dialog.paper-modal[open], dialog.data-modal[open] { display: flex; flex-directio
   .import-result { padding: 11px 13px; gap: 10px; }
   .import-result-actions { width: 100%; }
   .import-result-actions button { flex: 1 1 auto; }
+}
+
+/* LinkedIn academic history review and public profile timeline. */
+.linkedin-modal .modal-head > div, .linkedin-modal .form-field { min-width: 0; }
+.linkedin-modal .form-field input, .linkedin-modal .form-field select { min-width: 0; }
+.linkedin-api-settings { border: 1px solid #d7e3ed; border-radius: 5px; padding: 13px 15px; background: #f6f9fc; margin: 14px 0; }
+.linkedin-api-settings .form-field, .linkedin-api-settings .form-field:first-of-type { margin: 0; }
+.linkedin-api-settings input[type="password"] { display: block; width: 100%; min-width: 0; border: 1px solid #bfd3e2; border-radius: 4px; padding: 10px 11px; background: #fbfdfe; color: #30536e; font-size: 12px; }
+.linkedin-api-settings small, .linkedin-identity small { display: block; font-size: 10px; line-height: 1.75; margin-top: 7px; color: #7894a9; }
+.linkedin-api-settings .source-note { padding: 0; margin-top: 9px; }
+#linkedin-fallback { margin: 17px 0; }
+#linkedin-fallback > summary { color: #426e8d; cursor: pointer; font-size: 12px; }
+.linkedin-identity, .history-fields { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 13px 17px; }
+.linkedin-identity { padding: 17px 0; margin-top: 15px; border-top: 1px solid #d7e3ed; }
+.linkedin-identity .form-field, .linkedin-identity .form-field:first-of-type, .history-fields .form-field, .history-fields .form-field:first-of-type { margin: 0; }
+.linkedin-history-card { border: 1px solid #d4e2ec; border-radius: 6px; padding: 15px; margin: 13px 0; background: #fff; }
+.history-card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; padding-bottom: 13px; margin-bottom: 13px; border-bottom: 1px solid #e0e9f1; }
+.history-card-head label { display: inline-flex; align-items: center; gap: 6px; color: #466b86; font-size: 12px; cursor: pointer; }
+.history-card-head input[type="checkbox"] { width: auto; flex: 0 0 auto; accent-color: #2174bb; }
+.history-card-head select { max-width: 220px; min-width: 160px; padding: 8px 10px; border: 1px solid #bfd3e2; border-radius: 4px; color: #315d7b; background: #f9fbfc; font-size: 12px; }
+.history-fields .form-field label { margin: 0; font-size: 11px; }
+.history-fields .form-field input, .history-fields .form-field select { display: block; margin-top: 5px; }
+.linkedin-profile-history .academic-history-list, .academic-history-list { margin: 0; padding: 0; list-style: none; }
+.academic-history-list > li { position: relative; margin: 0 0 14px 4px; padding: 0 0 3px 13px; border-left: 2px solid #bfd3e2; color: #6083a0; font-size: 10px; line-height: 1.8; overflow-wrap: anywhere; }
+.academic-history-list > li::before { content: ""; position: absolute; top: 6px; left: -4px; width: 6px; height: 6px; border-radius: 50%; background: #87a6be; }
+.academic-history-list > li:last-child { margin-bottom: 0; }
+.academic-history-list b, .academic-history-list strong { display: block; color: #3e617c; font-size: 11px; font-weight: 500; }
+.academic-history-list small, .academic-history-list .history-dates { display: block; color: #7894a9; font-size: 10px; line-height: 1.8; }
+.academic-history-list .evidence-link { font-size: 10px; }
+@media (max-width: 600px) {
+  .linkedin-api-settings { padding: 11px 12px; }
+  .linkedin-identity, .history-fields { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .linkedin-history-card { padding: 12px; }
+  .history-card-head { gap: 10px; }
+  .history-card-head select { min-width: 0; width: 100%; max-width: none; }
 }

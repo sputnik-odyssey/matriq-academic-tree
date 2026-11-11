@@ -1,10 +1,12 @@
 /* MatriQ Academic Tree — dependency-free, source-backed relationship explorer. */
-import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=paper-confirm-20261111';
-import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=paper-confirm-20261111';
-import {enrichPeople} from './people.mjs?v=paper-confirm-20261111';
-import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=paper-confirm-20261111';
-import {setupDataManager} from './data-manager.mjs?v=paper-confirm-20261111';
-import {setupPaperManager} from './paper-manager.mjs?v=paper-confirm-20261111';
+import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=linkedin-history-20261111';
+import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=linkedin-history-20261111';
+import {enrichPeople} from './people.mjs?v=linkedin-history-20261111';
+import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=linkedin-history-20261111';
+import {setupDataManager} from './data-manager.mjs?v=linkedin-history-20261111';
+import {setupPaperManager} from './paper-manager.mjs?v=linkedin-history-20261111';
+import {setupLinkedInManager} from './linkedin-manager.mjs?v=linkedin-history-20261111';
+import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=linkedin-history-20261111';
 'use strict';
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -21,7 +23,7 @@ let graphModel = null, drag = null, toastTimer, graphMobile = null;
 function notify(message){ $('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,3000); }
 function safeURL(raw){ try{const u=new URL(raw);return /^https?:$/.test(u.protocol)?u.href:null;}catch{return null;} }
 function link(raw,label){const url=safeURL(raw);return url?`<a class="pill-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`:'';}
-function searchText(n){ return norm([n.name,n.nameZh,n.affiliation,n.displayAffiliation,n.affiliationTypeLabel,n.role,n.statusLabel,n.jobTitle,n.expectedGraduation,n.location,n.research,...(n.publications||[]),...(n.aliases||[])].join(' ')); }
+function searchText(n){ return norm([n.name,n.nameZh,n.affiliation,n.displayAffiliation,n.affiliationTypeLabel,n.role,n.statusLabel,n.jobTitle,n.expectedGraduation,n.location,n.research,...(n.publications||[]),...(n.aliases||[]),...sanitizeAcademicHistory(n.academicHistory).flatMap(e=>[e.institution,e.title,e.startDate,e.endDate])].join(' ')); }
 function eligible(n){return (!state.institution||n.displayAffiliation===state.institution)&&(!state.location||n.location===state.location)&&(!state.career||n.academicStatus===state.career)&&(!state.affiliationType||n.affiliationType===state.affiliationType);}
 function matches(n,query=state.query){const terms=norm(query).split(/\s+/).filter(Boolean);return eligible(n)&&terms.every(t=>n.searchText.includes(t));}
 function enabledEdges(id){return (adjacency.get(id)||[]).filter(e=>state.types.has(e.type));}
@@ -32,7 +34,7 @@ async function init(){
     const response=await fetch('data.json.gz',{cache:'no-cache'});
     if(!response.ok)throw Error('数据文件未能载入');
     publishedGraph=await decodeGraphBytes(await response.arrayBuffer());
-    try{const evidenceResponse=await fetch('mentorships.json?v=paper-confirm-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
+    try{const evidenceResponse=await fetch('mentorships.json?v=linkedin-history-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
     let active=publishedGraph,info={source:'published'};
     try{
       const local=await loadLocalGraph();
@@ -49,6 +51,7 @@ async function init(){
       if(nextInfo.focusPersonId&&nodes.has(nextInfo.focusPersonId)){state.layout='radial';$$('[data-layout]').forEach(button=>button.classList.toggle('active',button.dataset.layout==='radial'));selectPerson(nextInfo.focusPersonId);}
     }});
     setupPaperManager({getBaseGraph:()=>rawGraph,dataManager});
+    setupLinkedInManager({getBaseGraph:()=>rawGraph,dataManager});
   }catch(error){$('#graph-status').textContent='载入失败';$('#graph-empty').hidden=false;$('#graph-empty').textContent=`${error.message}。请刷新页面重试。`;console.error(error);}
 }
 
@@ -187,6 +190,10 @@ function zoom(factor,x,y){const r=$('#graph-stage').getBoundingClientRect();x??=
 function edgeSourceText(edge){
   return edge.type==='coauthor'?'共同作者 · '+(edge.paperIds?.length||1)+' 篇论文':edge.label+' · '+(edge.evidence||[]).filter(v=>v.column&&v.row).map(v=>v.column+v.row).join(', ');
 }
+function renderAcademicHistory(person){
+  const entries=sanitizeAcademicHistory(person.academicHistory);if(!entries.length)return'';
+  return '<section class="detail-section linkedin-profile-history"><h3>PhD / Postdoc 履历</h3><ul class="academic-history-list">'+entries.map(entry=>'<li><b>'+esc(entry.type==='phd'?'PhD':'Postdoc')+' · '+esc(entry.institution||'机构未提供')+'</b><span>'+esc(entry.title)+'</span><span>'+(entry.type==='phd'?'入学 / 开始：':'开始任职：')+esc(formatAcademicDate(entry.startDate))+'</span><span>'+(entry.endDateType==='expected'?'预计结束 / 毕业：':entry.type==='phd'?'结束 / 毕业（履历所列）：':'结束任职：')+esc(formatAcademicDate(entry.endDate,{present:entry.ongoing}))+'</span><small>'+esc(entry.sourceSection||'公开履历')+(entry.retrievedAt?' · 提取于 '+esc(entry.retrievedAt):'')+'</small>'+(entry.sourceUrl?link(entry.sourceUrl,'履历来源'):'')+'</li>').join('')+'</ul></section>';
+}
 function renderPaperRecords(person){
   const papers=(data.papers||[]).filter(paper=>paper.authors?.some(author=>author.nodeId===person.id));
   if(!papers.length)return'';
@@ -214,9 +221,9 @@ function renderDetail(){
   <div class="profile-metrics"><div><b>${fmt(edges.length)}</b><span>直接关联</span></div><div><b>${fmt(profileSourceCount)}</b><span>${n.stub?'引用行':'来源记录'}</span></div></div>
   ${n.stub?'<div class="notice compact">此对象仅在关系字段出现；未记录的机构和履历不会自动补全。</div>':''}
   ${ambiguous?`<section class="detail-section"><h3>同名候选档案</h3><p class="source-note">Multiple same-name profiles remain separate.</p>${ambiguous.candidateIds.filter(id=>nodes.has(id)).map(id=>{const c=nodes.get(id);return`<button class="relation-item" data-person="${id}"><b>${esc(c.name)}</b><small>${esc(c.displayAffiliation||c.phd||'第 '+c.rows[0]+' 行')}</small></button>`}).join('')}</section>`:''}
-  <section class="detail-section"><h3>Affiliation & career</h3><dl>${field('Affiliation',n.displayAffiliation)}${field('Affiliation type',n.affiliationTypeLabel)}${field('Career status',n.statusLabel)}${n.academicStatus==='industry'||n.jobTitle?field('Job title',n.jobTitle||'Not provided'):''}${n.expectedGraduationRelevant?field('Expected graduation',n.expectedGraduation||'Not provided'):''}${n.expectedGraduationSource==='degree_range'?field('Graduation date source','End of recorded current PhD range; expected, not confirmed completion'):''}${n.displayAffiliationSource==='degree_record'?field('Affiliation source','Current doctoral degree record'):''}${field('Country / region',n.location)}${field('PhD record',n.phd)}${field('Bachelor record',n.bachelor)}</dl>${notes}<div class="external-links">${link(n.website,'个人主页')}${link(n.scholar,'Scholar')}${link(n.linkedin,'LinkedIn')}${n.orcid?link('https://orcid.org/'+n.orcid.replace(/^.*orcid.org\//,''),'ORCID'):''}</div></section>
+  <section class="detail-section"><h3>Affiliation & career</h3><dl>${field('Affiliation',n.displayAffiliation)}${field('Affiliation type',n.affiliationTypeLabel)}${field('Career status',n.statusLabel)}${n.academicStatus==='industry'||n.jobTitle?field('Job title',n.jobTitle||'Not provided'):''}${n.expectedGraduationRelevant?field('Expected graduation',n.expectedGraduation||'Not provided'):''}${n.expectedGraduationSource==='degree_range'?field('Graduation date source','End of recorded current PhD range; expected, not confirmed completion'):''}${n.displayAffiliationSource==='degree_record'?field('Affiliation source','Current doctoral degree record'):''}${field('Country / region',n.location)}${field('PhD record',n.phd)}${field('Bachelor record',n.bachelor)}</dl>${notes}<div class="external-links">${link(n.website,'个人主页')}${link(n.scholar,'Scholar')}${link(n.linkedin,'LinkedIn')}${n.linkedin?`<button class="pill-link" data-open-linkedin data-linkedin-url="${esc(n.linkedin)}">导入 LinkedIn 履历</button>`:''}${n.orcid?link('https://orcid.org/'+n.orcid.replace(/^.*orcid.org\//,''),'ORCID'):''}</div></section>
   <section class="detail-section"><h3>关联人物与对象 <small>${edges.length}</small></h3><div class="relation-list">${relationRows.length?relationRows.map(e=>{const person=nodes.get(other(e,n.id)),type=types.find(x=>x.id===e.type);return`<div class="relation-row"><button class="relation-item" data-person="${person.id}"><span class="color-dot" style="background:${esc(type?.color||'#789')}"></span><span><b>${esc(person.name)}</b><small>${esc(person.displayAffiliation)} · ${esc(person.displayRole)}</small></span><span aria-hidden="true">↗</span></button><button class="source-link" data-edge="${e.id}">${esc(edgeSourceText(e))}</button></div>`}).join(''):'<p class="source-note">原表尚无可展示的关联记录。</p>'}</div></section>
-  ${renderPaperRecords(n)}${renderMappingRecords(n)}`;
+  ${renderAcademicHistory(n)}${renderPaperRecords(n)}${renderMappingRecords(n)}`;
 }
 
 function showEdge(id){

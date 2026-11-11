@@ -1,7 +1,8 @@
-import {parseUpload} from './importer.mjs?v=paper-confirm-20261111';
-import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=paper-confirm-20261111';
-import {enrichPerson} from './people.mjs?v=paper-confirm-20261111';
-import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=paper-confirm-20261111';
+import {parseUpload} from './importer.mjs?v=linkedin-history-20261111';
+import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=linkedin-history-20261111';
+import {enrichPerson} from './people.mjs?v=linkedin-history-20261111';
+import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=linkedin-history-20261111';
+import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=linkedin-history-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const format=value=>Number(value||0).toLocaleString('en-US');
@@ -9,9 +10,9 @@ const issueText=issue=>typeof issue==='string'?issue:issue?.message||String(issu
 
 export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,onActivateGraph}){
   const $=selector=>document.querySelector(selector),dialog=$('#data-modal');
-  let upload=null,preview=null,previewDocuments=[],previewBaseFingerprint='',busy=false,previewGeneration=0,previewCommitted=false,canReturnToPaper=false;
+  let upload=null,preview=null,previewDocuments=[],previewBaseFingerprint='',busy=false,previewGeneration=0,previewCommitted=false,canReturnToPaper=false,canReturnToLinkedIn=false;
   const status=(message,error=false)=>{const element=$('#import-status');element.textContent=message;element.className=error?'notice import-error':'sync-status';if(error&&dialog.open)element.scrollIntoView({block:'nearest'});};
-  function setBusy(value){busy=value;dialog.dataset.busy=String(value);const errors=preview?.issues?.some(issue=>typeof issue==='object'&&issue.level==='error');for(const id of ['preview-pasted','apply-import','download-import','publish-import','show-publish','restore-published','back-paper']){const button=$('#'+id);if(button)button.disabled=value||((!preview||errors)&&['apply-import','download-import','publish-import','show-publish'].includes(id));}$('#data-file').disabled=value;dialog.querySelectorAll('[data-open-paper],[data-close]').forEach(button=>button.disabled=value);}
+  function setBusy(value){busy=value;dialog.dataset.busy=String(value);const errors=preview?.issues?.some(issue=>typeof issue==='object'&&issue.level==='error');for(const id of ['preview-pasted','apply-import','download-import','publish-import','show-publish','restore-published','back-paper','back-linkedin']){const button=$('#'+id);if(button)button.disabled=value||((!preview||errors)&&['apply-import','download-import','publish-import','show-publish'].includes(id));}$('#data-file').disabled=value;dialog.querySelectorAll('[data-open-paper],[data-open-linkedin],[data-close]').forEach(button=>button.disabled=value);}
   function closeCredentials(){ $('#owner-token').value='';$('#publish-reviewed').checked=false; }
   dialog.addEventListener('close',closeCredentials);
   dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
@@ -34,7 +35,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     if(busy)return;
     const pending=getActiveInfo()?.pendingUploads||[];if(!pending.length)return;
     dialog.showModal();setBusy(true);status('正在准备待发布更新…');
-    try{canReturnToPaper=false;await makePreview(pending.at(-1),getPublishedGraph(),pending);}
+    try{canReturnToPaper=false;canReturnToLinkedIn=false;await makePreview(pending.at(-1),getPublishedGraph(),pending);}
     catch(error){preview=null;$('#import-preview').hidden=true;status(error.message,true);}
     finally{setBusy(false);if(preview)revealPublish();}
   });
@@ -59,12 +60,18 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     $('#publish-import').disabled=busy||errors.length>0;
     $('#publish-reviewed').checked=false;
     $('#data-title').textContent='确认导入';
-    $('#import-step').textContent=upload?.kind==='paper'?'1 论文与作者已核对 → 2 确认导入':'选择来源 → 合并已预览 → 确认导入';
-    $('#data-source-controls').hidden=upload?.kind==='paper';
+    $('#import-step').textContent=upload?.kind==='linkedin'?'LinkedIn 履历已核对 → 确认导入':upload?.kind==='paper'?'1 论文与作者已核对 → 2 确认导入':'选择来源 → 合并已预览 → 确认导入';
+    $('#data-source-controls').hidden=['paper','linkedin'].includes(upload?.kind);
     $('#data-source-controls').open=false;
     $('#back-paper').hidden=!canReturnToPaper||upload?.kind!=='paper';
+    $('#back-linkedin').hidden=!canReturnToLinkedIn||upload?.kind!=='linkedin';
     $('#import-action-hint').textContent='确认导入会保存到当前浏览器并显示图谱；共享发布后其他访客才能看到更新。';
     renderPaperSummary();
+    if(upload?.kind==='linkedin'){
+      const section=document.createElement('section');section.className='linkedin-profile-history paper-import-list';
+      section.innerHTML='<h3>博士与博后履历</h3>'+upload.rows.map(row=>'<b>'+esc(row.fields.A)+'</b><ul class="academic-history-list">'+sanitizeAcademicHistory(row.fields.academicHistory).map(entry=>'<li><b>'+esc(entry.type==='phd'?'PhD':'Postdoc')+' · '+esc(entry.institution)+'</b><span>'+esc(entry.title)+'</span><span>开始：'+esc(formatAcademicDate(entry.startDate))+' · '+(entry.endDateType==='expected'?'预计结束：':'结束：')+esc(formatAcademicDate(entry.endDate,{present:entry.ongoing}))+'</span></li>').join('')+'</ul>').join('');
+      $('#import-preview').prepend(section);
+    }
   }
   async function makePreview(parsed,base,documents=null){
     const generation=++previewGeneration;
@@ -93,6 +100,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
   async function openParsed(parsed,options={}){
     if(busy)return;
     canReturnToPaper=Boolean(options.canReturnToPaper);
+    canReturnToLinkedIn=Boolean(options.canReturnToLinkedIn);
     if(!dialog.open)dialog.showModal();
     setBusy(true);status('正在生成合并预览…');
     try{await makePreview(parsed,getBaseGraph());return preview;}
@@ -102,6 +110,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
   async function readFile(file){
     if(!file||busy)return;
     canReturnToPaper=false;
+    canReturnToLinkedIn=false;
     setBusy(true);status('Reading the document and preparing a public-field-only merge…');
     try{const parsed=await parseUpload(file);await makePreview(parsed,getBaseGraph());}
     catch(error){preview=null;$('#import-preview').hidden=true;status(error.message||'This document could not be imported.',true);}
@@ -124,7 +133,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
   });
   $('#restore-published').addEventListener('click',async()=>{
     if(busy)return;setBusy(true);
-    try{await clearLocalGraph();await onActivateGraph(getPublishedGraph(),{source:'published'});preview=null;upload=null;$('#import-preview').hidden=true;$('#data-title').textContent='上传与更新数据库';$('#data-source-controls').hidden=false;$('#data-source-controls').open=true;$('#back-paper').hidden=true;$('#owner-controls').open=false;showLocalResult({source:'published'});status('已恢复已发布数据库，并清除本地未发布更新。');$('#import-action-hint').textContent='生成预览后，在此确认导入。';}
+    try{await clearLocalGraph();await onActivateGraph(getPublishedGraph(),{source:'published'});preview=null;upload=null;$('#import-preview').hidden=true;$('#data-title').textContent='上传与更新数据库';$('#data-source-controls').hidden=false;$('#data-source-controls').open=true;$('#back-paper').hidden=true;$('#back-linkedin').hidden=true;$('#owner-controls').open=false;showLocalResult({source:'published'});status('已恢复已发布数据库，并清除本地未发布更新。');$('#import-action-hint').textContent='生成预览后，在此确认导入。';}
     catch(error){status(error.message,true);}finally{setBusy(false);}
   });
   $('#download-import').addEventListener('click',()=>{

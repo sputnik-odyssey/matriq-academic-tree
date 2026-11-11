@@ -7,8 +7,8 @@
   <meta name="description" content="量子物理人物、机构、职业信息与学术关系数据库。">
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=paper-confirm-layout-20261111">
-  <script type="module" src="app.js?v=paper-confirm-20261111"></script>
+  <link rel="stylesheet" href="style.css?v=linkedin-history-20261111">
+  <script type="module" src="app.js?v=linkedin-history-20261111"></script>
 </head>
 <body>
 <header class="topbar">
@@ -18,7 +18,7 @@
 </header>
 <main>
   <section class="intro compact-intro">
-    <div class="project-heading"><h1>量子学术图谱</h1><span id="database-state" class="badge">已发布数据库</span><button class="paper-entry" data-open-paper aria-label="导入论文">＋ 论文</button></div>
+    <div class="project-heading"><h1>量子学术图谱</h1><span id="database-state" class="badge">已发布数据库</span><button class="paper-entry" data-open-paper aria-label="导入论文">＋ 论文</button><button class="paper-entry" data-open-linkedin aria-label="导入 LinkedIn 履历">＋ LinkedIn</button></div>
     <div class="metrics" aria-label="数据概况"><div class="metric"><b id="people-count">—</b><span>人物</span></div><div class="metric"><b id="edge-count">—</b><span>关联</span></div><div class="metric"><b id="institution-count">—</b><span>机构名称</span></div></div>
   </section>
   <section id="import-result" class="import-result" aria-label="导入结果" hidden><p id="import-result-text" role="status"></p><div class="import-result-actions"><button class="secondary-button" id="review-local-publish">发布本地更新到共享数据库</button><button class="text-button" id="dismiss-import-result" aria-label="隐藏导入提示">×</button></div></section>
@@ -52,7 +52,7 @@
 <dialog id="edge-modal" class="modal"><div class="modal-head"><h2>这条关系来自哪里</h2><button class="icon-button" data-close aria-label="关闭">×</button></div><div class="modal-body" id="edge-content"></div></dialog>
 <dialog id="data-modal" class="modal import-modal data-modal" aria-labelledby="data-title"><div class="modal-head"><div><h2 id="data-title">上传与更新数据库</h2><p id="import-step" class="import-step">选择来源 → 核对合并 → 确认导入</p></div><button class="icon-button" data-close aria-label="关闭数据导入">×</button></div><div class="modal-body">
   <details id="data-source-controls" open><summary>选择或更换导入来源</summary>
-    <p><button class="secondary-button" data-open-paper>通过论文标题或链接导入共同作者</button></p><p>支持 Excel <b>Mapping</b> 工作表、CSV 和 JSON。先核对合并结果，再确认导入。</p>
+    <div class="paper-actions"><button class="secondary-button" data-open-paper>通过论文导入共同作者</button><button class="secondary-button" data-open-linkedin>通过 LinkedIn 导入履历</button></div><p>支持 Excel <b>Mapping</b> 工作表、CSV 和 JSON。先核对合并结果，再确认导入。</p>
     <label class="file-drop" for="data-file">选择文档<input id="data-file" type="file" accept=".xlsx,.csv,.tsv,.json"></label>
     <p><a class="evidence-link" href="import-template.csv" download>下载公开字段模板 ↗</a></p>
     <details><summary>或粘贴 CSV / JSON</summary><div class="form-field"><label for="import-text">结构化数据</label><textarea id="import-text" rows="5" placeholder="Legal Name,CurrentAffiliation,Affiliation Type,Academic Status,Job Title,Expected Graduation"></textarea></div><button class="secondary-button" id="preview-pasted">预览粘贴数据</button></details>
@@ -66,7 +66,7 @@
     <label class="publish-confirmation"><input id="publish-reviewed" type="checkbox">我已核对本次公开数据合并，确认发布给所有访客。</label>
     <button class="primary-button" id="publish-import" disabled>确认发布到共享数据库</button>
   </details>
-</div><div class="workflow-footer"><p id="import-action-hint">生成预览后，在此确认导入。</p><div class="workflow-buttons"><button class="secondary-button" id="back-paper" hidden>返回作者核对</button><button class="primary-button" id="apply-import" disabled>确认导入并查看图谱</button><button class="secondary-button" id="show-publish" disabled>发布到共享数据库</button></div></div></dialog>
+</div><div class="workflow-footer"><p id="import-action-hint">生成预览后，在此确认导入。</p><div class="workflow-buttons"><button class="secondary-button" id="back-paper" hidden>返回作者核对</button><button class="secondary-button" id="back-linkedin" hidden>返回履历核对</button><button class="primary-button" id="apply-import" disabled>确认导入并查看图谱</button><button class="secondary-button" id="show-publish" disabled>发布到共享数据库</button></div></div></dialog>
 <dialog id="paper-modal" class="modal paper-modal" aria-labelledby="paper-title"><div class="modal-head"><div><h2 id="paper-title">导入论文与合作关系</h2><p class="import-step">1 识别论文与核对作者 → 2 确认导入</p></div><button class="icon-button" data-close aria-label="关闭论文导入">×</button></div><div class="modal-body">
   <form id="paper-lookup">
     <div class="form-field"><label for="paper-query">论文标题、DOI、arXiv 或 Google Scholar 链接</label><input id="paper-query" type="search" autocomplete="off" maxlength="2000" placeholder="输入论文标题或链接"></div>
@@ -78,5 +78,21 @@
   <div id="paper-candidates" hidden></div>
   <section id="paper-authors" hidden></section>
 </div><div class="workflow-footer"><p id="paper-next-hint">识别论文后，核对作者并进入确认导入。</p><div class="workflow-buttons"><button class="secondary-button" data-close>取消</button><button class="primary-button" id="preview-paper" disabled>下一步：确认导入 →</button></div></div></dialog>
+<dialog id="linkedin-modal" class="modal linkedin-modal" aria-labelledby="linkedin-title"><div class="modal-head"><div><h2 id="linkedin-title">导入 LinkedIn 学术履历</h2><p class="import-step">1 获取履历 → 2 核对 PhD / Postdoc → 3 确认导入</p></div><button class="icon-button" data-close aria-label="关闭 LinkedIn 导入">×</button></div><div class="modal-body">
+  <form id="linkedin-fetch-form">
+    <div class="form-field"><label for="linkedin-url">LinkedIn 人物链接</label><input id="linkedin-url" type="url" maxlength="2000" placeholder="https://www.linkedin.com/in/…" autocomplete="off"></div>
+    <div class="linkedin-api-settings"><div class="form-field"><label for="linkedin-api-token">Apify API Token</label><input id="linkedin-api-token" type="password" autocomplete="off" spellcheck="false" placeholder="输入 Apify API Token"><small>密钥仅用于本次请求，关闭窗口即清空。每次仅抓取一位人物，每任务费用上限 US$0.10；实际费用以 Apify 服务为准。</small></div><p class="source-note"><a class="evidence-link" id="linkedin-provider-link" target="_blank" rel="noopener noreferrer">查看抓取服务 ↗</a> · <a class="evidence-link" href="https://console.apify.com/settings/integrations" target="_blank" rel="noopener noreferrer">获取 Apify Token ↗</a></p></div>
+    <details><summary>继续已有 Apify 任务（可选）</summary><div class="form-field"><label for="linkedin-run-id">Apify Run ID</label><input id="linkedin-run-id" type="text" autocomplete="off" maxlength="64" placeholder="从 Apify 控制台复制任务编号"></div></details>
+    <div class="paper-actions"><button class="primary-button" id="fetch-linkedin" type="submit">抓取 LinkedIn 履历</button><button class="secondary-button" id="new-linkedin-run" type="button" hidden>创建新的抓取任务</button><button class="secondary-button" id="stop-linkedin" type="button" hidden>停止等待</button></div>
+  </form>
+  <details id="linkedin-fallback"><summary>备用：粘贴履历文字</summary><div class="form-field"><label for="linkedin-text">LinkedIn Education / Experience 文字</label><textarea id="linkedin-text" rows="7" maxlength="150000" placeholder="粘贴姓名、Education 和 Experience。只提取博士及博后条目。"></textarea></div><button class="secondary-button" id="parse-linkedin-text">识别粘贴履历</button></details>
+  <div id="linkedin-status" class="sync-status" role="status">输入人物链接和 Apify Token 后抓取。博士从 Education 识别，博后同时检查 Experience。</div>
+  <section id="linkedin-review" hidden>
+    <div class="linkedin-identity"><div class="form-field"><label for="linkedin-name">人物姓名（请核对）</label><input id="linkedin-name" type="text" maxlength="300"></div><div class="form-field"><label for="linkedin-match">对应人物档案</label><select id="linkedin-match"></select><small id="linkedin-match-note"></small></div></div>
+    <div id="linkedin-history-entries"></div>
+    <p class="source-note">日期保留来源精度；空白表示未提供。PhD 的结束年份不自动视为已授予学位。博后记录任职起止时间。</p>
+    <button class="secondary-button" id="add-linkedin-entry" type="button">＋ 补充履历条目</button>
+  </section>
+</div><div class="workflow-footer"><p id="linkedin-next-hint">抓取完成后可修改机构及起止日期，再确认导入。</p><div class="workflow-buttons"><button class="secondary-button" data-close>取消</button><button class="primary-button" id="preview-linkedin" disabled>下一步：确认导入 →</button></div></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 </body></html>

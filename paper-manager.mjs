@@ -1,5 +1,5 @@
-import {resolvePaper,parsePaperInput} from './paper-resolver.mjs?v=paper-confirm-20261111';
-import {previewAuthorMatches,normalizeORCID} from './paper-importer.mjs?v=paper-confirm-20261111';
+import {resolvePaper,parsePaperInput} from './paper-resolver.mjs?v=linkedin-history-20261111';
+import {previewAuthorMatches,normalizeORCID} from './paper-importer.mjs?v=linkedin-history-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeURL=value=>{try{const u=new URL(value);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return'';}};

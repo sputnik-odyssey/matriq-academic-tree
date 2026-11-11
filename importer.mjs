@@ -1,6 +1,7 @@
 /* Local-only structured-file import. Uploaded text is data, never executable instructions. */
-import {normalizeMappingEdges} from './mentorship.mjs?v=paper-collaboration-20261111';
-import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=paper-collaboration-20261111';
+import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory,sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=linkedin-history-20261111';
+import {normalizeMappingEdges} from './mentorship.mjs?v=linkedin-history-20261111';
+import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=linkedin-history-20261111';
 export const PUBLIC_COLUMNS=Object.freeze([
   {key:'A',label:'Legal Name'},{key:'B',label:'中文名'},{key:'C',label:'PhD'},
   {key:'D',label:'Bachelor location'},{key:'E',label:'Bachelor'},
@@ -10,7 +11,8 @@ export const PUBLIC_COLUMNS=Object.freeze([
   {key:'T',label:'Scholar'},{key:'U',label:'Citation Count'},{key:'V',label:'Paper'},
   {key:'W',label:'Paper Citation Count'},{key:'X',label:'Year Cited'},{key:'AB',label:'Source'},
   {key:'affiliationType',label:'Affiliation Type'},{key:'academicStatus',label:'Academic Status'},
-  {key:'jobTitle',label:'Job Title'},{key:'expectedGraduation',label:'Expected Graduation'}
+  {key:'jobTitle',label:'Job Title'},{key:'expectedGraduation',label:'Expected Graduation'},
+  {key:'academicHistory',label:'Academic History'}
 ]);
 const PUBLIC_KEYS=new Set(PUBLIC_COLUMNS.map(c=>c.key));
 const MAX_FILE=20*1024*1024,MAX_XML=64*1024*1024,MAX_ROWS=100000,MAX_COLUMNS=512,MAX_CELL=40000;
@@ -31,10 +33,11 @@ function cleanedFields(fields){return Object.fromEntries(Object.entries(fields||
 function sanitiseFields(fields){
   const result={};
   for(const [key,value] of Object.entries(fields||{}))if(PUBLIC_KEYS.has(key)&&value!==null&&value!==undefined){
-    const str=text(value);if(str&&!((key==='N'||key==='O')&&!useful(str)))result[key]=str;
+    const str=key==='academicHistory'?serializeAcademicHistory(value):text(value);if(str&&!((key==='N'||key==='O')&&!useful(str)))result[key]=str;
   }
   return result;
 }
+export const sanitizePublicImportFields=sanitiseFields;
 
 const HEADER_ALIASES=new Map();
 for(const c of PUBLIC_COLUMNS)HEADER_ALIASES.set(norm(c.label),c.key);
@@ -49,6 +52,7 @@ for(const [key,names] of Object.entries({
   affiliationType:['Institution Type','Organization Type','Organisation Type','Public Affiliation Type'],
   academicStatus:['AcademicStatus','Student Status','PhD Status','Career Status'],
   jobTitle:['JobTitle','Employment Title','Current Job Title','Actual Job Title'],
+  academicHistory:['AcademicHistory','Academic Timeline','博士与博后履历','学术履历'],
   expectedGraduation:['ExpectedGraduation','Expected Graduation Date','Expected Graduation Year','Anticipated Graduation','预计毕业时间','预计毕业日期','预计毕业年份']
 }))for(const name of names)HEADER_ALIASES.set(norm(name),key);
 
@@ -200,7 +204,8 @@ function objectFields(value){
   const result={};
   for(const [key,val] of Object.entries(value||{})){
     const mapped=PUBLIC_KEYS.has(key)?key:/^affiliation\s+type$/i.test(key)?'affiliationType':HEADER_ALIASES.get(norm(key));
-    if(mapped&&val!==null&&val!==undefined&&['string','number','boolean'].includes(typeof val))result[mapped]=text(val);
+    if(mapped==='academicHistory'){const history=serializeAcademicHistory(val);if(history)result[mapped]=history;}
+    else if(mapped&&val!==null&&val!==undefined&&['string','number','boolean'].includes(typeof val))result[mapped]=text(val);
   }
   return sanitiseFields(result);
 }
@@ -226,9 +231,15 @@ function parseJSONUpload(value,file){
           const supplied=node[key];
           if(['string','number','boolean'].includes(typeof supplied)&&useful(supplied)&&!mapped.some(r=>useful(r.fields[key])))mapped[0].fields[key]=text(supplied);
         }
+        if(mapped.length){
+          const history=mergeAcademicHistory(mapped.flatMap(r=>sanitizeAcademicHistory(r.fields.academicHistory)),node.academicHistory);
+          // The node chronology is the current reviewed snapshot. Apply it after
+          // older source rows so a graph roundtrip cannot revive superseded dates.
+          if(history.length)mapped.at(-1).fields.academicHistory=serializeAcademicHistory(history);
+        }
         records.push(...mapped);
       }
-      else records.push({personKey:text(node.id).slice(0,200),fields:{A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation}});
+      else records.push({personKey:text(node.id).slice(0,200),fields:{A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation,academicHistory:serializeAcademicHistory(node.academicHistory)}});
     }
   }
   if(!records)throw Error('JSON must contain an array of named people rows or an exported graph.');
@@ -271,13 +282,13 @@ function urlIdentity(value,type){
   }
   try{const url=new URL(/^https?:\/\//i.test(value)?value:'https://'+value);if(!['http:','https:'].includes(url.protocol))return '';
     if(type==='T'){const id=url.searchParams.get('user');return url.hostname.toLowerCase()==='scholar.google.com'&&!url.username&&!url.password&&!url.port&&/^[A-Za-z0-9_-]{3,64}$/.test(id||'')?'scholar:'+id:'';}
-    if(type==='R'&&(!/(^|\.)linkedin\.com$/i.test(url.hostname)||!/^\/(?:in|pub)\/[^/]+/i.test(url.pathname)))return '';
+    if(type==='R'){if(!/(^|\.)linkedin\.com$/i.test(url.hostname)||!/^\/(?:in|pub)\/[^/]+/i.test(url.pathname)||url.username||url.password||url.port)return '';return 'linkedin.com'+decodeURIComponent(url.pathname).replace(/\/+$/,'').toLowerCase();}
     return url.hostname.toLowerCase().replace(/^www\./,'')+decodeURIComponent(url.pathname).replace(/\/+$/,'').toLowerCase();
   }catch{return '';}
 }
 
 function nodeFields(node){
-  const result={A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation};
+  const result={A:node.name,B:node.nameZh,C:node.phd,E:node.bachelor,G:node.affiliation,H:node.role,I:node.location,P:node.website,Q:node.orcid,R:node.linkedin,T:node.scholar,affiliationType:node.affiliationType,academicStatus:node.academicStatus,jobTitle:node.jobTitle,expectedGraduation:node.expectedGraduation,academicHistory:serializeAcademicHistory(mergeAcademicHistory((node.records||[]).flatMap(r=>sanitizeAcademicHistory(r.fields?.academicHistory)),node.academicHistory))};
   for(const record of node.records||[])for(const [key,value] of Object.entries(record.fields||{}))if(PUBLIC_KEYS.has(key)&&useful(value)&&!useful(result[key]))result[key]=value;
   return sanitiseFields(result);
 }
@@ -299,7 +310,7 @@ function identityMatch(node,fields,record,sourceFile){
 
 function makePerson(fields,id){
   const name=nameOf(fields),nameZh=useful(fields.B)&&norm(fields.B)!==norm(name)?fields.B:'';
-  return{id,name,nameZh,kind:'person',entityType:'person',affiliation:useful(fields.G)?fields.G:'',role:useful(fields.H)?fields.H:'',location:useful(fields.I)?fields.I:'',phd:useful(fields.C)?fields.C:'',bachelor:useful(fields.E)?fields.E:'',research:'',website:useful(fields.P)?fields.P:'',scholar:useful(fields.T)?fields.T:'',orcid:useful(fields.Q)?fields.Q:'',linkedin:useful(fields.R)?fields.R:'',affiliationType:useful(fields.affiliationType)?fields.affiliationType:'',academicStatus:useful(fields.academicStatus)?fields.academicStatus:'',jobTitle:useful(fields.jobTitle)?fields.jobTitle:'',expectedGraduation:useful(fields.expectedGraduation)?fields.expectedGraduation:'',rows:[],records:[],stub:false,aliases:[name],identityNote:'',degree:0,publications:useful(fields.V)?[fields.V]:[]};
+  return{id,name,nameZh,kind:'person',entityType:'person',affiliation:useful(fields.G)?fields.G:'',role:useful(fields.H)?fields.H:'',location:useful(fields.I)?fields.I:'',phd:useful(fields.C)?fields.C:'',bachelor:useful(fields.E)?fields.E:'',research:'',website:useful(fields.P)?fields.P:'',scholar:useful(fields.T)?fields.T:'',orcid:useful(fields.Q)?fields.Q:'',linkedin:useful(fields.R)?fields.R:'',affiliationType:useful(fields.affiliationType)?fields.affiliationType:'',academicStatus:useful(fields.academicStatus)?fields.academicStatus:'',jobTitle:useful(fields.jobTitle)?fields.jobTitle:'',expectedGraduation:useful(fields.expectedGraduation)?fields.expectedGraduation:'',academicHistory:sanitizeAcademicHistory(fields.academicHistory),rows:[],records:[],stub:false,aliases:[name],identityNote:'',degree:0,publications:useful(fields.V)?[fields.V]:[]};
 }
 
 function sanitiseNode(node,sourceFile){
@@ -332,6 +343,7 @@ function updatePerson(node,fields,record,sourceFile,{preserveName=false}={}){
   const patch=makePerson(fields,node.id);
   const mapping={A:'name',B:'nameZh',C:'phd',E:'bachelor',G:'affiliation',H:'role',I:'location',P:'website',Q:'orcid',R:'linkedin',T:'scholar',affiliationType:'affiliationType',academicStatus:'academicStatus',jobTitle:'jobTitle',expectedGraduation:'expectedGraduation'};
   for(const [key,property] of Object.entries(mapping))if(useful(fields[key])&&!(preserveName&&key==='A'))node[property]=key==='B'&&norm(fields.B)===norm(node.name)?'':patch[property];
+  node.academicHistory=mergeAcademicHistory(node.academicHistory,fields.academicHistory);
   node.aliases=[...new Set([...node.aliases,nameOf(fields)].filter(useful))];
   if(useful(fields.V))node.publications=[...new Set([...node.publications,fields.V])];
   const safeRecord={row:record.row,fields:sanitiseFields(fields),sourceFile};
@@ -357,7 +369,28 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
     const f=nodeFields(node);for(const key of ['Q','R','T']){const value=urlIdentity(f[key],key);if(value){const id=key+':'+value;if(!byIdentifier.has(id))byIdentifier.set(id,new Set());byIdentifier.get(id).add(node.id);}}
   }
   profileNodes.forEach(indexNode);
-  const affected=new Map(),rowTargets=[],sourceGroups=new Map(),inputRows=upload.rows.filter(r=>r&&typeof r==='object');let excluded=0,ambiguous=0,sourceRecordRows=0;
+  const inputRows=upload.rows.filter(r=>r&&typeof r==='object').map(r=>upload.kind==='linkedin'?{...r,fields:Object.fromEntries(Object.entries(r.fields||{}).filter(([key])=>['A','B','R','academicHistory'].includes(key)))}:r);
+  let reviewedProfile=null;
+  if(upload.kind==='linkedin'){
+    if(inputRows.length!==1)throw Error('Review one LinkedIn profile at a time.');
+    const choice=sanitizeLinkedInProfileMatch(upload.profileMatch),fields=sanitiseFields(inputRows[0].fields),incoming=urlIdentity(fields.R,'R');
+    const reviewedRow=inputRows[0],reviewedSource=basename(reviewedRow.sourceFile||sourceFile);
+    const alreadyApplied=node=>provenanceMatch(node,fields,{row:reviewedRow.row},reviewedSource);
+    if(!choice||!incoming)throw Error('Confirm a valid LinkedIn profile and its person match before importing.');
+    if(choice==='new'){
+      const existing=profileNodes.filter(n=>urlIdentity(nodeFields(n).R,'R')===incoming);
+      if(existing.length===1&&alreadyApplied(existing[0]))reviewedProfile=existing[0];
+      else if(existing.length)throw Error('The shared database now has this LinkedIn profile. Return to person matching and review the existing profile.');
+    }else{
+      const node=nodeMap.get(choice.nodeId),current=node?nodeFields(node):{};
+      if(!node||node.stub||node.entityType!=='person'||norm(choice.identity.name)!==norm(node.name)||(urlIdentity(choice.identity.linkedin,'R')!==urlIdentity(current.R,'R')&&!alreadyApplied(node)))throw Error('The selected person changed since review. Return to person matching and review again.');
+      if(urlIdentity(current.R,'R')&&urlIdentity(current.R,'R')!==incoming)throw Error('The selected person has a different LinkedIn profile. Review the identity before importing.');
+      const sameIdentifier=profileNodes.filter(n=>urlIdentity(nodeFields(n).R,'R')===incoming);
+      if(!urlIdentity(current.R,'R')&&sameIdentifier.some(n=>n.id!==node.id))throw Error('This LinkedIn profile belongs to another existing person. Review the person match again.');
+      reviewedProfile=node;
+    }
+  }
+  const affected=new Map(),rowTargets=[],sourceGroups=new Map();let excluded=0,ambiguous=0,sourceRecordRows=0;
   for(const record of inputRows){
     const fields=sanitiseFields(record.fields),row=Number(record.row);
     const rowSource=basename(record.sourceFile||sourceFile);
@@ -370,7 +403,7 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
     const candidates=[...candidateIDs].map(id=>nodeMap.get(id));
     const exactProvenance=candidates.filter(n=>provenanceMatch(n,fields,{row},rowSource));
     const exactIdentifiers=candidates.filter(n=>!identityConflict(nodeFields(n),fields)&&['Q','R','T'].some(key=>urlIdentity(fields[key],key)&&urlIdentity(fields[key],key)===urlIdentity(nodeFields(n)[key],key)));
-    const matched=exactProvenance.length?exactProvenance:exactIdentifiers.length?exactIdentifiers:grouped.length?grouped:candidates.filter(n=>identityMatch(n,fields,{row},rowSource));
+    const matched=upload.kind==='linkedin'?(reviewedProfile?[reviewedProfile]:[]):exactProvenance.length?exactProvenance:exactIdentifiers.length?exactIdentifiers:grouped.length?grouped:candidates.filter(n=>identityMatch(n,fields,{row},rowSource));
     let node;
     if(matched.length===1)node=matched[0];
     else{
@@ -444,7 +477,7 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
   if(excluded)warnings.push(`${excluded} rows without a usable name or valid row number were excluded.`);
   let graph={meta,nodes,edges,edgeTypes:EDGE_TYPES.map(t=>({...t}))};
   if(mode==='merge'&&baseGraph.papers?.length)graph=rebuildPaperGraph(graph,baseGraph.papers);
-  const summary={added,updated,unchanged,newRelationships,retained:mode==='merge'?profiles.filter(n=>oldIDs.has(n.id)&&!affected.has(n.id)).length:0,ambiguous,excluded,processedRows:sourceRecordRows,totalPeople:profiles.length,totalRelationships:graph.edges.length,totalNodes:nodes.length,changedIds:[...affected].filter(([,kind])=>kind!=='unchanged').map(([id])=>id),subjectIds:[...affected.keys()],mode,papersAdded:0,papersUpdated:0,totalPapers:graph.papers?.length||0};
+  const summary={added,updated,unchanged,newRelationships,retained:mode==='merge'?profiles.filter(n=>oldIDs.has(n.id)&&!affected.has(n.id)).length:0,ambiguous,excluded,processedRows:sourceRecordRows,totalPeople:profiles.length,totalRelationships:graph.edges.length,totalNodes:nodes.length,changedIds:[...affected].filter(([,kind])=>kind!=='unchanged').map(([id])=>id),subjectIds:[...affected.keys()],mode,papersAdded:0,papersUpdated:0,totalPapers:graph.papers?.length||0,...(upload.kind==='linkedin'?{focusPersonId:rowTargets[0]?.target||null}:{})};
   if(upload.papers?.length){
     const bindings=new Map();for(const r of rowTargets)if(r.personKey){if(!bindings.has(r.personKey))bindings.set(r.personKey,new Set());bindings.get(r.personKey).add(r.target);}
     const changed=new Set(summary.changedIds),subjects=new Set(summary.subjectIds);

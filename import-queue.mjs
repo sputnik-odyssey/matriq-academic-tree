@@ -1,8 +1,10 @@
-import {previewImport} from './importer.mjs?v=paper-collaboration-20261111';
-import {previewPaperImport,sanitizePaper,sanitizePaperDocument} from './paper-importer.mjs?v=paper-collaboration-20261111';
+import {sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=linkedin-history-20261111';
+import {previewImport,sanitizePublicImportFields} from './importer.mjs?v=linkedin-history-20261111';
+import {previewPaperImport,sanitizePaper,sanitizePaperDocument} from './paper-importer.mjs?v=linkedin-history-20261111';
 
 export function queueUpload(parsed,staged=[]){
-  const current=parsed.kind==='paper'?sanitizePaperDocument(parsed):{sourceFile:parsed.sourceFile,sheet:parsed.sheet,rows:structuredClone(parsed.rows),warnings:[],...(parsed.sourceIdentity?{sourceIdentity:parsed.sourceIdentity}:{}),...(parsed.papers?.length?{papers:parsed.papers.map(p=>sanitizePaper(p,{keepNodeIds:true}))}:{})};
+  const rows=parsed.kind==='linkedin'?(parsed.rows||[]).map(row=>({row:row.row,fields:sanitizePublicImportFields(Object.fromEntries(Object.entries(row.fields||{}).filter(([key])=>['A','B','R','academicHistory'].includes(key))))})):structuredClone(parsed.rows);
+  const current=parsed.kind==='paper'?sanitizePaperDocument(parsed):{...(parsed.kind==='linkedin'?{kind:'linkedin',profileMatch:sanitizeLinkedInProfileMatch(parsed.profileMatch)}:{}),sourceFile:parsed.sourceFile,sheet:parsed.sheet,rows,warnings:[],...(parsed.sourceIdentity?{sourceIdentity:parsed.sourceIdentity}:{}),...(parsed.papers?.length?{papers:parsed.papers.map(p=>sanitizePaper(p,{keepNodeIds:true}))}:{})};
   const queue=structuredClone(staged);
   if(!queue.some(item=>JSON.stringify(item)===JSON.stringify(current)))queue.push(current);
   return queue;
