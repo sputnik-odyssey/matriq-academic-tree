@@ -1,5 +1,5 @@
-import {resolvePaper,parsePaperInput} from './paper-resolver.mjs?v=paper-collaboration-20261111';
-import {previewAuthorMatches,normalizeORCID} from './paper-importer.mjs?v=paper-collaboration-20261111';
+import {resolvePaper,parsePaperInput} from './paper-resolver.mjs?v=paper-confirm-20261111';
+import {previewAuthorMatches,normalizeORCID} from './paper-importer.mjs?v=paper-confirm-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeURL=value=>{try{const u=new URL(value);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return'';}};
@@ -10,16 +10,22 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   const $=s=>document.querySelector(s),dialog=$('#paper-modal');
   let candidates=[],selected=null,review=null,busy=false,request=null,inputInfo=null;
   const status=(message,error=false)=>{const element=$('#paper-status');element.textContent=message;element.className=error?'notice import-error':'sync-status';};
-  function setBusy(value){busy=value;$('#find-paper').disabled=value;$('#paper-example').disabled=value;$('#preview-paper').disabled=value||!review;$('#paper-query').disabled=value;$('#paper-title-hint').disabled=value;}
-  function open(){
+  function updateNext(){
+    const count=review?.authors?.length||0,unresolved=[...document.querySelectorAll('[data-author-index]')].some(select=>!select.value);
+    $('#preview-paper').disabled=busy||!count||count>100||unresolved;
+    $('#paper-next-hint').textContent=busy?'正在识别论文，请稍候…':!count?'识别论文后，核对作者并进入确认导入。':unresolved?'请选择每位作者对应的档案，或选择新建人物。':count>100?'单篇论文最多支持 100 位作者。':'已识别 '+count+' 位作者。核对后点击下一步，确认新增人物与合作关系。';
+  }
+  function setBusy(value){busy=value;$('#find-paper').disabled=value;$('#paper-example').disabled=value;$('#paper-query').disabled=value;$('#paper-title-hint').disabled=value;updateNext();}
+  function open(preserveReview=false){
     if($('#data-modal').open)$('#data-modal').close();
-    if(selected)renderAuthors(selected);
+    if(selected&&!preserveReview)renderAuthors(selected);
     dialog.showModal();
     $('#paper-query').focus();
   }
-  document.querySelectorAll('[data-open-paper]').forEach(button=>button.addEventListener('click',open));
-  $('#paper-query').addEventListener('input',()=>{$('#paper-title-hint').value='';selected=null;review=null;$('#paper-candidates').hidden=true;$('#paper-authors').hidden=true;$('#preview-paper').disabled=true;});
-  $('#paper-title-hint').addEventListener('input',()=>{selected=null;review=null;$('#paper-candidates').hidden=true;$('#paper-authors').hidden=true;$('#preview-paper').disabled=true;});
+  document.querySelectorAll('[data-open-paper]').forEach(button=>button.addEventListener('click',()=>open()));
+  $('#back-paper').addEventListener('click',()=>open(true));
+  $('#paper-query').addEventListener('input',()=>{$('#paper-title-hint').value='';selected=null;review=null;$('#paper-candidates').hidden=true;$('#paper-authors').hidden=true;updateNext();});
+  $('#paper-title-hint').addEventListener('input',()=>{selected=null;review=null;$('#paper-candidates').hidden=true;$('#paper-authors').hidden=true;updateNext();});
   dialog.addEventListener('close',()=>{if(busy&&request)request.abort();});
   $('#paper-example').addEventListener('click',()=>{$('#paper-query').value=EXAMPLE_URL;$('#paper-title-hint').value='';lookup();});
   $('#paper-lookup').addEventListener('submit',event=>{event.preventDefault();lookup();});
@@ -27,7 +33,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
     const index=event.target.dataset.paperIndex;
     if(index!==undefined){try{renderAuthors(candidates[Number(index)]);}catch(error){status(error.message||'此记录的作者信息不可导入，请选择另一条。',true);}}
   });
-  $('#paper-authors').addEventListener('change',()=>{if(review)$('#preview-paper').disabled=busy||[...document.querySelectorAll('[data-author-index]')].some(select=>!select.value);});
+  $('#paper-authors').addEventListener('change',updateNext);
   function renderCandidates(){
     $('#paper-candidates').hidden=false;
     $('#paper-candidates').innerHTML='<fieldset class="paper-result-list"><legend>选择论文记录</legend>'+candidates.map((paper,index)=>
@@ -40,7 +46,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
     const nodeMap=new Map(getBaseGraph().nodes.map(n=>[n.id,n]));
     const authors=review.authors||[],pairs=authors.length*(authors.length-1)/2;
     $('#paper-authors').hidden=false;
-    $('#paper-authors').innerHTML='<h3>'+esc(paper.title)+'</h3><p class="source-note">'+authors.length+' 位作者 · 将记录 '+pairs+' 组共同作者关系。请核对作者档案后预览合并。</p>'+
+    $('#paper-authors').innerHTML='<h3>'+esc(paper.title)+'</h3><p class="source-note">'+authors.length+' 位作者 · 将记录 '+pairs+' 组共同作者关系。核对后点击窗口底部的“下一步：确认导入”。</p>'+
       '<div class="table-scroll"><table class="directory-table paper-author-table"><thead><tr><th>作者</th><th>论文所列机构</th><th>匹配人物档案</th></tr></thead><tbody>'+
       authors.map(author=>{
         const ids=author.candidateIds||[];
@@ -48,13 +54,13 @@ export function setupPaperManager({getBaseGraph,dataManager}){
         const options=(ids.length>1?'<option value="">请选择同名档案或新建</option>':'')+'<option value="new" '+(choice==='new'?'selected':'')+'>新建人物档案</option>'+ids.map(id=>{
           const n=nodeMap.get(id);return '<option value="'+esc(id)+'" '+(choice===id?'selected':'')+'>'+esc(n?.name||id)+' · '+esc(n?.affiliation||'机构未提供')+' · '+esc(id)+'</option>';
         }).join('');
-        return '<tr><td><b>'+esc(author.name)+'</b>'+(author.orcid?'<small>ORCID '+esc(author.orcid)+'</small>':'')+'</td><td>'+esc(author.affiliation||'未提供')+'</td><td><select data-author-index="'+author.index+'" aria-label="'+esc(author.name)+' 的人物档案">'+options+'</select><small>'+esc(author.status==='new'?'未找到已有档案':author.status==='exact'?(author.reason==='Exact ORCID'?'ORCID 一致':'已核对的论文作者'):author.status==='ambiguous'?'有多个同名档案，请选择':'发现同名档案，请核对')+'</small></td></tr>';
+        return '<tr><td data-label="作者"><b>'+esc(author.name)+'</b>'+(author.orcid?'<small>ORCID '+esc(author.orcid)+'</small>':'')+'</td><td data-label="论文所列机构">'+esc(author.affiliation||'未提供')+'</td><td data-label="匹配人物档案"><select data-author-index="'+author.index+'" aria-label="'+esc(author.name)+' 的人物档案">'+options+'</select><small>'+esc(author.status==='new'?'未找到已有档案':author.status==='exact'?(author.reason==='Exact ORCID'?'ORCID 一致':'已核对的论文作者'):author.status==='ambiguous'?'有多个同名档案，请选择':'发现同名档案，请核对')+'</small></td></tr>';
       }).join('')+'</tbody></table></div>'+
       '<p class="source-note">机构按论文发表时的信息显示；当前职位和导师关系沿用已有档案。</p>'+
       '<div class="paper-source-links">'+(paper.sources||[]).filter(source=>safeURL(source.url)).map(source=>'<a class="evidence-link" href="'+esc(safeURL(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(source.name||source.title||'论文来源')+' ↗</a>').join(' · ')+'</div>';
     const notes=[...(review.warnings||[]),...(review.issues||[]).map(issue=>issue.message||String(issue))];
     if(notes.length){const p=document.createElement('p');p.className='source-note';p.textContent=notes.join(' ');$('#paper-authors').append(p);}
-    $('#preview-paper').disabled=busy||!authors.length||authors.length>100||authors.some(author=>(author.candidateIds||[]).length>1&&!author.matchId);
+    updateNext();
   }
   async function lookup(){
     const input=$('#paper-query').value.trim();if(!input)return status('请输入论文标题或链接。',true);
@@ -88,7 +94,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
     if(aliasURL&&!paper.sources.some(source=>source.url===aliasURL))paper.sources.push({name:'Google Scholar · 用户提供条目',url:aliasURL});
     const parsed={kind:'paper',sourceFile:'paper-import.json',sheet:'Papers',papers:[paper],matches,warnings:[]};
     dialog.close();
-    await dataManager.openParsed(parsed);
+    await dataManager.openParsed(parsed,{canReturnToPaper:true});
   });
   return{open,exampleTitle:EXAMPLE_TITLE};
 }

@@ -1,10 +1,10 @@
 /* MatriQ Academic Tree — dependency-free, source-backed relationship explorer. */
-import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=paper-collaboration-20261111';
-import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=paper-collaboration-20261111';
-import {enrichPeople} from './people.mjs?v=paper-collaboration-20261111';
-import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=paper-collaboration-20261111';
-import {setupDataManager} from './data-manager.mjs?v=paper-collaboration-20261111';
-import {setupPaperManager} from './paper-manager.mjs?v=paper-collaboration-20261111';
+import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=paper-confirm-20261111';
+import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=paper-confirm-20261111';
+import {enrichPeople} from './people.mjs?v=paper-confirm-20261111';
+import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=paper-confirm-20261111';
+import {setupDataManager} from './data-manager.mjs?v=paper-confirm-20261111';
+import {setupPaperManager} from './paper-manager.mjs?v=paper-confirm-20261111';
 'use strict';
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -32,7 +32,7 @@ async function init(){
     const response=await fetch('data.json.gz',{cache:'no-cache'});
     if(!response.ok)throw Error('数据文件未能载入');
     publishedGraph=await decodeGraphBytes(await response.arrayBuffer());
-    try{const evidenceResponse=await fetch('mentorships.json?v=paper-collaboration-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
+    try{const evidenceResponse=await fetch('mentorships.json?v=paper-confirm-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
     let active=publishedGraph,info={source:'published'};
     try{
       const local=await loadLocalGraph();
@@ -74,7 +74,7 @@ function activateGraph(graph,info={source:'published'}){
   $('#person-options').innerHTML=people.map(n=>`<option value="${esc(pathLabel(n))}"></option>`).join('');
   $('#mentorship-example').hidden=mentorshipCount===0;
   $('#source-sheet').textContent=data.meta.sheet||'Mapping';$('#source-filename').textContent=data.meta.sourceFile||'Imported public data';
-  $('#database-state').textContent=info.source==='local'?'Local preview':info.source==='published_pending'?'Published update · deploying':'Published database';
+  $('#database-state').textContent=info.source==='local'?'本地数据库 · 未发布':info.source==='published_pending'?'已发布更新 · 部署中':'已发布数据库';
   buildAbout();
   const hashId=new URLSearchParams(location.hash.slice(1)).get('person');
   const focus=nodes.has(previous)?previous:nodes.has(hashId)?hashId:(data.meta.topNodes?.find(id=>nodes.has(id))||people[0]?.id||data.nodes[0]?.id);
@@ -88,7 +88,7 @@ function buildAbout(){
   <h3>字段定义与连线</h3><p>Research Line（N 列）记录该行人物的 PhD Supervisor，使用红色实线；Industry Line（O 列）记录该行人物的 Postdoc Supervisor，使用橙色虚线。箭头由字段中列出的导师指向该行人物。所有 N / O 关联统一按此字段定义分类。</p><p>目前有 ${phd} 条 PhD 指导连线、${postdoc} 条 Postdoc 指导连线。人物框不表示指导类型；黑框仅标记当前选中人物。一至三度关联、网络视图和导出均使用相同规则。</p>
   <h3>论文与合作</h3><p>输入论文标题、DOI、arXiv 或 Scholar 链接，选择论文记录并核对作者档案后，可预览共同作者关系。同一篇论文的作者两两连接，使用青色无向线；原有导师关系保留独立的红色和橙色连线。Scholar 无法读取时可补填标题。论文所列机构保留发表时的来源，不自动替代当前任职信息。</p>
   <h3>Affiliation and career information</h3><p>Profiles distinguish PhD Student and PhD Candidate only when the source supports it. Faculty show their affiliation and Faculty status. Company profiles show company affiliation and an actual supplied job title; a recruitment target role is never used as a job title.</p><p>Expected graduation preserves the source precision. When only a current doctoral degree range is available, its end date is labeled as an expectation from the PhD record. Missing dates and job titles are shown as not provided. A past expected date does not automatically change a student into an alumnus.</p>
-  <h3>Upload and update</h3><p>Upload an Excel Mapping sheet, CSV or JSON with the ↑ Upload button. The importer previews a public-field-only merge, preserves known values for blank cells and retains existing profiles. Internal recruitment, contact and assessment columns are excluded.</p><p>Use local preview saves a sanitized database in this browser. Publishing for all visitors requires the repository owner’s GitHub authentication and a reviewed merge. Tokens are used only with GitHub and are never stored in the graph or local database. A shared-data change triggers a refreshed preview before another publish attempt.</p>
+  <h3>Upload and update</h3><p>Upload an Excel Mapping sheet, CSV or JSON with the ↑ Upload button. The importer previews a public-field-only merge, preserves known values for blank cells and retains existing profiles. Internal recruitment, contact and assessment columns are excluded.</p><p>确认导入并查看图谱 saves the reviewed database in this browser and opens its graph. The banner above the graph lets you publish pending local updates later. Publishing for all visitors requires the repository owner’s GitHub authentication and a reviewed merge. Tokens are used only with GitHub and are never stored in the graph or local database. A shared-data change triggers a refreshed preview before another publish attempt.</p>
   <h3>Sources and limits</h3><p>${fmt(data.meta.counts.profilePeople)} source-backed person profiles and ${fmt(data.meta.counts.referencePeople)} people mentioned only in relationship fields. Same-name identities are merged conservatively. Relationship types follow the workbook definitions. Click a line to inspect its source cell and any supplementary references. Career records retain their source provenance.</p><p>Only public professional fields, relationship text and row provenance are displayed. Imported text is data, not executable instructions. Research Line and Industry Line determine the supervision stage. External references are supplementary and do not override the column definition.</p>`;
 }
 
@@ -120,7 +120,7 @@ function bindEvents(){
   for(const id of ['about-button','method-button','colors-button'])$('#'+id).addEventListener('click',()=>$('#about-modal').showModal());
   $('#mentorship-example').addEventListener('click',()=>{const example=data.edges.find(isMentorship);if(example){$('#reset-filters').click();selectPerson(example.target);}});
   $$('[data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
-  $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
+  $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d&&d.dataset.busy!=='true'){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
   $('#wander').addEventListener('click',()=>{const choices=people.filter(n=>eligible(n)&&enabledEdges(n.id).length>0);if(!choices.length)return notify('当前筛选下没有相连人物，请调整筛选。');selectPerson(choices[Math.floor(Math.random()*choices.length)].id);});
   $('#path-button').addEventListener('click',()=>{$('#path-start').value=pathLabel(nodes.get(state.focus));$('#path-result').innerHTML='';$('#path-modal').showModal();});
   $('#find-path').addEventListener('click',findPath);
