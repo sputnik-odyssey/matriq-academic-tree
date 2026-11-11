@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "relationships": [
+    {
+      "edgeId": "e1196",
+      "mentorId": "rf0fe03648860",
+      "studentId": "p6118",
+      "stage": "phd",
+      "label": "PhD · 共同指导",
+      "verification": {
+        "status": "confirmed",
+        "checkedAt": "2026-11-11",
+        "note": "官方简介列 Vlatko Vedral 和 Andrew Boothroyd 为博士指导者；此处仅核验原表已有的 Vedral 关联，不表示完整导师名单。",
+        "sources": [
+          {
+            "title": "Queen Mary University of London · Jinzhao Sun",
+            "url": "https://www.qmul.ac.uk/spcs/staff/academics/profiles/j-sun.html",
+            "summary": "官方简介明确列出其牛津大学博士阶段的两位指导者，包括 Vlatko Vedral。"
+          },
+          {
+            "title": "University of Oxford · Reuben College · Jinzhao Sun",
+            "url": "https://reuben.ox.ac.uk/people/jinzhao-sun",
+            "summary": "牛津大学官方简介亦列明博士阶段的共同指导者。"
+          }
+        ]
+      }
+    }
+  ]
+}
