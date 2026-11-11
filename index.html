@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163e33">
+  <meta name="description" content="从一个名字出发，探索 Mapping 中量子物理研究者的科研与职业关联。">
+  <title>MatriQ · 量子学术图谱</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#" aria-label="MatriQ 图谱首页"><svg width="33" height="36" viewBox="0 0 36 38" fill="none" aria-hidden="true"><path d="M18 32V18M18 21 6 10M18 21 30 10M18 16V5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="32" r="3" fill="currentColor"/><circle cx="6" cy="10" r="3.5" fill="currentColor"/><circle cx="30" cy="10" r="3.5" fill="currentColor"/><circle cx="18" cy="5" r="3.5" fill="currentColor"/></svg><span>MatriQ <small>ACADEMIC TREE</small></span></a>
+  <nav aria-label="主导航"><button class="nav-button active" data-view="graph">关系图谱</button><button class="nav-button" data-view="directory">人物名录</button><button class="nav-button" data-view="institutions">研究机构</button></nav>
+  <div class="header-actions"><button class="text-button" id="about-button">数据说明 <span aria-hidden="true">↗</span></button><span class="private-label">开放学术图谱</span></div>
+</header>
+<main>
+  <section class="intro">
+    <div><p class="eyebrow">QUANTUM PHYSICS · PEOPLE & CONNECTIONS</p><h1>每一条连线，都是探索的延续。</h1><p class="intro-description">从一个名字出发，发现量子研究者之间的学术与职业关联。</p></div>
+    <div class="metrics" aria-label="数据概况"><div class="metric"><b id="people-count">—</b><span>人物</span></div><div class="metric"><b id="edge-count">—</b><span>关联</span></div><div class="metric"><b id="institution-count">—</b><span>机构名称</span></div></div>
+  </section>
+  <div class="workspace">
+    <aside class="filters" aria-label="搜索与筛选">
+      <p class="panel-label">发现人物</p>
+      <div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索姓名、机构、论文" aria-label="搜索姓名、机构、论文" autocomplete="off"><kbd class="shortcut">/</kbd><div id="search-results" class="search-results" hidden></div></div>
+      <div class="filter-group"><label for="institution-filter">研究机构</label><select id="institution-filter"><option value="">全部机构</option></select></div>
+      <div class="filter-group"><label for="location-filter">国家 / 地区</label><select id="location-filter"><option value="">全部国家 / 地区</option></select></div>
+      <div class="filter-group"><label>关系类型</label><div id="type-filters"></div></div>
+      <div class="filter-group" id="depth-group"><label for="depth">展开范围</label><select id="depth"><option value="1" selected>一度关联</option><option value="2">二度关联</option><option value="3">三度关联</option></select></div>
+      <button class="secondary-button" id="reset-filters">重置筛选</button>
+      <div class="sidebar-footer"><span class="small-tree" aria-hidden="true">✣</span><h3>从相遇到连接</h3><p>点击人物切换探索中心，沿着连线继续发现。</p><button class="text-button" id="wander">随机漫游 <span aria-hidden="true">↗</span></button></div>
+      <div class="source-note">数据来源 <b>Mapping</b><br>Nov 13 Original and Compiled.xlsx</div>
+    </aside>
+    <section class="graph-panel" aria-label="学术关系探索">
+      <div class="graph-toolbar"><div class="view-tabs"><button class="view-tab active" data-layout="tree">层级视图</button><button class="view-tab" data-layout="radial">网络视图</button></div><span class="graph-context" id="graph-context">正在读取图谱…</span><button class="icon-button mobile-filter" id="mobile-filter" aria-label="打开筛选">☷</button><button class="icon-button" id="path-button" title="查找两个人物之间的关系路径" aria-label="查找关系路径">⇄</button><button class="icon-button" id="download-button" title="导出当前图谱为 SVG" aria-label="导出当前图谱">↓</button></div>
+      <div id="graph-stage" class="graph-stage"><svg id="graph" role="img" aria-label="可拖动和缩放的学术关系图谱"><g id="graph-world"></g></svg><div class="graph-status" id="graph-status" aria-live="polite">正在载入…</div><div id="graph-empty" class="graph-empty" hidden></div><div class="zoom-controls"><button id="zoom-in" aria-label="放大">+</button><span id="zoom-label">100%</span><button id="zoom-out" aria-label="缩小">−</button><button id="fit" aria-label="适合画布" title="适合画布">⛶</button></div><button id="show-more" class="secondary-button show-more" hidden>展开更多</button><div class="canvas-caption">MAPPING THE QUANTUM COMMUNITY</div></div>
+      <div class="graph-bottom"><div class="legend" id="legend"></div><span class="hint">拖动画布 · 滚轮缩放 · 点击连线查看来源</span></div>
+      <div id="directory" hidden></div><div id="institutions" hidden></div>
+    </section>
+    <aside class="detail-panel" id="detail" aria-label="人物档案"><div class="detail-placeholder">选择一个人物<br>查看档案与关联记录</div></aside>
+  </div>
+  <footer class="page-footer"><span>MatriQ Academic Tree <span aria-hidden="true">·</span> 让研究者之间的连接可见</span><button class="text-button" id="method-button">关系如何解读？</button></footer>
+</main>
+<dialog id="about-modal" class="modal"><div class="modal-head"><h2>关于这份学术图谱</h2><button class="icon-button" data-close aria-label="关闭">×</button></div><div class="modal-body" id="about-content"></div></dialog>
+<dialog id="path-modal" class="modal"><div class="modal-head"><h2>发现两个人之间的连接</h2><button class="icon-button" data-close aria-label="关闭">×</button></div><div class="modal-body"><p>沿当前勾选的关系类型，查找最短无向路径。</p><div class="form-field"><label for="path-start">起点人物</label><input id="path-start" type="search" list="person-options" placeholder="输入并选择完整姓名"></div><div class="form-field"><label for="path-end">终点人物</label><input id="path-end" type="search" list="person-options" placeholder="输入并选择完整姓名"></div><datalist id="person-options"></datalist><button class="primary-button" id="find-path">查找路径</button><div id="path-result" aria-live="polite"></div></div></dialog>
+<dialog id="edge-modal" class="modal"><div class="modal-head"><h2>这条关系来自哪里</h2><button class="icon-button" data-close aria-label="关闭">×</button></div><div class="modal-body" id="edge-content"></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+</body></html>
