@@ -11,10 +11,19 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   let candidates=[],selected=null,review=null,busy=false,request=null,inputInfo=null;
   const status=(message,error=false)=>{const element=$('#paper-status');element.textContent=message;element.className=error?'notice import-error':'sync-status';};
   function updateNext(){
-    const count=review?.authors?.length||0,unresolved=[...document.querySelectorAll('[data-author-index]')].some(select=>!select.value);
-    $('#preview-paper').disabled=busy||!count||count>100||unresolved;
-    $('#paper-next-hint').textContent=busy?'正在识别论文，请稍候…':!count?'识别论文后，核对作者并进入确认导入。':unresolved?'请选择每位作者对应的档案，或选择新建人物。':count>100?'单篇论文最多支持 100 位作者。':'已识别 '+count+' 位作者。核对后点击下一步，确认新增人物与合作关系。';
+    const count=review?.authors?.length||0,selects=count?[...dialog.querySelectorAll('[data-author-index]')]:[],unresolved=selects.filter(select=>!select.value),onlyPending=$('#paper-only-pending')?.checked;
+    for(const select of selects){const row=select.closest('tr'),missing=!select.value;row.classList.toggle('needs-review',missing);row.hidden=Boolean(onlyPending&&!missing);if(missing)select.setAttribute('aria-invalid','true');else select.removeAttribute('aria-invalid');}
+    if($('#paper-review-count'))$('#paper-review-count').textContent='已选择 '+(count-unresolved.length)+' / '+count+' 位作者'+(unresolved.length?' · 还有 '+unresolved.length+' 位待选择':' · 全部完成');
+    if($('#paper-review-complete'))$('#paper-review-complete').hidden=!(onlyPending&&!unresolved.length);
+    $('#preview-paper').disabled=busy||!count||count>100||unresolved.length>0;
+    $('#paper-next-hint').textContent=busy?'正在识别论文，请稍候…':!count?'识别论文后，核对作者并进入确认导入。':count>100?'单篇论文最多支持 100 位作者。':unresolved.length?'还有 '+unresolved.length+' 位作者未选择档案。点击姓名可定位，或勾选“只看待选择作者”。':'已为全部 '+count+' 位作者选择档案，可以进入确认导入。';
+    $('#paper-pending').hidden=busy||!unresolved.length;
+    $('#paper-pending').innerHTML=unresolved.map(select=>{const author=review.authors.find(author=>String(author.index)===select.dataset.authorIndex);return '<button type="button" class="pending-author-link" data-jump-author="'+esc(select.dataset.authorIndex)+'">'+esc(author?.name||'待选择作者')+'</button>';}).join('');
+    $('#paper-next-unresolved').hidden=busy||!unresolved.length;
   }
+  function focusAuthor(index){const select=dialog.querySelector('[data-author-index="'+index+'"]');if(!select)return;select.closest('tr').scrollIntoView({block:'center'});select.focus({preventScroll:true});}
+  $('#paper-pending').addEventListener('click',event=>{const button=event.target.closest('[data-jump-author]');if(button)focusAuthor(button.dataset.jumpAuthor);});
+  $('#paper-next-unresolved').addEventListener('click',()=>{const select=[...dialog.querySelectorAll('[data-author-index]')].find(select=>!select.value);if(select)focusAuthor(select.dataset.authorIndex);});
   function setBusy(value){busy=value;$('#find-paper').disabled=value;$('#paper-example').disabled=value;$('#paper-query').disabled=value;$('#paper-title-hint').disabled=value;updateNext();}
   function open(preserveReview=false){
     if($('#data-modal').open)$('#data-modal').close();
@@ -34,10 +43,11 @@ export function setupPaperManager({getBaseGraph,dataManager}){
     if(index!==undefined){try{renderAuthors(candidates[Number(index)]);}catch(error){status(error.message||'此记录的作者信息不可导入，请选择另一条。',true);}}
   });
   $('#paper-authors').addEventListener('change',event=>{
+    if(event.target.id==='paper-only-pending'){updateNext();return;}
     const select=event.target.closest('[data-author-index]');
     if(select&&review){
       const author=review.authors.find(a=>String(a.index)===select.dataset.authorIndex),note=select.closest('td').querySelector('[data-match-note]');
-      if(note&&author)note.textContent=select.value==='new'?'将新建独立人物档案。':(author.variantCandidateIds||[]).includes(select.value)?'姓名变体候选；确认后记住论文署名，保留已有主姓名。':'已选择已有档案；确认后保留论文署名作为别名。';
+      if(note&&author)note.textContent=!select.value?'待选择：请选择已有档案，或明确选择新建人物。':select.value==='new'?'将新建独立人物档案。':(author.variantCandidateIds||[]).includes(select.value)?'姓名变体候选；确认后记住论文署名，保留已有主姓名。':'已选择已有档案；确认后保留论文署名作为别名。';
     }
     updateNext();
   });
@@ -63,11 +73,12 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   }
   function renderAuthors(paper){
     selected=null;review=null;$('#paper-authors').hidden=true;$('#preview-paper').disabled=true;
+    updateNext();
     const checked=previewAuthorMatches(getBaseGraph(),paper);selected=paper;review=checked;
     const nodeMap=new Map(getBaseGraph().nodes.map(n=>[n.id,n]));
     const authors=review.authors||[],pairs=authors.length*(authors.length-1)/2;
     $('#paper-authors').hidden=false;
-    $('#paper-authors').innerHTML='<h3>'+esc(paper.title)+'</h3><p class="source-note">'+authors.length+' 位作者 · 将记录 '+pairs+' 组共同作者关系。核对后点击窗口底部的“下一步：确认导入”。</p>'+
+    $('#paper-authors').innerHTML='<h3>'+esc(paper.title)+'</h3><p class="source-note">'+authors.length+' 位作者 · 将记录 '+pairs+' 组共同作者关系。核对后点击窗口底部的“下一步：确认导入”。</p><div class="paper-review-toolbar"><b id="paper-review-count"></b><label><input id="paper-only-pending" type="checkbox"> 只看待选择作者</label></div><p id="paper-review-complete" class="sync-status" hidden>作者已全部选择，可点击下一步。取消筛选可复核完整作者列表。</p>'+
       '<div class="table-scroll"><table class="directory-table paper-author-table"><thead><tr><th>作者</th><th>论文所列机构</th><th>匹配人物档案</th></tr></thead><tbody>'+
       authors.map(author=>{
         const ids=author.candidateIds||[];
@@ -75,9 +86,9 @@ export function setupPaperManager({getBaseGraph,dataManager}){
         const options=(ids.length>1||author.requiresReview?'<option value="">请选择候选档案或新建</option>':'')+'<option value="new" '+(choice==='new'?'selected':'')+'>新建人物档案</option>'+ids.map(id=>{
           const n=nodeMap.get(id);return '<option value="'+esc(id)+'" '+(choice===id?'selected':'')+'>'+esc(n?.name||id)+' · '+esc(n?.affiliation||'机构未提供')+' · '+esc(id)+'</option>';
         }).join('');
-        const note=author.status==='variant'?'发现姓名变体，请选择已有档案或新建':author.status==='new'?'未找到精确匹配，可搜索已有档案':author.status==='exact'?(author.reason==='Exact ORCID'?'ORCID 一致':'已核对的姓名或论文作者'):author.status==='ambiguous'?'有多个候选档案，请选择':'发现同名档案，请核对';
+        const note=author.status==='variant'?'待选择：发现姓名变体，请选择已有档案或新建':author.status==='new'?'未找到精确匹配，可搜索已有档案':author.status==='exact'?(author.reason==='Exact ORCID'?'ORCID 一致':'已核对的姓名或论文作者'):author.status==='ambiguous'?'待选择：有多个候选档案，请明确选择':'发现同名档案，请核对';
         const search='<details class="author-match-search"><summary>搜索其他已有档案</summary><input type="search" data-author-search="'+author.index+'" aria-label="搜索 '+esc(author.name)+' 的已有档案" placeholder="姓名、机构或档案编号" autocomplete="off"><div data-author-results aria-live="polite"></div></details>';
-        return '<tr><td data-label="作者"><b>'+esc(author.name)+'</b>'+(author.orcid?'<small>ORCID '+esc(author.orcid)+'</small>':'')+'</td><td data-label="论文所列机构">'+esc(author.affiliation||'未提供')+'</td><td data-label="匹配人物档案"><select data-author-index="'+author.index+'" aria-label="'+esc(author.name)+' 的人物档案">'+options+'</select><small data-match-note>'+esc(note)+'</small>'+search+'</td></tr>';
+        return '<tr data-author-row="'+author.index+'"><td data-label="作者"><b>'+esc(author.name)+'</b>'+(author.orcid?'<small>ORCID '+esc(author.orcid)+'</small>':'')+'</td><td data-label="论文所列机构">'+esc(author.affiliation||'未提供')+'</td><td data-label="匹配人物档案"><select data-author-index="'+author.index+'" aria-label="'+esc(author.name)+' 的人物档案" aria-describedby="author-match-note-'+author.index+'">'+options+'</select><small id="author-match-note-'+author.index+'" data-match-note>'+esc(note)+'</small>'+search+'</td></tr>';
       }).join('')+'</tbody></table></div>'+
       '<p class="source-note">机构按论文发表时的信息显示；确认匹配后保留已有主姓名，记住论文署名及无冲突的 ORCID。当前职位和导师关系沿用已有档案。</p>'+
       '<div class="paper-source-links">'+(paper.sources||[]).filter(source=>safeURL(source.url)).map(source=>'<a class="evidence-link" href="'+esc(safeURL(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(source.name||source.title||'论文来源')+' ↗</a>').join(' · ')+'</div>';

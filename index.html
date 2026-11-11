@@ -7,8 +7,8 @@
   <meta name="description" content="量子物理人物、机构、职业信息与学术关系数据库。">
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=author-alias-20261111">
-  <script type="module" src="app.js?v=author-alias-20261111"></script>
+  <link rel="stylesheet" href="style.css?v=readability-20261111">
+  <script type="module" src="app.js?v=readability-20261111"></script>
 </head>
 <body>
 <header class="topbar">
@@ -77,7 +77,7 @@
   <div id="paper-status" class="sync-status" role="status">输入论文信息后开始检索。合作关系使用青色无向连线。</div>
   <div id="paper-candidates" hidden></div>
   <section id="paper-authors" hidden></section>
-</div><div class="workflow-footer"><p id="paper-next-hint">识别论文后，核对作者并进入确认导入。</p><div class="workflow-buttons"><button class="secondary-button" data-close>取消</button><button class="primary-button" id="preview-paper" disabled>下一步：确认导入 →</button></div></div></dialog>
+</div><div class="workflow-footer"><p id="paper-next-hint" role="status" aria-live="polite">识别论文后，核对作者并进入确认导入。</p><div id="paper-pending" class="paper-pending" aria-label="待选择作者" hidden></div><div class="workflow-buttons"><button class="secondary-button" id="paper-next-unresolved" type="button" hidden>定位下一位待选择作者</button><button class="secondary-button" data-close>取消</button><button class="primary-button" id="preview-paper" disabled>下一步：确认导入 →</button></div></div></dialog>
 <dialog id="linkedin-modal" class="modal linkedin-modal" aria-labelledby="linkedin-title"><div class="modal-head"><div><h2 id="linkedin-title">导入 LinkedIn 学术履历</h2><p class="import-step">1 获取履历 → 2 核对 PhD / Postdoc → 3 确认导入</p></div><button class="icon-button" data-close aria-label="关闭 LinkedIn 导入">×</button></div><div class="modal-body">
   <form id="linkedin-fetch-form">
     <div class="form-field"><label for="linkedin-url">LinkedIn 人物链接</label><input id="linkedin-url" type="url" maxlength="2000" placeholder="https://www.linkedin.com/in/…" autocomplete="off"></div>

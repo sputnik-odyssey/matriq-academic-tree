@@ -4,7 +4,7 @@ import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-rende
 import {enrichPeople} from './people.mjs?v=author-alias-20261111';
 import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=author-alias-20261111';
 import {setupDataManager} from './data-manager.mjs?v=author-alias-20261111';
-import {setupPaperManager} from './paper-manager.mjs?v=author-alias-20261111';
+import {setupPaperManager} from './paper-manager.mjs?v=readability-20261111';
 import {setupLinkedInManager} from './linkedin-manager.mjs?v=author-alias-20261111';
 import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=author-alias-20261111';
 'use strict';
