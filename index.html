@@ -8,7 +8,7 @@
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=edge-colors-20261111">
-  <script type="module" src="app.js?v=guidance-coverage-20261111"></script>
+  <script type="module" src="app.js?v=column-rules-20261111"></script>
 </head>
 <body>
 <header class="topbar">
@@ -32,7 +32,7 @@
       <div class="filter-group"><label>关系类型</label><div id="type-filters"></div></div>
       <div class="filter-group" id="depth-group"><label for="depth">展开范围</label><select id="depth"><option value="1" selected>一度关联</option><option value="2">二度关联</option><option value="3">三度关联</option></select></div>
       <button class="secondary-button" id="reset-filters">重置筛选</button>
-      <div class="mentorship-note"><b>指导连线</b><p>红线：PhD · 橙色虚线：Postdoc。箭头由导师指向受指导者。灰线：原表关联，指导类型尚未核实。</p><button class="text-button" id="mentorship-example" hidden>查看已确认师承 ↗</button><button class="text-button" id="colors-button">配色说明 ↗</button></div>
+      <div class="mentorship-note"><b>指导连线</b><p>Research Line：PhD 红线。Industry Line：Postdoc 橙线。箭头由导师指向学生。</p><button class="text-button" id="mentorship-example" hidden>查看指导关系 ↗</button><button class="text-button" id="colors-button">配色说明 ↗</button></div>
       <div class="sidebar-footer"><button class="text-button" id="wander">随机人物 <span aria-hidden="true">↗</span></button></div>
       <div class="source-note">数据来源 <b id="source-sheet">Mapping</b><br><span id="source-filename">Nov 13 Original and Compiled.xlsx</span></div>
     </aside>

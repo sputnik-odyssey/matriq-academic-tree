@@ -1,7 +1,7 @@
-import {parseUpload} from './importer.mjs?v=profiles-upload-20261111';
-import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=profiles-upload-20261111';
-import {enrichPerson} from './people.mjs?v=profiles-upload-20261111';
-import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=profiles-upload-20261111';
+import {parseUpload} from './importer.mjs?v=column-rules-20261111';
+import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=column-rules-20261111';
+import {enrichPerson} from './people.mjs?v=column-rules-20261111';
+import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=column-rules-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const format=value=>Number(value||0).toLocaleString('en-US');

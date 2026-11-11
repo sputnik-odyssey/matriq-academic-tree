@@ -1,4 +1,4 @@
-import {ROLE_STYLES,MENTORSHIP_COLORS,isVerifiedMentorship} from './mentorship.mjs?v=edge-colors-20261111';
+import {ROLE_STYLES,MENTORSHIP_COLORS,isMentorship,isVerifiedMentorship} from './mentorship.mjs?v=column-rules-20261111';
 
 export const NODE_WIDTH=196;
 export const NODE_HEIGHT=70;
@@ -20,12 +20,12 @@ export function renderGraphSVG({model,focus,nodes,layout}){
   let svg=`<defs>${Object.entries(MENTORSHIP_COLORS).map(([type,color])=>`<marker id="arrow-${type}" viewBox="-1 -1 10 10" refX="7" refY="4" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L8 4 L0 8 Z" fill="${color}" stroke="${EDGE_OUTLINE}" stroke-width=".6" paint-order="stroke"/></marker>`).join('')}</defs>`;
   const pairs=new Map();
   for(const edge of model.edges){const key=[edge.source,edge.target].sort().join('|');if(!pairs.has(key))pairs.set(key,[]);pairs.get(key).push(edge.id);}
-  const orderedEdges=[...model.edges].sort((a,b)=>Number(isVerifiedMentorship(a))-Number(isVerifiedMentorship(b)));
+  const orderedEdges=[...model.edges].sort((a,b)=>Number(isMentorship(a))-Number(isMentorship(b)));
   for(const edge of orderedEdges){
     const a=model.positions.get(edge.source),b=model.positions.get(edge.target);
     const start=anchor(a,b),end=anchor(b,a),pair=pairs.get([edge.source,edge.target].sort().join('|'));
     const offset=(pair.indexOf(edge.id)-(pair.length-1)/2)*32;
-    const confirmed=isVerifiedMentorship(edge);
+    const confirmed=isMentorship(edge);
     const color=confirmed?MENTORSHIP_COLORS[edge.type]:'#b2c2cf';
     const displayType=confirmed?edge.type:['research','followup','institution'].includes(edge.type)?edge.type:'unverified';
     let d;
@@ -36,7 +36,7 @@ export function renderGraphSVG({model,focus,nodes,layout}){
     const dash=confirmed?(edge.type==='postdoc'?'7 4':'none'):edge.type==='followup'?'4 5':'none';
     const description=`${nodes.get(edge.source).name} ${confirmed?'→':'与'} ${nodes.get(edge.target).name} · ${edge.relationshipLabel||edge.label}`;
     const marker=confirmed?` marker-end="url(#arrow-${edge.type})"`:'';
-    svg+=`<g class="edge edge-${displayType}" data-edge="${edge.id}" data-relationship-type="${confirmed?edge.type:'unverified'}" role="button" tabindex="0" aria-label="${esc(description)}"><title>${esc(description)} · ${(edge.evidence||[]).map(v=>`${v.column}${v.row}`).join('、')} · 点击查看${confirmed?'公开指导证据与':''}原文</title>${confirmed?`<path class="edge-underlay" d="${d}" fill="none" stroke="${EDGE_OUTLINE}" stroke-width="5.2" stroke-dasharray="${dash}" pointer-events="none"/>`:''}<path class="edge-line" d="${d}" fill="none" stroke="${color}" stroke-width="${confirmed?2.7:1.3}" stroke-dasharray="${dash}"${marker}/><path class="edge-hit" d="${d}" fill="none" stroke="transparent" stroke-width="14"/>${confirmed?`<text class="edge-label edge-type-label" x="${(start.x+end.x)/2+offset+(offset<0?-10:12)}" y="${(start.y+end.y)/2-5}" text-anchor="${offset<0?'end':'start'}" fill="${color}" font-family="Times New Roman, Times, serif" font-size="12" font-weight="600" stroke="${EDGE_OUTLINE}" stroke-width="4" paint-order="stroke">${edge.type==='phd'?'PhD':'Postdoc'}</text>`:''}</g>`;
+    svg+=`<g class="edge edge-${displayType}" data-edge="${edge.id}" data-relationship-type="${confirmed?edge.type:'unverified'}" role="button" tabindex="0" aria-label="${esc(description)}"><title>${esc(description)} · ${(edge.evidence||[]).map(v=>`${v.column}${v.row}`).join('、')} · 点击查看${isVerifiedMentorship(edge)?'公开指导证据与':confirmed?'字段定义与':''}原文</title>${confirmed?`<path class="edge-underlay" d="${d}" fill="none" stroke="${EDGE_OUTLINE}" stroke-width="5.2" stroke-dasharray="${dash}" pointer-events="none"/>`:''}<path class="edge-line" d="${d}" fill="none" stroke="${color}" stroke-width="${confirmed?2.7:1.3}" stroke-dasharray="${dash}"${marker}/><path class="edge-hit" d="${d}" fill="none" stroke="transparent" stroke-width="14"/>${confirmed?`<text class="edge-label edge-type-label" x="${(start.x+end.x)/2+offset+(offset<0?-10:12)}" y="${(start.y+end.y)/2-5}" text-anchor="${offset<0?'end':'start'}" fill="${color}" font-family="Times New Roman, Times, serif" font-size="12" font-weight="600" stroke="${EDGE_OUTLINE}" stroke-width="4" paint-order="stroke">${edge.type==='phd'?'PhD':'Postdoc'}</text>`:''}</g>`;
   }
   for(const id of model.ids){
     const selected=id===focus;

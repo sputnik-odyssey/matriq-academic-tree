@@ -1,4 +1,5 @@
 /* Local-only structured-file import. Uploaded text is data, never executable instructions. */
+import {normalizeMappingEdges} from './mentorship.mjs?v=column-rules-20261111';
 export const PUBLIC_COLUMNS=Object.freeze([
   {key:'A',label:'Legal Name'},{key:'B',label:'中文名'},{key:'C',label:'PhD'},
   {key:'D',label:'Bachelor location'},{key:'E',label:'Bachelor'},
@@ -13,7 +14,7 @@ export const PUBLIC_COLUMNS=Object.freeze([
 const PUBLIC_KEYS=new Set(PUBLIC_COLUMNS.map(c=>c.key));
 const MAX_FILE=20*1024*1024,MAX_XML=64*1024*1024,MAX_ROWS=100000,MAX_COLUMNS=512,MAX_CELL=40000;
 const MISSING=new Set(['','/','-','—','none','null','n/a','na','pending','connected','unknown','待确认','待核']);
-const EDGE_TYPES=[{id:'research',label:'科研关联',color:'#8ba2b7'},{id:'followup',label:'后续关联',color:'#9aaabe'},{id:'institution',label:'机构关联',color:'#7196b4'}];
+const EDGE_TYPES=[{id:'phd',label:'PhD 指导',color:'#ff8a80'},{id:'postdoc',label:'Postdoc 指导',color:'#ffb74d'},{id:'institution',label:'未分类机构关联',color:'#7196b4'}];
 const norm=value=>String(value??'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 const useful=value=>!MISSING.has(String(value??'').trim().toLowerCase());
 const text=value=>String(value??'').replace(/\u0000/g,'').trim().slice(0,MAX_CELL);
@@ -378,16 +379,21 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
   }
   if(!rowTargets.length)throw Error('The document contains no usable named people. No update was applied.');
 
-  const edges=mode==='merge'?baseGraph.edges.filter(e=>nodeMap.has(e.source)&&nodeMap.has(e.target)).map(e=>{
-    const type=['research','followup','institution'].includes(e.originalType)?e.originalType:['research','followup','institution'].includes(e.type)?e.type:'research';
-    return{id:text(e.id),source:e.source,target:e.target,type,label:EDGE_TYPES.find(t=>t.id===type).label,directed:false,evidence:(e.evidence||[]).filter(v=>['N','O'].includes(v.column)).map(v=>({row:Number(v.row),column:v.column,field:v.column==='N'?'Research Line':'Industry Line',value:text(v.value),sourceFile:basename(v.sourceFile||baseSource)})),rows:[...new Set((e.rows||[]).filter(Number.isInteger))]};
-  }):[];
+  let edges=mode==='merge'?normalizeMappingEdges(baseGraph.edges.filter(e=>nodeMap.has(e.source)&&nodeMap.has(e.target)).map(e=>{
+    const type=['research','followup','institution','phd','postdoc'].includes(e.type)?e.type:'institution';
+    const column=e.definition?.basis==='mapping_column'&&['N','O'].includes(e.definition.column)?e.definition.column:null;
+    return{id:text(e.id),source:e.source,target:e.target,type,directed:['phd','postdoc'].includes(type),
+      ...(column?{definition:{basis:'mapping_column',column}}:{}),
+      ...(e.columnSourceEdgeId?{columnSourceEdgeId:text(e.columnSourceEdgeId)}:{}),
+      ...(e.originalType?{originalType:text(e.originalType)}:{}),
+      evidence:(e.evidence||[]).filter(v=>['N','O'].includes(v.column)).map(v=>({row:Number(v.row),column:v.column,field:v.column==='N'?'Research Line':'Industry Line',value:text(v.value),sourceFile:basename(v.sourceFile||baseSource)})),rows:[...new Set((e.rows||[]).filter(Number.isInteger))]};
+  })):[];
   const edgeIndex=new Map(edges.map(e=>[[e.source,e.target,e.type].join('|'),e])),edgeIDs=new Set(edges.map(e=>e.id)),refs=new Map();
   for(const node of nodes.filter(n=>n.stub))refs.set(node.entityType+':'+norm(node.name),node);
   const ambiguousReferences=mode==='merge'&&Array.isArray(baseGraph.meta?.ambiguousReferences)?clone(baseGraph.meta.ambiguousReferences):[];
   const knownInstitutions=new Set(nodes.filter(n=>n.entityType==='institution').map(n=>norm(n.name)));
   for(const node of profileNodes)if(/company|industry|industrial|corporate|企业|公司/i.test(node.affiliationType+' '+node.role)&&useful(node.affiliation))knownInstitutions.add(norm(node.affiliation));
-  let newRelationships=0;
+  let newRelationships=mode==='merge'?Math.max(0,edges.length-baseGraph.edges.length):0;
   for(const {row,fields,target,sourceFile:rowSource} of rowTargets){
     for(const column of ['N','O']){
       const value=fields[column];if(!useful(value))continue;
@@ -405,14 +411,15 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
           if(candidates.length>1&&!ambiguousReferences.some(r=>r.referenceId===ref.id)){ambiguousReferences.push({name,candidateIds:candidates.map(n=>n.id),referenceId:ref.id});ambiguous++;}
         }
         if(source===target)continue;
-        const type=kind==='institution'?'institution':column==='N'?'research':'followup',key=[source,target,type].join('|');let edge=edgeIndex.get(key);
-        if(!edge){let id='e'+hash(key);while(edgeIDs.has(id))id+='x';edge={id,source,target,type,label:EDGE_TYPES.find(t=>t.id===type).label,directed:false,evidence:[],rows:[]};edges.push(edge);edgeIndex.set(key,edge);edgeIDs.add(id);newRelationships++;}
+        const type=column==='N'?'phd':'postdoc',key=[source,target,type].join('|');let edge=edgeIndex.get(key);
+        if(!edge){let id='e'+hash(key);while(edgeIDs.has(id))id+='x';edge={id,source,target,type,label:EDGE_TYPES.find(t=>t.id===type).label,directed:true,definition:{basis:'mapping_column',column},evidence:[],rows:[]};edges.push(edge);edgeIndex.set(key,edge);edgeIDs.add(id);newRelationships++;}
         const evidence={row,column,field:column==='N'?'Research Line':'Industry Line',value,sourceFile:rowSource};
         if(!edge.evidence.some(v=>v.row===row&&v.column===column&&v.value===value&&v.sourceFile===rowSource))edge.evidence.push(evidence);
         if(!edge.rows.includes(row))edge.rows.push(row);
       }
     }
   }
+  edges=normalizeMappingEdges(edges);
   for(const node of nodes)node.degree=0;
   for(const edge of edges){nodeMap.get(edge.source).degree++;nodeMap.get(edge.target).degree++;}
   const profiles=nodes.filter(n=>!n.stub&&n.entityType==='person'),references=nodes.filter(n=>n.stub&&n.entityType==='person');
@@ -425,7 +432,7 @@ export function previewImport(baseGraph,upload,{mode='merge',asOf}={}){
   const meta={sourceFile,sheet:text(upload.sheet||'Mapping'),sourceFiles:sources,generatedAt:asOf||new Date().toISOString().slice(0,10),publicVersion:true,
     counts:{sourceRows,personRows:recordCoordinates.size,people:profiles.length+references.length,profilePeople:profiles.length,referencePeople:references.length,nodes:nodes.length,edges:edges.length,mergedRows:Math.max(0,recordCoordinates.size-profiles.length),excludedUnnamedRows:mode==='merge'?Math.max(Number(baseGraph.meta?.counts?.excludedUnnamedRows)||0,excluded):excluded,connectedPeople:nodes.filter(n=>n.entityType==='person'&&n.degree>0).length},
     columns:PUBLIC_COLUMNS.map(c=>({...c})),edgeTypes:EDGE_TYPES.map(t=>({...t})),topNodes:[...nodes].sort((a,b)=>b.degree-a.degree).slice(0,15).map(n=>n.id),ambiguousReferences,
-    notes:['Public professional fields only; recruitment evaluations, contact status and internal notes are excluded.','Research Line and Industry Line create unverified, undirected associations; imported files cannot self-certify mentorship.','Names alone do not establish identity. Ambiguous people remain separate and keep source records.','Merge mode retains existing profiles and links; non-empty supplied public fields update matched profiles.']};
+    notes:['Public professional fields only; recruitment evaluations, contact status and internal notes are excluded.','Mapping column definitions: Research Line (N) lists PhD supervisors and Industry Line (O) lists Postdoc supervisors. Directed links run from supervisor to student; this classification uses the user-defined column meaning, without claiming independent external verification.','Names alone do not establish identity. Ambiguous people remain separate and keep source records.','Merge mode retains existing profiles and links; non-empty supplied public fields update matched profiles.']};
   if(ambiguous)warnings.push(`${ambiguous} ambiguous identities or relationship references were retained separately.`);
   if(excluded)warnings.push(`${excluded} rows without a usable name or valid row number were excluded.`);
   const graph={meta,nodes,edges,edgeTypes:EDGE_TYPES.map(t=>({...t}))};

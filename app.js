@@ -1,9 +1,9 @@
 /* MatriQ Academic Tree — dependency-free, source-backed relationship explorer. */
-import {applyVerifiedMentorships,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=edge-colors-20261111';
-import {renderGraphSVG,GRAPH_BACKGROUND} from './graph-render.mjs?v=edge-colors-20261111';
-import {enrichPeople} from './people.mjs?v=profiles-upload-20261111';
-import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=profiles-upload-20261111';
-import {setupDataManager} from './data-manager.mjs?v=profiles-upload-20261111';
+import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=column-rules-20261111';
+import {renderGraphSVG,GRAPH_BACKGROUND} from './graph-render.mjs?v=column-rules-20261111';
+import {enrichPeople} from './people.mjs?v=column-rules-20261111';
+import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=column-rules-20261111';
+import {setupDataManager} from './data-manager.mjs?v=column-rules-20261111';
 'use strict';
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -13,7 +13,7 @@ const truncate = (s,n=24) => [...String(s||'')].length>n ? [...s].slice(0,n-1).j
 const fmt = n => Number(n).toLocaleString('en-US');
 const clean = v => v && !/^(?:\/|none|null|n\/a|-|—)$/i.test(String(v).trim()) ? String(v) : '';
 const kindLabel = n => ({person:n.stub?'关系引用':'人物档案',institution:'机构',group:'课题组',publication:'论文'}[n.entityType]||'关联对象');
-let data, rawGraph, publishedGraph, activeInfo={source:'published'}, evidenceRecords=[], nodes, adjacency, types, people, institutions, verificationCount=0;
+let data, rawGraph, publishedGraph, activeInfo={source:'published'}, evidenceRecords=[], nodes, adjacency, types, people, institutions, mentorshipCount=0;
 const state = {focus:null,view:'graph',layout:'tree',depth:1,limit:9,page:0,query:'',institution:'',location:'',career:'',affiliationType:'',types:new Set(),path:null,transform:{x:0,y:0,k:1}};
 let graphModel = null, drag = null, toastTimer, graphMobile = null;
 
@@ -31,7 +31,7 @@ async function init(){
     const response=await fetch('data.json.gz',{cache:'no-cache'});
     if(!response.ok)throw Error('数据文件未能载入');
     publishedGraph=await decodeGraphBytes(await response.arrayBuffer());
-    try{const evidenceResponse=await fetch('mentorships.json?v=guidance-coverage-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
+    try{const evidenceResponse=await fetch('mentorships.json?v=column-rules-20261111',{cache:'no-cache'});if(evidenceResponse.ok)evidenceRecords=(await evidenceResponse.json()).relationships||[];}catch(error){console.warn('Guidance evidence could not be loaded.');}
     let active=publishedGraph,info={source:'published'};
     try{
       const local=await loadLocalGraph();
@@ -53,13 +53,11 @@ function activateGraph(graph,info={source:'published'}){
   const previous=state.focus;
   activeInfo=structuredClone(info);rawGraph=structuredClone(graph);data=structuredClone(rawGraph);
   const today=new Date(),asOf=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  data.nodes=enrichPeople(data.nodes,{asOf});verificationCount=applyVerifiedMentorships(data,evidenceRecords);
+  data.nodes=enrichPeople(data.nodes,{asOf});mentorshipCount=applyColumnMentorships(data,evidenceRecords);
   nodes=new Map(data.nodes.map(n=>[n.id,n]));adjacency=new Map(data.nodes.map(n=>[n.id,[]]));
   for(const n of data.nodes)n.searchText=searchText(n);
   for(const edge of data.edges){adjacency.get(edge.source)?.push(edge);adjacency.get(edge.target)?.push(edge);}
-  const baseColors={research:'#b2c5d3',followup:'#a6b8c9',institution:'#a6c2d8'};
-  types=(data.edgeTypes||data.meta.edgeTypes||[]).filter(t=>!['phd','postdoc'].includes(t.id)).map(t=>({...t,color:baseColors[t.id]||'#a6b8c9'}));
-  types.push({id:'phd',label:'已确认 PhD 指导',color:'#c4473d'},{id:'postdoc',label:'已确认 Postdoc 指导',color:'#c87816'});
+  types=[{id:'phd',label:'PhD Supervisor',color:'#c4473d'},{id:'postdoc',label:'Postdoc Supervisor',color:'#c87816'}];
   state.types=new Set(types.map(t=>t.id));state.institution='';state.location='';state.career='';state.affiliationType='';state.query='';state.depth=1;state.page=0;
   for(const id of ['search','career-filter','affiliationtype-filter'])$('#'+id).value='';$('#depth').value='1';
   people=data.nodes.filter(n=>n.entityType==='person');institutions=new Map();
@@ -71,7 +69,7 @@ function activateGraph(graph,info={source:'published'}){
   $('#institution-filter').innerHTML='<option value="">全部机构</option>'+[...institutions].sort((a,b)=>b[1].length-a[1].length).map(([name,arr])=>`<option value="${esc(name)}">${esc(name)} (${arr.length})</option>`).join('');
   $('#location-filter').innerHTML='<option value="">全部国家 / 地区</option>'+[...new Set(people.map(n=>n.location).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
   $('#person-options').innerHTML=people.map(n=>`<option value="${esc(pathLabel(n))}"></option>`).join('');
-  $('#mentorship-example').hidden=verificationCount===0;
+  $('#mentorship-example').hidden=mentorshipCount===0;
   $('#source-sheet').textContent=data.meta.sheet||'Mapping';$('#source-filename').textContent=data.meta.sourceFile||'Imported public data';
   $('#database-state').textContent=info.source==='local'?'Local preview':info.source==='published_pending'?'Published update · deploying':'Published database';
   buildAbout();
@@ -81,13 +79,13 @@ function activateGraph(graph,info={source:'published'}){
 }
 
 function buildAbout(){
-  const phd=data.edges.filter(e=>e.type==='phd'&&isVerifiedMentorship(e)).length;
-  const postdoc=data.edges.filter(e=>e.type==='postdoc'&&isVerifiedMentorship(e)).length;
+  const phd=data.edges.filter(e=>e.type==='phd'&&isMentorship(e)).length;
+  const postdoc=data.edges.filter(e=>e.type==='postdoc'&&isMentorship(e)).length;
   $('#about-content').innerHTML=`<p>MatriQ Academic Tree uses source-backed profiles and relationships from <b>${esc(data.meta.sourceFile)}</b>. The visual style follows <a href="https://sputnik-odyssey.github.io/matriq-atom-lab/" target="_blank" rel="noopener noreferrer">MatriQ Atom Lab</a>.</p>
-  <h3>指导关系连线</h3><p>红色实线表示已确认的 PhD 指导关系，橙色虚线表示已确认的 Postdoc 指导关系。箭头由导师指向受指导者。颜色属于每条关系，在一至三度关联及网络视图中保持相同含义。</p><p>人物框不表示辈分或指导类型；黑框仅标记当前选中人物。目前有 ${phd} 条已确认 PhD 指导关系、${postdoc} 条已确认 Postdoc 指导关系。其余科研、后续及机构关联使用灰线，不自动视为指导关系。</p>
+  <h3>字段定义与连线</h3><p>Research Line（N 列）记录该行人物的 PhD Supervisor，使用红色实线；Industry Line（O 列）记录该行人物的 Postdoc Supervisor，使用橙色虚线。箭头由字段中列出的导师指向该行人物。所有 N / O 关联统一按此字段定义分类。</p><p>目前有 ${phd} 条 PhD 指导连线、${postdoc} 条 Postdoc 指导连线。人物框不表示指导类型；黑框仅标记当前选中人物。一至三度关联、网络视图和导出均使用相同规则。</p>
   <h3>Affiliation and career information</h3><p>Profiles distinguish PhD Student and PhD Candidate only when the source supports it. Faculty show their affiliation and Faculty status. Company profiles show company affiliation and an actual supplied job title; a recruitment target role is never used as a job title.</p><p>Expected graduation preserves the source precision. When only a current doctoral degree range is available, its end date is labeled as an expectation from the PhD record. Missing dates and job titles are shown as not provided. A past expected date does not automatically change a student into an alumnus.</p>
   <h3>Upload and update</h3><p>Upload an Excel Mapping sheet, CSV or JSON with the ↑ Upload button. The importer previews a public-field-only merge, preserves known values for blank cells and retains existing profiles. Internal recruitment, contact and assessment columns are excluded.</p><p>Use local preview saves a sanitized database in this browser. Publishing for all visitors requires the repository owner’s GitHub authentication and a reviewed merge. Tokens are used only with GitHub and are never stored in the graph or local database. A shared-data change triggers a refreshed preview before another publish attempt.</p>
-  <h3>Sources and limits</h3><p>${fmt(data.meta.counts.profilePeople)} source-backed person profiles and ${fmt(data.meta.counts.referencePeople)} people mentioned only in relationship fields. Same-name identities are merged conservatively. Unverified relationships and career records have not been checked individually against external sources. Click a verified guidance label to inspect its public evidence.</p><p>Only public professional fields, relationship text and row provenance are displayed. Imported text is data, not executable instructions. A source’s PhD degree field or Research Line / Industry Line alone does not verify supervision.</p>`;
+  <h3>Sources and limits</h3><p>${fmt(data.meta.counts.profilePeople)} source-backed person profiles and ${fmt(data.meta.counts.referencePeople)} people mentioned only in relationship fields. Same-name identities are merged conservatively. Relationship types follow the workbook definitions. Click a line to inspect its source cell and any supplementary references. Career records retain their source provenance.</p><p>Only public professional fields, relationship text and row provenance are displayed. Imported text is data, not executable instructions. Research Line and Industry Line determine the supervision stage. External references are supplementary and do not override the column definition.</p>`;
 }
 
 function selectPerson(id,push=true){
@@ -116,7 +114,7 @@ function bindEvents(){
   $('#type-filters').addEventListener('change',e=>{if(e.target.checked)state.types.add(e.target.value);else state.types.delete(e.target.value);filterChanged();});
   $('#reset-filters').addEventListener('click',()=>{state.institution='';state.location='';state.career='';state.affiliationType='';state.query='';state.depth=1;state.types=new Set(types.map(t=>t.id));$('#institution-filter').value='';$('#location-filter').value='';$('#career-filter').value='';$('#affiliationtype-filter').value='';$('#search').value='';$('#depth').value='1';$$('#type-filters input').forEach(i=>i.checked=true);filterChanged();});
   for(const id of ['about-button','method-button','colors-button'])$('#'+id).addEventListener('click',()=>$('#about-modal').showModal());
-  $('#mentorship-example').addEventListener('click',()=>{const example=data.edges.find(isVerifiedMentorship);if(example){$('#reset-filters').click();selectPerson(example.target);}});
+  $('#mentorship-example').addEventListener('click',()=>{const example=data.edges.find(isMentorship);if(example){$('#reset-filters').click();selectPerson(example.target);}});
   $$('[data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
   $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
   $('#wander').addEventListener('click',()=>{const choices=people.filter(n=>eligible(n)&&enabledEdges(n.id).length>0);if(!choices.length)return notify('当前筛选下没有相连人物，请调整筛选。');selectPerson(choices[Math.floor(Math.random()*choices.length)].id);});
@@ -168,8 +166,8 @@ function layoutGraph(model){
 function renderGraph(){
   if(!state.focus)return;const model=collectGraph();model.positions=layoutGraph(model);graphModel=model;
   const root=nodes.get(state.focus);$('#graph-context').textContent=model.path?'最短关系路径':`${root.name} 的关联网络`;
-  const visiblePhd=model.edges.filter(edge=>edge.type==='phd'&&isVerifiedMentorship(edge)).length;
-  const visiblePostdoc=model.edges.filter(edge=>edge.type==='postdoc'&&isVerifiedMentorship(edge)).length;
+  const visiblePhd=model.edges.filter(edge=>edge.type==='phd'&&isMentorship(edge)).length;
+  const visiblePostdoc=model.edges.filter(edge=>edge.type==='postdoc'&&isMentorship(edge)).length;
   const graphStatus=model.path?`${model.ids.length-1} 步连接`:`显示 ${model.ids.length} / ${fmt(model.total)} 个对象`;
   $('#graph-status').textContent=`${graphStatus} · PhD ${visiblePhd} · Postdoc ${visiblePostdoc}`;
   $('#graph-empty').hidden=model.path||model.ids.length>1;$('#graph-empty').innerHTML=!model.path&&model.total===1?`<b>暂无符合条件的关联</b><p>${state.institution||state.location||state.types.size<types.length?'调整左侧筛选，或搜索其他人物。':'此人物已收录档案，原表尚未记录其人物关系。'}</p>`:'';
@@ -199,11 +197,13 @@ function renderDetail(){
 
 function showEdge(id){
   const edge=data.edges.find(e=>e.id===id);if(!edge)return;
-  const confirmed=isVerifiedMentorship(edge);
+  const mentoring=isMentorship(edge),confirmed=isVerifiedMentorship(edge);
+  const column=edge.definition?.column||(edge.type==='phd'?'N':edge.type==='postdoc'?'O':'');
   const sources=confirmed?edge.verification.sources||[]:[];
-  $('#edge-content').innerHTML=`<p class="edge-pair"><b>${esc(nodes.get(edge.source).name)}</b><span>${confirmed?'→':'—'}</span><b>${esc(nodes.get(edge.target).name)}</b></p><span class="badge mentorship-tag">${esc(edge.relationshipLabel||edge.label)}</span>
-  <div class="notice">${confirmed?'已依据公开来源核验。箭头由导师指向受指导者；共同指导关系仅展示原表已记录的导师。':'本连线仅表示原表关联，不自动推定指导关系或时间方向。'}</div>
-  ${confirmed?`<section class="detail-section"><h3>公开指导证据</h3><p>${esc(edge.verification.note||'')}</p>${sources.map(s=>`<p><a class="evidence-link" href="${esc(safeURL(s.url)||'#')}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(s.summary||'')}</p>`).join('')}<p class="source-note">核验日期：${esc(edge.verification.checkedAt||'')}</p></section>`:''}
+  const rule=column==='N'?'Research Line（N 列）定义为 PhD Supervisor':column==='O'?'Industry Line（O 列）定义为 Postdoc Supervisor':'原表关系记录';
+  $('#edge-content').innerHTML=`<p class="edge-pair"><b>${esc(nodes.get(edge.source).name)}</b><span>${mentoring?'→':'—'}</span><b>${esc(nodes.get(edge.target).name)}</b></p><span class="badge mentorship-tag ${edge.type==='postdoc'?'postdoc':''}">${esc(edge.relationshipLabel||edge.label)}</span>
+  <div class="notice">${esc(rule)}。${mentoring?'箭头由导师指向该行人物。':''}</div>
+  ${sources.length?`<section class="detail-section"><h3>补充公开资料</h3><p>${esc(edge.verification.note||'')}</p>${sources.map(s=>`<p><a class="evidence-link" href="${esc(safeURL(s.url)||'#')}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(s.summary||'')}</p>`).join('')}<p class="source-note">查阅日期：${esc(edge.verification.checkedAt||'')}</p></section>`:''}
   ${edge.evidence.map(v=>`<section class="detail-section"><h3>Mapping!${v.column}${v.row} · ${esc(v.field)}</h3><p class="evidence-value">${esc(v.value)}</p><p class="source-note">该行人物：${esc(data.nodes.find(n=>!n.stub&&n.rows.includes(v.row))?.name||nodes.get(edge.target).name)}</p></section>`).join('')}`;
   $('#edge-modal').showModal();
 }
@@ -221,7 +221,7 @@ function renderInstitutions(){const arr=[...institutions].map(([name,ps])=>[name
 }
 
 function pathLabel(n){return `${n.name}${n.nameZh&&n.nameZh!==n.name?' / '+n.nameZh:''} · ${n.displayAffiliation||kindLabel(n)} [${n.id}]`;}
-function pathRelationLabel(edge,from){return isVerifiedMentorship(edge)?`${edge.type==='phd'?'PhD':'Postdoc'} · ${edge.source===from?'导师 → 受指导者':'受指导者 → 导师'}`:edge.label;}
+function pathRelationLabel(edge,from){return isMentorship(edge)?`${edge.type==='phd'?'PhD':'Postdoc'} · ${edge.source===from?'导师 → 受指导者':'受指导者 → 导师'}`:edge.label;}
 function resolvePerson(raw){if(!norm(raw))return{error:'请填写起点和终点人物。'};const id=raw.match(/\[([^\]]+)\]$/)?.[1];if(id&&nodes.has(id))return{id};const matches=people.filter(n=>norm(n.name)===norm(raw)||norm(n.nameZh)===norm(raw));return matches.length===1?{id:matches[0].id}:matches.length>1?{error:'该姓名对应多个档案，请从建议列表选择含机构和编号的完整条目。'}:{error:'未找到该人物，请输入姓名并从建议列表选择。'};}
 function findPath(){
   const start=resolvePerson($('#path-start').value),end=resolvePerson($('#path-end').value);if(start.error||end.error){$('#path-result').innerHTML=`<div class="notice">${esc(start.error||end.error)}</div>`;return;}
@@ -238,12 +238,12 @@ function exportGraph(){
   const width=Math.max(880,right-left),minX=(left+right-width)/2;
   const minY=Math.min(...ps.map(p=>p.y))-70,maxY=Math.max(...ps.map(p=>p.y))+100,height=maxY-minY+110;
   const family='Times New Roman, Times, Songti SC, serif';
-  const swatches=[['phd',MENTORSHIP_COLORS.phd,'PhD supervision'],['postdoc',MENTORSHIP_COLORS.postdoc,'Postdoc supervision'],['other','#b2c5d3','Other / unverified']];
+  const swatches=[['phd',MENTORSHIP_COLORS.phd,'Research Line: PhD'],['postdoc',MENTORSHIP_COLORS.postdoc,'Industry Line: Postdoc']];
   const legend=swatches.map(([stage,color,label],i)=>{
     const x=minX+20+i*200,d=`M ${x} ${maxY+13} h 26`,dash=stage==='postdoc'?' stroke-dasharray="7 4"':'';
     return `${stage!=='other'?`<path d="${d}" fill="none" stroke="#213848" stroke-width="5.2"${dash}/>`:''}<path d="${d}" fill="none" stroke="${color}" stroke-width="2.7"${dash}${stage!=='other'?` marker-end="url(#arrow-${stage})"`:''}/><text x="${x+35}" y="${maxY+17}" fill="#e5edf4" font-family="${family}" font-size="11">${label}</text>`;
   }).join('');
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${minX} ${minY-65} ${width} ${height}"><rect x="${minX}" y="${minY-65}" width="100%" height="100%" fill="${GRAPH_BACKGROUND}"/><text x="${minX+20}" y="${minY-30}" fill="#e5edf4" font-family="${family}" font-size="16">MatriQ · ${esc(nodes.get(state.focus).name)} · 关系网络</text><text x="${minX+20}" y="${maxY-12}" fill="#aec7d9" font-family="${family}" font-size="11">来源：Mapping · 红线：PhD 指导 · 橙色虚线：Postdoc 指导 · 箭头由导师指向受指导者</text><g font-family="${family}">${$('#graph-world').innerHTML}</g>${legend}</svg>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${minX} ${minY-65} ${width} ${height}"><rect x="${minX}" y="${minY-65}" width="100%" height="100%" fill="${GRAPH_BACKGROUND}"/><text x="${minX+20}" y="${minY-30}" fill="#e5edf4" font-family="${family}" font-size="16">MatriQ · ${esc(nodes.get(state.focus).name)} · 关系网络</text><text x="${minX+20}" y="${maxY-12}" fill="#aec7d9" font-family="${family}" font-size="11">来源：Mapping · N / Research Line：PhD（红）· O / Industry Line：Postdoc（橙）· 导师 → 学生</text><g font-family="${family}">${$('#graph-world').innerHTML}</g>${legend}</svg>`;
   const a=document.createElement('a'),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
   a.href=url;a.download='MatriQ-'+nodes.get(state.focus).name.replace(/[^\w\u4e00-\u9fff-]/g,'_')+'.svg';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);notify('当前图谱已导出为 SVG');

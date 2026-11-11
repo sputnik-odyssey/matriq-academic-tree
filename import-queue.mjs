@@ -1,4 +1,4 @@
-import {previewImport} from './importer.mjs?v=profiles-upload-20261111';
+import {previewImport} from './importer.mjs?v=column-rules-20261111';
 
 export function queueUpload(parsed,staged=[]){
   const current={sourceFile:parsed.sourceFile,sheet:parsed.sheet,rows:structuredClone(parsed.rows),warnings:[],...(parsed.sourceIdentity?{sourceIdentity:parsed.sourceIdentity}:{})};
