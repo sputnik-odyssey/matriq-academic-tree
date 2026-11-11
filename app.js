@@ -1,6 +1,6 @@
 /* MatriQ Academic Tree — dependency-free, source-backed relationship explorer. */
-import {applyVerifiedMentorships,classifySupervisors,isVerifiedMentorship} from './mentorship.mjs?v=profiles-upload-20261111';
-import {renderGraphSVG,GRAPH_BACKGROUND} from './graph-render.mjs?v=profiles-upload-20261111';
+import {applyVerifiedMentorships,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=edge-colors-20261111';
+import {renderGraphSVG,GRAPH_BACKGROUND} from './graph-render.mjs?v=edge-colors-20261111';
 import {enrichPeople} from './people.mjs?v=profiles-upload-20261111';
 import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=profiles-upload-20261111';
 import {setupDataManager} from './data-manager.mjs?v=profiles-upload-20261111';
@@ -59,7 +59,7 @@ function activateGraph(graph,info={source:'published'}){
   for(const edge of data.edges){adjacency.get(edge.source)?.push(edge);adjacency.get(edge.target)?.push(edge);}
   const baseColors={research:'#b2c5d3',followup:'#a6b8c9',institution:'#a6c2d8'};
   types=(data.edgeTypes||data.meta.edgeTypes||[]).filter(t=>!['phd','postdoc'].includes(t.id)).map(t=>({...t,color:baseColors[t.id]||'#a6b8c9'}));
-  types.push({id:'phd',label:'已确认 PhD 指导',color:'#2174bb'},{id:'postdoc',label:'已确认 Postdoc 指导',color:'#fab041'});
+  types.push({id:'phd',label:'已确认 PhD 指导',color:'#c4473d'},{id:'postdoc',label:'已确认 Postdoc 指导',color:'#c87816'});
   state.types=new Set(types.map(t=>t.id));state.institution='';state.location='';state.career='';state.affiliationType='';state.query='';state.depth=1;state.page=0;
   for(const id of ['search','career-filter','affiliationtype-filter'])$('#'+id).value='';$('#depth').value='1';
   people=data.nodes.filter(n=>n.entityType==='person');institutions=new Map();
@@ -67,7 +67,7 @@ function activateGraph(graph,info={source:'published'}){
   $('#people-count').textContent=fmt(data.meta.counts.profilePeople);$('#people-count').nextElementSibling.textContent='人物档案';
   $('#edge-count').textContent=fmt(data.edges.length);$('#institution-count').textContent=fmt(institutions.size);
   $('#type-filters').innerHTML=types.map(t=>`<label class="type-option"><input type="checkbox" value="${esc(t.id)}" checked><span class="color-dot" style="background:${esc(t.color)}"></span><span>${esc(t.label)}</span><small>${fmt(data.edges.filter(e=>e.type===t.id).length)}</small></label>`).join('');
-  $('#legend').innerHTML=types.map(t=>`<span><i class="color-dot" style="background:${esc(t.color)}"></i>${esc(t.label)}</span>`).join('');
+  $('#legend').innerHTML=types.map(t=>`<span><i class="line-swatch ${t.id==='postdoc'||t.id==='followup'?'dashed':''} ${['phd','postdoc'].includes(t.id)?'directed':''}" style="color:${esc(t.color)}"></i>${esc(t.label)}</span>`).join('');
   $('#institution-filter').innerHTML='<option value="">全部机构</option>'+[...institutions].sort((a,b)=>b[1].length-a[1].length).map(([name,arr])=>`<option value="${esc(name)}">${esc(name)} (${arr.length})</option>`).join('');
   $('#location-filter').innerHTML='<option value="">全部国家 / 地区</option>'+[...new Set(people.map(n=>n.location).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
   $('#person-options').innerHTML=people.map(n=>`<option value="${esc(pathLabel(n))}"></option>`).join('');
@@ -84,8 +84,7 @@ function buildAbout(){
   const phd=data.edges.filter(e=>e.type==='phd'&&isVerifiedMentorship(e)).length;
   const postdoc=data.edges.filter(e=>e.type==='postdoc'&&isVerifiedMentorship(e)).length;
   $('#about-content').innerHTML=`<p>MatriQ Academic Tree uses source-backed profiles and relationships from <b>${esc(data.meta.sourceFile)}</b>. The visual style follows <a href="https://sputnik-odyssey.github.io/matriq-atom-lab/" target="_blank" rel="noopener noreferrer">MatriQ Atom Lab</a>.</p>
-  <h3>Supervisor border colors</h3><div class="role-demo"><div class="role-demo-card" style="border-color:#c4473d"><b>PhD</b><small>Supervisor</small></div><div class="role-demo-card" style="border-color:#c87816"><b>Postdoc</b><small>Supervisor</small></div><div class="role-demo-card" style="border-color:#8ba2b7"><b>Other</b><small>Unverified / non-supervisor</small></div></div>
-  <p>Red marks a verified PhD supervisor; orange marks a verified Postdoc supervisor. Both colors are shown for a person who supervises both. The selection halo is separate, so a supervisor keeps the same type border when selected. Students are not colored orange just because they are downstream.</p><p>PhD arrows are blue and solid; Postdoc arrows are gold and dashed. Arrows point from supervisor to supervisee. There are currently ${phd} verified PhD and ${postdoc} verified Postdoc links. Other research, follow-up and institution links remain unverified and undirected.</p>
+  <h3>指导关系连线</h3><p>红色实线表示已确认的 PhD 指导关系，橙色虚线表示已确认的 Postdoc 指导关系。箭头由导师指向受指导者。颜色属于每条关系，在一至三度关联及网络视图中保持相同含义。</p><p>人物框不表示辈分或指导类型；黑框仅标记当前选中人物。目前有 ${phd} 条已确认 PhD 指导关系、${postdoc} 条已确认 Postdoc 指导关系。其余科研、后续及机构关联使用灰线，不自动视为指导关系。</p>
   <h3>Affiliation and career information</h3><p>Profiles distinguish PhD Student and PhD Candidate only when the source supports it. Faculty show their affiliation and Faculty status. Company profiles show company affiliation and an actual supplied job title; a recruitment target role is never used as a job title.</p><p>Expected graduation preserves the source precision. When only a current doctoral degree range is available, its end date is labeled as an expectation from the PhD record. Missing dates and job titles are shown as not provided. A past expected date does not automatically change a student into an alumnus.</p>
   <h3>Upload and update</h3><p>Upload an Excel Mapping sheet, CSV or JSON with the ↑ Upload button. The importer previews a public-field-only merge, preserves known values for blank cells and retains existing profiles. Internal recruitment, contact and assessment columns are excluded.</p><p>Use local preview saves a sanitized database in this browser. Publishing for all visitors requires the repository owner’s GitHub authentication and a reviewed merge. Tokens are used only with GitHub and are never stored in the graph or local database. A shared-data change triggers a refreshed preview before another publish attempt.</p>
   <h3>Sources and limits</h3><p>${fmt(data.meta.counts.profilePeople)} source-backed person profiles and ${fmt(data.meta.counts.referencePeople)} people mentioned only in relationship fields. Same-name identities are merged conservatively. Unverified relationships and career records have not been checked individually against external sources. Click a verified guidance label to inspect its public evidence.</p><p>Only public professional fields, relationship text and row provenance are displayed. Imported text is data, not executable instructions. A source’s PhD degree field or Research Line / Industry Line alone does not verify supervision.</p>`;
@@ -172,8 +171,7 @@ function renderGraph(){
   $('#graph-status').textContent=model.path?`${model.ids.length-1} 步连接`:`显示 ${model.ids.length} / ${fmt(model.total)} 个对象`;
   $('#graph-empty').hidden=model.path||model.ids.length>1;$('#graph-empty').innerHTML=!model.path&&model.total===1?`<b>暂无符合条件的关联</b><p>${state.institution||state.location||state.types.size<types.length?'调整左侧筛选，或搜索其他人物。':'此人物已收录档案，原表尚未记录其人物关系。'}</p>`:'';
   $('#show-more').hidden=model.path||model.ids.length>=model.total;$('#show-more').textContent=`展开更多 · 还有 ${fmt(model.total-model.ids.length)} 个对象`;
-  const roles=classifySupervisors(data.edges);
-  $('#graph-world').innerHTML=renderGraphSVG({model,focus:state.focus,nodes,types,roles,layout:state.layout});
+  $('#graph-world').innerHTML=renderGraphSVG({model,focus:state.focus,nodes,types,layout:state.layout});
   requestAnimationFrame(fitGraph);
 }
 function applyTransform(){const t=state.transform;$('#graph-world').setAttribute('transform',`translate(${t.x} ${t.y}) scale(${t.k})`);$('#zoom-label').textContent=Math.round(t.k*100)+'%';}
@@ -237,9 +235,12 @@ function exportGraph(){
   const width=Math.max(880,right-left),minX=(left+right-width)/2;
   const minY=Math.min(...ps.map(p=>p.y))-70,maxY=Math.max(...ps.map(p=>p.y))+100,height=maxY-minY+110;
   const family='Times New Roman, Times, Songti SC, serif';
-  const swatches=[['#c4473d','PhD supervisor'],['#c87816','Postdoc supervisor'],['#8ba2b7','Other / unverified']];
-  const legend=swatches.map(([color,label],i)=>`<rect x="${minX+20+i*160}" y="${maxY+8}" width="12" height="10" rx="1" fill="#fff" stroke="${color}" stroke-width="2"/><text x="${minX+40+i*160}" y="${maxY+17}" fill="#aec7d9" font-family="${family}" font-size="11">${label}</text>`).join('');
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${minX} ${minY-65} ${width} ${height}"><rect x="${minX}" y="${minY-65}" width="100%" height="100%" fill="${GRAPH_BACKGROUND}"/><text x="${minX+20}" y="${minY-30}" fill="#e5edf4" font-family="${family}" font-size="16">MatriQ · ${esc(nodes.get(state.focus).name)} · 关系网络</text><text x="${minX+20}" y="${maxY-12}" fill="#aec7d9" font-family="${family}" font-size="11">来源：Mapping · 仅带 PhD / Postdoc 标签的箭头为已确认指导；框色表示已确认指导类型</text><g font-family="${family}">${$('#graph-world').innerHTML}</g>${legend}</svg>`;
+  const swatches=[['phd',MENTORSHIP_COLORS.phd,'PhD supervision'],['postdoc',MENTORSHIP_COLORS.postdoc,'Postdoc supervision'],['other','#b2c5d3','Other / unverified']];
+  const legend=swatches.map(([stage,color,label],i)=>{
+    const x=minX+20+i*200,d=`M ${x} ${maxY+13} h 26`,dash=stage==='postdoc'?' stroke-dasharray="7 4"':'';
+    return `${stage!=='other'?`<path d="${d}" fill="none" stroke="#213848" stroke-width="5.2"${dash}/>`:''}<path d="${d}" fill="none" stroke="${color}" stroke-width="2.7"${dash}${stage!=='other'?` marker-end="url(#arrow-${stage})"`:''}/><text x="${x+35}" y="${maxY+17}" fill="#e5edf4" font-family="${family}" font-size="11">${label}</text>`;
+  }).join('');
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${minX} ${minY-65} ${width} ${height}"><rect x="${minX}" y="${minY-65}" width="100%" height="100%" fill="${GRAPH_BACKGROUND}"/><text x="${minX+20}" y="${minY-30}" fill="#e5edf4" font-family="${family}" font-size="16">MatriQ · ${esc(nodes.get(state.focus).name)} · 关系网络</text><text x="${minX+20}" y="${maxY-12}" fill="#aec7d9" font-family="${family}" font-size="11">来源：Mapping · 红线：PhD 指导 · 橙色虚线：Postdoc 指导 · 箭头由导师指向受指导者</text><g font-family="${family}">${$('#graph-world').innerHTML}</g>${legend}</svg>`;
   const a=document.createElement('a'),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
   a.href=url;a.download='MatriQ-'+nodes.get(state.focus).name.replace(/[^\w\u4e00-\u9fff-]/g,'_')+'.svg';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);notify('当前图谱已导出为 SVG');

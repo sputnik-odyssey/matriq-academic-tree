@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --paper: #f4f8fb;
+  --paper: #e4ebf2;
   --surface: #fff;
   --ink: #1b3348;
   --muted: #688094;
@@ -8,7 +8,10 @@
   --accent: #2174bb;
   --brand-deep: #001689;
   --brand-gold: #fab041;
-  --dark: #294359;
+  --dark: #101e33;
+  --canvas: #496275;
+  --phd-line: #ff8a80;
+  --postdoc-line: #ffb74d;
   --green: var(--accent);
   --moss: var(--muted);
   --pale: #eaf1f7;
@@ -104,7 +107,7 @@ input::placeholder { color: #88a2b7; }
 .toolbar-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .icon-button { width: 29px; height: 29px; padding: 5px; border-color: #d8e3ec; display: inline-flex; align-items: center; justify-content: center; color: #5e809c; border-radius: 4px; flex-shrink: 0; }
 .icon-button svg { width: 14px; height: 14px; }
-.graph-stage { height: clamp(540px, calc(100vh - 290px), 900px); flex: 1; min-height: 540px; position: relative; overflow: hidden; background-color: var(--dark); background-image: radial-gradient(#48667d .65px, transparent .65px); background-size: 20px 20px; }
+.graph-stage { height: clamp(540px, calc(100vh - 290px), 900px); flex: 1; min-height: 540px; position: relative; overflow: hidden; background-color: var(--canvas); background-image: radial-gradient(#668094 .65px, transparent .65px); background-size: 20px 20px; }
 svg#graph { width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; cursor: grab; user-select: none; }
 svg#graph:active { cursor: grabbing; }
 .graph-status { position: absolute; top: 18px; right: 18px; padding: 6px 9px; border: 1px solid #648198; border-radius: 4px; color: #d8e7f1; background: #294359ed; font-size: 10px; pointer-events: none; line-height: 1.5; max-width: 230px; }
@@ -122,39 +125,34 @@ svg#graph:active { cursor: grabbing; }
 .zoom-controls button { width: 31px; height: 31px; padding: 3px; border: 0; border-bottom: 1px solid #dee8f0; border-radius: 0; color: #56758f; font-size: 17px; font-weight: 400; line-height: 1; }
 .zoom-controls button:last-child { border-bottom: 0; }
 .zoom-controls button svg { width: 13px; height: 13px; }
-.canvas-caption { position: absolute; bottom: 19px; left: 62px; font-size: 9px; color: #7595ad; pointer-events: none; }
-.graph-stage .generation-label { fill: #8dacc4; font: 10px var(--serif); letter-spacing: 1px; }
-.edge path:first-of-type, path.edge { fill: none; opacity: .8; transition: opacity .15s, stroke-width .15s; }
-.edge:hover path:first-of-type, .edge:focus path:first-of-type, path.edge:hover { stroke-width: 3; opacity: 1; }
-.edge path:last-of-type:not(:first-of-type) { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
-.edge.dashed path:first-of-type, path.edge.dashed { stroke-dasharray: 4 4; }
-.edge.active path:first-of-type, .edge.highlighted path:first-of-type, path.edge.highlighted { stroke: #4b667c; stroke-width: 2; opacity: 1; }
-.edge-label { font: 12px var(--serif); paint-order: stroke; stroke: var(--dark); stroke-width: 4px; stroke-linejoin: round; pointer-events: auto; cursor: pointer; }
+.canvas-caption { position: absolute; bottom: 19px; left: 62px; font-size: 9px; color: #c4d6e3; pointer-events: none; }
+.graph-stage .generation-label { fill: #d7e5f0; font: 10px var(--serif); letter-spacing: 1px; }
+.edge-line, path.edge { fill: none; opacity: .95; transition: opacity .15s, stroke-width .15s; }
+.edge:hover .edge-line, .edge:focus .edge-line, path.edge:hover { stroke-width: 3.6; opacity: 1; }
+.edge-underlay { fill: none; stroke: #213848; stroke-width: 5.2; pointer-events: none; }
+.edge-hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
+path.edge.dashed { stroke-dasharray: 4 4; }
+.edge.active .edge-line, .edge.highlighted .edge-line, path.edge.highlighted { stroke-width: 3.6; opacity: 1; }
+.edge-label { font: 12px var(--serif); paint-order: stroke; stroke: #213848; stroke-width: 4px; stroke-linejoin: round; pointer-events: auto; cursor: pointer; }
 .node { cursor: pointer; outline: 0; --node-border: #8ba2b7; --node-fill: #fff; --node-width: 1.6px; }
-.role-mentor { --role-color: #c4473d; }
+.role-mentor { --role-color: #8ba2b7; }
 .role-focus { --role-color: #111111; }
-.role-student { --role-color: #c87816; }
-.role-phd-supervisor { --role-color: #c4473d; }
-.role-postdoc-supervisor { --role-color: #c87816; }
-.role-dual-supervisor { --role-color: #c4473d; }
+.role-student { --role-color: #8ba2b7; }
+.role-phd-supervisor, .role-postdoc-supervisor, .role-dual-supervisor { --role-color: #8ba2b7; }
 .role-other, .role-conflict { --role-color: #8ba2b7; }
-.node.role-mentor { --node-border: #c4473d; --node-width: 2.8px; }
+.node.role-mentor, .node.role-student, .node.role-phd-supervisor, .node.role-postdoc-supervisor, .node.role-dual-supervisor { --node-border: #8ba2b7; --node-width: 1.6px; }
 .node.role-focus { --node-border: #111111; --node-fill: #f4f9fe; --node-width: 3px; }
-.node.role-student { --node-border: #c87816; --node-width: 2.8px; }
-.node.role-phd-supervisor { --node-border: #c4473d; --node-width: 2.8px; }
-.node.role-postdoc-supervisor { --node-border: #c87816; --node-width: 2.8px; }
-.node.role-dual-supervisor { --node-border: #c4473d; --node-width: 2.8px; }
 .node .node-card rect, .node > rect { fill: var(--node-fill, #fff); stroke: var(--node-border, #8ba2b7); stroke-width: var(--node-width); transition: filter .15s, stroke-width .15s; filter: drop-shadow(0 3px 4px #0003); }
 .node:hover .node-card rect, .node:hover > rect, .node:focus .node-card rect { stroke-width: calc(var(--node-width) + .7px); filter: drop-shadow(0 0 5px #8bbfeb88); }
 .node.active .node-card rect, .node.selected .node-card rect { filter: drop-shadow(0 0 7px #98c6e780); }
 .node.stub .node-card rect, .node.stub > rect, .node.role-conflict .node-card rect { stroke-dasharray: 4 3; }
-.node .node-card .supervisor-secondary-bracket { fill: none; stroke: #c87816; stroke-width: 1.8px; stroke-dasharray: none; filter: none; pointer-events: none; }
+.node .node-card .supervisor-secondary-bracket { display: none; }
 .node-name { font: 600 12px var(--serif); fill: #1b3348; stroke: none; }
 .node-subtitle { font: 10px var(--serif); fill: #688094; stroke: none; }
 .node-career { font: 10px var(--serif); fill: #526f87; stroke: none; }
 .node.active .node-name, .node.selected .node-name { fill: #142f46; }
 .node.active .node-subtitle, .node.selected .node-subtitle { fill: #526f87; }
-.node-role-label { font: 10px var(--serif); fill: #b3c9da; stroke: none; }
+.node-role-label { font: 10px var(--serif); fill: #d9e8f3; stroke: none; }
 .node-badge { font: 9px var(--serif); }
 .node-badge text { fill: #315979; stroke: none; }
 .node .node-dot { fill: #7eb2de; }
@@ -516,7 +514,7 @@ dialog.modal::backdrop { background: #202f3b5c; backdrop-filter: blur(3px); }
   .header-actions .text-button { display: inline-flex !important; }
 }
 
-/* Confirmed mentorship roles use border color independently from edge type. */
+/* Person frames remain neutral; confirmed supervision is shown by colored edges. */
 .legend-stack { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .node-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; color: #5e7f99; font-size: 10px; line-height: 1.6; }
 .node-legend > span { display: inline-flex; align-items: center; gap: 6px; }
@@ -526,7 +524,8 @@ dialog.modal::backdrop { background: #202f3b5c; backdrop-filter: blur(3px); }
 .mentorship-note p { margin: 3px 0 6px; }
 .mentorship-note button { margin-left: 8px; border: 0; padding: 0; background: transparent; color: #2174bb; text-decoration: underline; text-underline-offset: 3px; font-size: 11px; }
 .mentorship-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; padding: 2px 6px; border: 1px solid #cbddec; border-radius: 3px; color: #366c96; background: #edf5fc; white-space: nowrap; }
-.mentorship-tag.postdoc { color: #8f651a; border-color: #ead7ae; background: #fff8e9; }
+.mentorship-tag.phd { color: #a83e36; border-color: #edc9c4; background: #fff4f2; }
+.mentorship-tag.postdoc { color: #a05d0b; border-color: #ead2ab; background: #fff7e9; }
 .evidence-link { color: #2174bb; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 .relation-conflict { color: #6b7f90; font-size: 11px; border-left: 2px solid #8ba2b7; padding-left: 9px; }
 .role-demo { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 16px 0; }
@@ -574,7 +573,13 @@ dialog.modal::backdrop { background: #202f3b5c; backdrop-filter: blur(3px); }
 .publish-confirmation input { margin-right: 8px; accent-color: #2174bb; }
 .table-scroll { overflow: auto; }
 .directory-table { min-width: 540px; }
-.supervisor-dual-swatch { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px #c87816; border-color: #c4473d !important; width: 16px !important; height: 13px !important; }
+.relationship-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 10px; line-height: 1.7; color: #5e7f99; }
+.relationship-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.relationship-legend .phd, .relationship-legend .phd-line { color: #c4473d; }
+.relationship-legend .postdoc, .relationship-legend .postdoc-line { color: #c87816; }
+.line-swatch { display: inline-block; width: 23px; height: 0; border: 0; border-top: 2.5px solid currentColor; flex-shrink: 0; }
+.line-swatch.postdoc, .line-swatch.dashed { border-top-style: dashed; }
+.line-swatch.directed::after { content: ""; display: block; width: 5px; height: 5px; border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; transform: rotate(45deg); margin: -3.8px 0 0 auto; }
 @media (max-width: 700px) {
   .graph-panel { height: 690px; }
   .graph-stage { flex: 1; min-height: 0; height: auto; }

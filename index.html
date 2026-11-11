@@ -7,8 +7,8 @@
   <meta name="description" content="量子物理人物、机构、职业信息与学术关系数据库。">
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=expert-copy-20261111">
-  <script type="module" src="app.js?v=profiles-upload-20261111"></script>
+  <link rel="stylesheet" href="style.css?v=edge-colors-20261111">
+  <script type="module" src="app.js?v=edge-colors-20261111"></script>
 </head>
 <body>
 <header class="topbar">
@@ -32,14 +32,14 @@
       <div class="filter-group"><label>关系类型</label><div id="type-filters"></div></div>
       <div class="filter-group" id="depth-group"><label for="depth">展开范围</label><select id="depth"><option value="1" selected>一度关联</option><option value="2">二度关联</option><option value="3">三度关联</option></select></div>
       <button class="secondary-button" id="reset-filters">重置筛选</button>
-      <div class="mentorship-note"><b>Supervisor type</b><p>Red: verified PhD supervisor. Orange: verified Postdoc supervisor. Both colors: both types.</p><button class="text-button" id="mentorship-example" hidden>查看已确认师承 ↗</button><button class="text-button" id="colors-button">配色说明 ↗</button></div>
+      <div class="mentorship-note"><b>指导连线</b><p>红线：PhD · 橙色虚线：Postdoc。箭头由导师指向受指导者。</p><button class="text-button" id="mentorship-example" hidden>查看已确认师承 ↗</button><button class="text-button" id="colors-button">配色说明 ↗</button></div>
       <div class="sidebar-footer"><button class="text-button" id="wander">随机人物 <span aria-hidden="true">↗</span></button></div>
       <div class="source-note">数据来源 <b id="source-sheet">Mapping</b><br><span id="source-filename">Nov 13 Original and Compiled.xlsx</span></div>
     </aside>
     <section class="graph-panel" aria-label="学术关系探索">
       <div class="graph-toolbar"><div class="view-tabs"><button class="view-tab active" data-layout="tree">层级视图</button><button class="view-tab" data-layout="radial">网络视图</button></div><span class="graph-context" id="graph-context">正在读取图谱…</span><button class="icon-button mobile-filter" id="mobile-filter" aria-label="打开筛选">☷</button><button class="upload-button" id="upload-data" title="Upload a document and preview a database update" aria-label="Upload data">↑ Upload</button><button class="icon-button" id="path-button" title="查找两个人物之间的关系路径" aria-label="查找关系路径">⇄</button><button class="icon-button" id="download-button" title="导出当前图谱为 SVG" aria-label="导出当前图谱">↓</button></div>
       <div id="graph-stage" class="graph-stage"><svg id="graph" role="img" aria-label="可拖动和缩放的学术关系图谱"><g id="graph-world"></g></svg><div class="graph-status" id="graph-status" aria-live="polite">正在载入…</div><div id="graph-empty" class="graph-empty" hidden></div><div class="zoom-controls"><button id="zoom-in" aria-label="放大">+</button><span id="zoom-label">100%</span><button id="zoom-out" aria-label="缩小">−</button><button id="fit" aria-label="适合画布" title="适合画布">⛶</button></div><button id="show-more" class="secondary-button show-more" hidden>展开更多</button></div>
-      <div class="graph-bottom"><div class="legend-stack"><div class="node-legend" aria-label="Supervisor border colors"><span><i style="border-color:#c4473d"></i>PhD supervisor</span><span><i style="border-color:#c87816"></i>Postdoc supervisor</span><span><i style="border-color:#8ba2b7"></i>Other / unverified</span></div><div class="legend" id="legend"></div></div><span class="hint">拖动 · 缩放 · 点击连线查看来源</span></div>
+      <div class="graph-bottom"><div class="legend-stack"><div class="legend" id="legend"></div></div><span class="hint">拖动 · 缩放 · 点击连线查看来源</span></div>
       <div id="directory" hidden></div><div id="institutions" hidden></div>
     </section>
     <aside class="detail-panel" id="detail" aria-label="人物档案"><div class="detail-placeholder">选择一个人物<br>查看档案与关联记录</div></aside>

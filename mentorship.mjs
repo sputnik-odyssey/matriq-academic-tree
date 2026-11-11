@@ -1,21 +1,26 @@
 // Only explicitly verified, directed PhD/Postdoc links carry mentorship meaning.
+export const MENTORSHIP_COLORS=Object.freeze({phd:'#ff8a80',postdoc:'#ffb74d'});
+
+// Person frames are neutral. Supervision type is encoded on its verified edge.
 export const ROLE_STYLES = Object.freeze({
   focus: {color:'#111111',fill:'#eef5fb',label:'当前人物'},
-  mentor: {color:'#c4473d',fill:'#ffffff',label:'上游指导者 · 已确认'},
-  student: {color:'#c87816',fill:'#ffffff',label:'下游受指导者 · 已确认'},
-  'phd-supervisor': {color:'#c4473d',fill:'#ffffff',label:'PhD supervisor · confirmed'},
-  'postdoc-supervisor': {color:'#c87816',fill:'#ffffff',label:'Postdoc supervisor · confirmed'},
-  'dual-supervisor': {color:'#c4473d',secondaryColor:'#c87816',fill:'#ffffff',label:'PhD + Postdoc supervisor · confirmed'},
-  other: {color:'#8ba2b7',fill:'#ffffff',label:'普通关联 / 指导关系未确认'},
-  conflict: {color:'#8ba2b7',fill:'#ffffff',label:'指导链存在方向冲突 · 待核'}
+  mentor: {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'},
+  student: {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'},
+  'phd-supervisor': {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'},
+  'postdoc-supervisor': {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'},
+  'dual-supervisor': {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'},
+  other: {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'},
+  conflict: {color:'#8ba2b7',fill:'#ffffff',label:'人物档案'}
 });
 
 export function isVerifiedMentorship(edge){
-  return edge.directed===true && edge.verification?.status==='confirmed' && ['phd','postdoc'].includes(edge.type);
+  return Boolean(edge&&edge.directed===true&&edge.source&&edge.target&&edge.source!==edge.target&&
+    edge.verification?.status==='confirmed'&&['phd','postdoc'].includes(edge.type)&&
+    Array.isArray(edge.verification.sources)&&edge.verification.sources.some(source=>/^https:\/\/[^\s/]+/i.test(source?.url||'')));
 }
 
-// Border color identifies the verified supervision stage, not graph generation.
-// Students never inherit an orange border just because they are downstream.
+// Legacy role queries remain available for nonvisual data analysis only.
+// renderGraphSVG deliberately ignores these maps when drawing person frames.
 export function classifySupervisors(edges){
   const stages=new Map();
   for(const edge of edges){
