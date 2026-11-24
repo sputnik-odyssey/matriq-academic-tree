@@ -1,7 +1,8 @@
-import {parseUpload} from './importer.mjs?v=author-alias-20261111';
-import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=author-alias-20261111';
+import {parseUpload} from './importer.mjs?v=arxiv-affiliations-20261124';
+import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=arxiv-affiliations-20261124';
 import {enrichPerson} from './people.mjs?v=author-alias-20261111';
 import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=author-alias-20261111';
+import {sanitizeAffiliationSources} from './paper-importer.mjs?v=arxiv-affiliations-20261124';
 import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=author-alias-20261111';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -52,7 +53,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     const messages=[...(preview.warnings||[]),...(preview.issues||[]).map(issueText)];
     $('#import-preview').hidden=false;
     $('#import-preview').innerHTML=`<div class="import-summary">${cells.map(([label,count])=>`<div><b>${format(count)}</b><span>${esc(label)}</span></div>`).join('')}</div><p class="source-note">合并后共 ${format(summary.totalPeople)} 位人物、${format(summary.totalRelationships)} 条关系。原有记录保留，空值不会清除已知信息。</p>
-    ${sample.length?`<div class="table-scroll import-table"><table class="directory-table"><thead><tr><th>变更人物</th><th>机构</th><th>身份 / 职位</th><th>毕业日期</th></tr></thead><tbody>${sample.map(n=>`<tr><td>${esc(n.name)}</td><td>${esc(n.displayAffiliation)}</td><td>${esc(n.displayRole)}</td><td>${esc(n.expectedGraduationLabel||'—')}</td></tr>`).join('')}</tbody></table></div><p class="source-note">最多显示 15 位变更人物；确认导入后可在图谱和名录中查看完整结果。</p>`:'<p class="source-note">本次没有变更人物档案。</p>'}
+    ${sample.length?`<div class="table-scroll import-table"><table class="directory-table"><thead><tr><th>变更人物</th><th>当前任职机构</th><th>身份 / 职位</th><th>毕业日期</th></tr></thead><tbody>${sample.map(n=>`<tr><td>${esc(n.name)}</td><td>${esc(n.displayAffiliation)}</td><td>${esc(n.displayRole)}</td><td>${esc(n.expectedGraduationLabel||'—')}</td></tr>`).join('')}</tbody></table></div><p class="source-note">最多显示 15 位变更人物；确认导入后可在图谱和名录中查看完整结果。</p>`:'<p class="source-note">本次没有变更人物档案。</p>'}
     ${messages.length?`<details class="import-warnings"><summary>${format(messages.length)} import notes</summary><ul>${messages.slice(0,30).map(message=>`<li>${esc(message)}</li>`).join('')}</ul>${messages.length>30?'<p>Additional notes are included in the import summary.</p>':''}</details>`:''}`;
     const errors=(preview.issues||[]).filter(issue=>typeof issue==='object'&&issue.level==='error');
     $('#apply-import').disabled=busy||errors.length>0;
@@ -95,10 +96,24 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     for(const paper of upload.papers){
       const p=document.createElement('p');p.textContent=paper.title+' · '+paper.authors.map(author=>author.name).join(', ');section.append(p);
       const resolved=(preview.graph.papers||[]).find(item=>item.id===paper.id||item.doi&&item.doi===paper.doi);
+      if(resolved){
+        const details=document.createElement('details');details.className='paper-affiliation-preview';
+        const summary=document.createElement('summary');summary.textContent='论文署名机构 · '+resolved.authors.filter(author=>author.affiliation).length+' / '+resolved.authors.length+' 位已填写';details.append(summary);
+        const note=document.createElement('p');note.className='source-note';note.textContent='保存在本篇论文记录中；下方人物档案表显示当前任职机构。';details.append(note);
+        const list=document.createElement('ul');
+        for(const author of resolved.authors){
+          const item=document.createElement('li'),name=document.createElement('b'),value=document.createElement('span');name.textContent=author.name;value.textContent=author.affiliation||'未提供';item.append(name,value);
+          const sources=document.createElement('small');
+          if(author.affiliationEdited)sources.textContent='已手动核对';
+          else for(const source of sanitizeAffiliationSources(author.affiliationSources)){const a=document.createElement('a');a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=source.name+(source.year?' · '+source.year:'');sources.append(a);}
+          if(sources.childNodes.length)item.append(sources);list.append(item);
+        }
+        details.append(list);section.append(details);
+      }
       const matches=(resolved?.authors||[]).map(author=>({author,node:preview.graph.nodes.find(node=>node.id===author.nodeId)})).filter(({author,node})=>node&&author.name!==node.name);
       if(matches.length){const list=document.createElement('ul');list.className='paper-author-matches';for(const {author,node} of matches){const item=document.createElement('li');item.textContent=author.name+' → '+node.name+'（'+(node.affiliation||'机构未提供')+' · '+node.id+'）';list.append(item);}section.append(list);}
     }
-    $('#import-preview').append(section);
+    $('#import-preview').prepend(section);
   }
   async function openParsed(parsed,options={}){
     if(busy)return;

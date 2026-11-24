@@ -1,10 +1,12 @@
 // Public bibliographic lookup only. Fetches are restricted to fixed metadata APIs.
 // A listed author/coauthor is not evidence of a PhD or Postdoc relationship.
-import {normalizeORCID} from './paper-importer.mjs?v=author-alias-20261111';
+import {normalizeORCID} from './paper-importer.mjs?v=arxiv-affiliations-20261124';
+import {nameMatchKind} from './name-matching.mjs?v=author-alias-20261111';
 const CROSSREF = 'https://api.crossref.org';
 const DATACITE = 'https://api.datacite.org';
+const OPENALEX = 'https://api.openalex.org';
 const CATALOG_URL = new URL('./paper-catalog.json', import.meta.url);
-const API_HOSTS = new Set(['api.crossref.org', 'api.datacite.org']);
+const API_HOSTS = new Set(['api.crossref.org', 'api.datacite.org', 'api.openalex.org']);
 const NON_PAPER_TYPES = new Set(['dataset', 'software', 'collection', 'image', 'model', 'workflow', 'physicalobject', 'instrument', 'service', 'grant', 'component']);
 const REQUEST_TIMEOUT = 15000;
 const RESULT_LIMIT = 12;
@@ -45,15 +47,25 @@ function extractOrcid(value) {
   // from an unrelated URL and accidentally turn it into a trusted bare ORCID.
   return normalizeORCID(value) || undefined;
 }
-function affiliationText(affiliations) {
-  if (!Array.isArray(affiliations)) return text(affiliations);
-  return [...new Set(affiliations.map(a => text(typeof a === 'string' ? a : a?.name)).filter(Boolean))].join('; ');
+function publicAffiliation(value) {
+  return text(value).replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '')
+    .replace(/https?:\/\/\S+|\bwww\.\S+/gi, '')
+    .replace(/\b(?:e-?mail|correspondence|tel(?:ephone)?|phone|fax)\s*:?\s*(?:[+()\d][\d\s().-]{5,})?/gi, '')
+    .replace(/\s+/g, ' ').replace(/[\s,;.]+$/g, '').trim().slice(0, 1000);
 }
-function authorRecord(name, {orcid, affiliation, externalId} = {}) {
+function affiliationText(affiliations) {
+  const values=Array.isArray(affiliations)?affiliations:[affiliations];
+  return [...new Set(values.map(a=>publicAffiliation(typeof a==='string'?a:a?.name)).filter(Boolean))].join('; ').slice(0, 1000);
+}
+function affiliationSourceList(sources) {
+  const raw=Array.isArray(sources)?sources:[],result=sourceList(raw);
+  return result.map(source=>{const original=raw.find(item=>item?.url===source.url),year=recordYear(original?.year);return {...source,...(year?{year}:{})};});
+}
+function authorRecord(name, {orcid, affiliation, externalId, affiliationSources} = {}) {
   const result = {name: text(name)};
   if (!result.name) return null;
   if (orcid) result.orcid = orcid;
-  if (affiliation) result.affiliation = affiliation;
+  if (affiliation) {result.affiliation = affiliation;const sources=affiliationSourceList(affiliationSources);if(sources.length)result.affiliationSources=sources;}
   if (externalId || orcid) result.externalId = externalId || `orcid:${orcid}`;
   return result;
 }
@@ -83,7 +95,7 @@ function baseRecord({title, authors, doi, arxivId, year, url, sources}) {
 }
 export function normalizeCrossrefWork(work, sourceURL) {
   if (!work || NON_PAPER_TYPES.has(String(work.type || '').toLowerCase())) return null;
-  const authors = (Array.isArray(work.author) ? work.author : []).map(a => authorRecord([text(a.given), text(a.family)].filter(Boolean).join(' ') || a.name, {orcid: extractOrcid(a.ORCID), affiliation: affiliationText(a.affiliation)}));
+  const authors = (Array.isArray(work.author) ? work.author : []).map(a => authorRecord([text(a.given), text(a.family)].filter(Boolean).join(' ') || a.name, {orcid: extractOrcid(a.ORCID), affiliation: affiliationText(a.affiliation), affiliationSources:[{name:'Crossref · publisher author affiliation',url:sourceURL || `${CROSSREF}/works/${doiPath(work.DOI)}`,year:recordYear(work.published,work.issued,work['published-print'],work['published-online'])}]}));
   return baseRecord({title: Array.isArray(work.title) ? work.title[0] : work.title, authors, doi: work.DOI, year: recordYear(work.published, work.issued, work['published-print'], work['published-online']), url: work.URL, sources: [{name: 'Crossref · publisher DOI metadata', url: sourceURL || `${CROSSREF}/works/${doiPath(work.DOI)}`}]});
 }
 export function normalizeDataCiteWork(work, sourceURL) {
@@ -92,13 +104,13 @@ export function normalizeDataCiteWork(work, sourceURL) {
   const authors = (Array.isArray(a.creators) ? a.creators : []).map(c => {
     const name = [text(c.givenName), text(c.familyName)].filter(Boolean).join(' ') || c.name;
     const orcid = extractOrcid((c.nameIdentifiers || []).find(i => String(i.nameIdentifierScheme || '').toLowerCase() === 'orcid')?.nameIdentifier);
-    return authorRecord(name, {orcid, affiliation: affiliationText(c.affiliation)});
+    return authorRecord(name, {orcid, affiliation: affiliationText(c.affiliation),affiliationSources:[{name:'DataCite · paper author affiliation',url:sourceURL || `${DATACITE}/dois/${doiPath(a.doi || work.id)}`,year:recordYear(a.publicationYear)}]});
   });
   const arxivId = (a.identifiers || []).find(i => String(i.identifierType || '').toLowerCase() === 'arxiv')?.identifier || normalizeArxivId(a.url);
   return baseRecord({title: a.titles?.[0]?.title, authors, doi: a.doi || work.id, arxivId, year: recordYear(a.publicationYear), url: a.url, sources: [{name: 'DataCite · repository DOI metadata', url: sourceURL || `${DATACITE}/dois/${doiPath(a.doi || work.id)}`}]});
 }
 function normalizeCatalogPaper(paper) {
-  return baseRecord({...paper, authors: (paper.authors || []).map(a => authorRecord(a.name, {orcid: extractOrcid(a.orcid), affiliation: affiliationText(a.affiliation), externalId: a.externalId}))});
+  return baseRecord({...paper, authors: (paper.authors || []).map(a => authorRecord(a.name, {orcid: extractOrcid(a.orcid), affiliation: affiliationText(a.affiliation), externalId: a.externalId, affiliationSources:a.affiliationSources}))});
 }
 function doiPath(doi) { return String(doi || '').split('/').map(encodeURIComponent).join('/'); }
 function isScholarHost(hostname) { return /^scholar\.google\.(?:com|[a-z]{2}|com\.[a-z]{2}|co\.[a-z]{2})$/i.test(hostname); }
@@ -173,6 +185,87 @@ function titleScore(title, query) {
   let shared = 0; for (const word of bb) if (aa.has(word)) shared++;
   return shared / Math.max(aa.size, bb.size, 1);
 }
+function relatedTitlesMatch(a, b) {
+  if (normalizePaperTitle(a) === normalizePaperTitle(b)) return true;
+  // Related versions can have small editorial title changes. Short or substantially
+  // different titles require an exact match, even when a DOI relation is present.
+  return [a,b].every(t=>normalizePaperTitle(t).split(' ').length>=6) && titleScore(a,b)>=0.85;
+}
+function uniqueAuthorMatches(original, related) {
+  const matches = new Map(), used = new Set();
+  for (let index=0;index<original.length;index++) {
+    const person=original[index];
+    const entries=related.map((other,i)=>({other,i}));
+    const identifiers=person.orcid?entries.filter(({other})=>person.orcid===other.orcid):[];
+    const possible=identifiers.length?identifiers:entries.filter(({other})=>{
+      if (person.orcid && other.orcid) return person.orcid===other.orcid;
+      return Boolean(nameMatchKind(person.name,other.name));
+    });
+    if (possible.length===1) matches.set(index,possible[0].i);
+  }
+  // A repeated or ambiguous name must not attach one affiliation to two people.
+  for (const [index,relatedIndex] of matches) {
+    if (used.has(relatedIndex)) {
+      for (const [otherIndex,otherRelated] of matches) if (otherRelated===relatedIndex) matches.delete(otherIndex);
+    } else used.add(relatedIndex);
+  }
+  return matches;
+}
+function relatedAuthorsMatch(original, related, matches) {
+  return original.length>0 && related.length>0 && matches.size>=Math.ceil(Math.max(original.length,related.length)*0.8);
+}
+function relatedPublicationDois(work, arxivDoi) {
+  const a=work?.attributes || work;
+  const permitted=new Set(['IsVersionOf','IsPreprintOf','IsIdenticalTo']);
+  return [...new Set((a?.relatedIdentifiers||[]).filter(r=>String(r.relatedIdentifierType).toUpperCase()==='DOI' && permitted.has(r.relationType)).map(r=>normalizeDoi(r.relatedIdentifier)).filter(doi=>doi && doi!==arxivDoi && !arxivFromDoi(doi)))].slice(0,2);
+}
+function openAlexAuthors(work) {
+  return (Array.isArray(work?.authorships)?work.authorships:[]).map(a=>{
+    const raw=affiliationText(a.raw_affiliation_strings);
+    return authorRecord(a.raw_author_name || a.author?.display_name,{
+      orcid:extractOrcid(a.author?.orcid),
+      affiliation:raw || affiliationText((a.institutions||[]).map(i=>i.display_name))
+    });
+  }).filter(Boolean);
+}
+function mergeRelatedAffiliations(original, related, matches, source) {
+  let added=0;
+  const authors=original.authors.map((author,index)=>{
+    const affiliation=related[matches.get(index)]?.affiliation;
+    if (author.affiliation || !affiliation) return author;
+    added++;
+    return {...author,affiliation,affiliationSources:affiliationSourceList([source])};
+  });
+  return added ? {...original,authors,sources:sourceList([...original.sources,source])} : original;
+}
+async function enrichArxivAffiliations(candidate, dataCiteWork, signal) {
+  let result=candidate;
+  if (!result.authors.some(author=>!author.affiliation)) return result;
+  for (const doi of relatedPublicationDois(dataCiteWork,candidate.doi)) {
+    throwIfAborted(signal);
+    const crossrefURL=`${CROSSREF}/works/${doiPath(doi)}`;
+    let publication;
+    try { publication=normalizeCrossrefWork((await fetchJson(crossrefURL,signal))?.message,crossrefURL); }
+    catch { throwIfAborted(signal); continue; }
+    if (!publication || publication.doi!==doi || !relatedTitlesMatch(candidate.title,publication.title)) continue;
+    const matches=uniqueAuthorMatches(candidate.authors,publication.authors);
+    if (!relatedAuthorsMatch(candidate.authors,publication.authors,matches)) continue;
+    result=mergeRelatedAffiliations(result,publication.authors,matches,{name:'Crossref · related publication author affiliation',url:crossrefURL,year:publication.year});
+    if (!result.authors.some(author=>!author.affiliation)) break;
+    const openAlexURL=`${OPENALEX}/works/doi:${doiPath(doi)}`;
+    let work;
+    try { work=await fetchJson(openAlexURL,signal); }
+    catch { throwIfAborted(signal); break; }
+    if (!work || normalizeDoi(work.doi)!==doi || !relatedTitlesMatch(candidate.title,work.title || work.display_name)) break;
+    const authors=openAlexAuthors(work),openAlexMatches=uniqueAuthorMatches(candidate.authors,authors);
+    if (!relatedAuthorsMatch(candidate.authors,authors,openAlexMatches)) break;
+    result=mergeRelatedAffiliations(result,authors,openAlexMatches,{name:'OpenAlex · related publication authorship',url:openAlexURL,year:recordYear(work.publication_year)});
+    // One verified journal version is enough; never blend institutions from
+    // additional versions of the publication into the same author preview.
+    break;
+  }
+  return result;
+}
 export function rankAndDedupeCandidates(candidates, query = '') {
   const found = new Map();
   for (const candidate of candidates.filter(Boolean)) {
@@ -188,6 +281,12 @@ export function rankAndDedupeCandidates(candidates, query = '') {
   return [...found.values()].sort((a, b) => titleScore(b.title, query) - titleScore(a.title, query) || a.title.localeCompare(b.title)).slice(0, RESULT_LIMIT);
 }
 function addInputURL(candidates, inputUrl) { return candidates.map(c => inputUrl ? {...c, inputUrl} : c); }
+function addArxivAffiliationWarnings(candidates, warnings) {
+  const papers=candidates.filter(paper=>paper.arxivId);
+  const missing=papers.reduce((sum,paper)=>sum+paper.authors.filter(author=>!author.affiliation).length,0);
+  if (missing) warnings.push(`有 ${missing} 位作者的论文机构尚未从公开元数据确认，请手动核对。`);
+  if (papers.some(paper=>paper.authors.some(author=>author.affiliationSources?.some(source=>source.name.includes('related publication'))))) warnings.push('部分机构来自关联的期刊发表记录，年份可能与 arXiv 版本不同，请核对来源。');
+}
 
 export async function resolvePaper(input, {titleHint, signal} = {}) {
   throwIfAborted(signal);
@@ -197,6 +296,7 @@ export async function resolvePaper(input, {titleHint, signal} = {}) {
   const catalogMatches = findCatalogMatches(catalog, parsed, titleHint);
   if (catalogMatches.length) {
     if (parsed.kind === 'scholar') warnings.push('已从收录的论文记录识别此 Scholar 链接；请核对标题与作者。');
+    addArxivAffiliationWarnings(catalogMatches,warnings);
     return {candidates: addInputURL(catalogMatches, parsed.inputUrl), warnings};
   }
   if (parsed.kind === 'scholar' && !text(titleHint)) return {candidates: [], warnings: ['此 Scholar 链接尚未收录，请在“补充论文标题”中填写完整标题后重试。']};
@@ -210,16 +310,31 @@ export async function resolvePaper(input, {titleHint, signal} = {}) {
   const dataciteURL = isIdentifier ? `${DATACITE}/dois/${doiPath(parsed.doi)}` : `${DATACITE}/dois?${new URLSearchParams({query: `titles.title:"${query.replace(/["\\]/g, ' ')}"`, 'page[size]': '6'})}`;
   const outcomes = await Promise.allSettled([fetchJson(crossrefURL, signal), fetchJson(dataciteURL, signal)]);
   throwIfAborted(signal);
-  const candidates = [];
+  const candidates = [], dataCiteWorks = [];
   if (outcomes[0].status === 'fulfilled' && outcomes[0].value) {
     const works = isIdentifier ? [outcomes[0].value.message] : outcomes[0].value.message?.items || [];
     candidates.push(...works.map(w => normalizeCrossrefWork(w, isIdentifier ? crossrefURL : undefined)).filter(Boolean));
   }
   if (outcomes[1].status === 'fulfilled' && outcomes[1].value) {
     const works = isIdentifier ? [outcomes[1].value.data] : outcomes[1].value.data || [];
+    dataCiteWorks.push(...works);
     candidates.push(...works.map(w => normalizeDataCiteWork(w, isIdentifier ? dataciteURL : undefined)).filter(Boolean));
   }
-  const resolved = addInputURL(rankAndDedupeCandidates(candidates, query), parsed.inputUrl);
+  const ranked = rankAndDedupeCandidates(candidates, query);
+  if (parsed.arxivId) {
+    for (let index=0;index<ranked.length;index++) {
+      const candidate=ranked[index];
+      if (candidate.arxivId!==parsed.arxivId) continue;
+      const work=dataCiteWorks.find(item=>{
+        const paper=normalizeDataCiteWork(item);
+        return paper?.arxivId===parsed.arxivId && relatedTitlesMatch(candidate.title,paper.title);
+      });
+      if (work) ranked[index]=await enrichArxivAffiliations(candidate,work,signal);
+    }
+  }
+  throwIfAborted(signal);
+  const resolved = addInputURL(ranked, parsed.inputUrl);
+  addArxivAffiliationWarnings(resolved,warnings);
   if (outcomes.every(o => o.status === 'rejected')) warnings.push('公开元数据服务暂时无法连接；请稍后重试，或使用已收录示例。');
   else if (outcomes.some(o => o.status === 'rejected')) warnings.push('部分元数据服务暂时不可用，以下结果来自可连接的公开来源。');
   if (!resolved.length && !warnings.some(w => w.includes('无法连接'))) warnings.push('未找到可用论文记录；请核对标题或标识符。论文可能尚未被这些公开服务收录。');

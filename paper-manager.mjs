@@ -1,8 +1,8 @@
-import {resolvePaper,parsePaperInput} from './paper-resolver.mjs?v=author-alias-20261111';
-import {previewAuthorMatches,normalizeORCID,searchProfilesForAuthor} from './paper-importer.mjs?v=author-alias-20261111';
+import {resolvePaper,parsePaperInput} from './paper-resolver.mjs?v=arxiv-affiliations-20261124';
+import {previewAuthorMatches,normalizeORCID,searchProfilesForAuthor,sanitizeAffiliationSources} from './paper-importer.mjs?v=arxiv-affiliations-20261124';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeURL=value=>{try{const u=new URL(value);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return'';}};
+const safeURL=value=>{try{const u=new URL(value);return /^https?:$/.test(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return'';}};
 const EXAMPLE_TITLE='Hardware-Aware Compilation and Execution of Bivariate Bicycle Codes on Neutral-Atom Systems';
 const EXAMPLE_URL='https://scholar.google.com/citations?view_op=view_citation&hl=en&user=rPCT_loAAAAJ&sortby=pubdate&citation_for_view=rPCT_loAAAAJ:eQOLeE2rZwMC';
 
@@ -10,6 +10,10 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   const $=s=>document.querySelector(s),dialog=$('#paper-modal');
   let candidates=[],selected=null,review=null,busy=false,request=null,inputInfo=null;
   const status=(message,error=false)=>{const element=$('#paper-status');element.textContent=message;element.className=error?'notice import-error':'sync-status';};
+  function updateAffiliationSummary(){
+    const fields=[...dialog.querySelectorAll('[data-author-affiliation]')],count=fields.filter(field=>field.value.trim()).length,summary=$('#paper-affiliation-summary');
+    if(summary)summary.textContent='已填写 '+count+' / '+fields.length+' 位作者的论文署名机构。可核对、修改或补充；相关发表版本的机构可能与 arXiv 版本不同。留空不会删除已保存的论文机构。';
+  }
   function updateNext(){
     const count=review?.authors?.length||0,selects=count?[...dialog.querySelectorAll('[data-author-index]')]:[],unresolved=selects.filter(select=>!select.value),onlyPending=$('#paper-only-pending')?.checked;
     for(const select of selects){const row=select.closest('tr'),missing=!select.value;row.classList.toggle('needs-review',missing);row.hidden=Boolean(onlyPending&&!missing);if(missing)select.setAttribute('aria-invalid','true');else select.removeAttribute('aria-invalid');}
@@ -52,6 +56,13 @@ export function setupPaperManager({getBaseGraph,dataManager}){
     updateNext();
   });
   $('#paper-authors').addEventListener('input',event=>{
+    const affiliation=event.target.closest('[data-author-affiliation]');
+    if(affiliation&&review){
+      const author=review.authors.find(a=>String(a.index)===affiliation.dataset.authorAffiliation),cell=affiliation.closest('td'),changed=affiliation.value.trim()!==(author?.affiliation||'');
+      cell.querySelector('[data-affiliation-source]').hidden=changed;
+      cell.querySelector('[data-affiliation-note]').textContent=changed?(affiliation.value.trim()?'已手动修改；确认后保存核对结果。':'留空将保留此前保存的机构（如有）。'):author?.affiliationEdited?'已保存的手动核对值。':!author?.affiliation?'未识别到机构，可手动补充；不影响继续导入。':'';
+      updateAffiliationSummary();return;
+    }
     const input=event.target.closest('[data-author-search]');if(!input||!review)return;
     const author=review.authors.find(a=>String(a.index)===input.dataset.authorSearch),results=input.closest('details').querySelector('[data-author-results]'),query=input.value.trim();
     if(!query){results.textContent='输入姓名、机构或档案编号。';return;}
@@ -74,12 +85,19 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   function renderAuthors(paper){
     selected=null;review=null;$('#paper-authors').hidden=true;$('#preview-paper').disabled=true;
     updateNext();
-    const checked=previewAuthorMatches(getBaseGraph(),paper);selected=paper;review=checked;
+    const graph=getBaseGraph(),checked=previewAuthorMatches(graph,paper);selected=paper;review=checked;
+    const prior=(graph.papers||[]).find(p=>p.id===paper.id||p.doi&&p.doi===paper.doi||p.arxivId&&p.arxivId===paper.arxivId);
+    // Reuse manual corrections only for a uniquely resolved author in this paper.
+    for(const author of review.authors){
+      if(!author.matchId)continue;
+      const previous=(prior?.authors||[]).filter(a=>a.nodeId===author.matchId&&(!a.orcid||!author.orcid||normalizeORCID(a.orcid)===normalizeORCID(author.orcid)));
+      if(previous.length===1&&previous[0].affiliationEdited&&previous[0].affiliation){author.affiliation=previous[0].affiliation;author.affiliationEdited=true;delete author.affiliationSources;}
+    }
     const nodeMap=new Map(getBaseGraph().nodes.map(n=>[n.id,n]));
     const authors=review.authors||[],pairs=authors.length*(authors.length-1)/2;
     $('#paper-authors').hidden=false;
     $('#paper-authors').innerHTML='<h3>'+esc(paper.title)+'</h3><p class="source-note">'+authors.length+' 位作者 · 将记录 '+pairs+' 组共同作者关系。核对后点击窗口底部的“下一步：确认导入”。</p><div class="paper-review-toolbar"><b id="paper-review-count"></b><label><input id="paper-only-pending" type="checkbox"> 只看待选择作者</label></div><p id="paper-review-complete" class="sync-status" hidden>作者已全部选择，可点击下一步。取消筛选可复核完整作者列表。</p>'+
-      '<div class="table-scroll"><table class="directory-table paper-author-table"><thead><tr><th>作者</th><th>论文所列机构</th><th>匹配人物档案</th></tr></thead><tbody>'+
+      '<p id="paper-affiliation-summary" class="affiliation-summary" role="status"></p><div class="table-scroll"><table class="directory-table paper-author-table"><thead><tr><th>作者</th><th>论文署名机构（可编辑）</th><th>匹配人物档案</th></tr></thead><tbody>'+
       authors.map(author=>{
         const ids=author.candidateIds||[];
         const choice=author.matchId||(author.requiresReview?'':ids.length===1?ids[0]:ids.length>1?'':'new');
@@ -88,19 +106,21 @@ export function setupPaperManager({getBaseGraph,dataManager}){
         }).join('');
         const note=author.status==='variant'?'待选择：发现姓名变体，请选择已有档案或新建':author.status==='new'?'未找到精确匹配，可搜索已有档案':author.status==='exact'?(author.reason==='Exact ORCID'?'ORCID 一致':'已核对的姓名或论文作者'):author.status==='ambiguous'?'待选择：有多个候选档案，请明确选择':'发现同名档案，请核对';
         const search='<details class="author-match-search"><summary>搜索其他已有档案</summary><input type="search" data-author-search="'+author.index+'" aria-label="搜索 '+esc(author.name)+' 的已有档案" placeholder="姓名、机构或档案编号" autocomplete="off"><div data-author-results aria-live="polite"></div></details>';
-        return '<tr data-author-row="'+author.index+'"><td data-label="作者"><b>'+esc(author.name)+'</b>'+(author.orcid?'<small>ORCID '+esc(author.orcid)+'</small>':'')+'</td><td data-label="论文所列机构">'+esc(author.affiliation||'未提供')+'</td><td data-label="匹配人物档案"><select data-author-index="'+author.index+'" aria-label="'+esc(author.name)+' 的人物档案" aria-describedby="author-match-note-'+author.index+'">'+options+'</select><small id="author-match-note-'+author.index+'" data-match-note>'+esc(note)+'</small>'+search+'</td></tr>';
+        const sources=author.affiliationEdited?[]:sanitizeAffiliationSources(author.affiliationSources);
+        const affiliation='<textarea class="author-affiliation-input" rows="3" maxlength="1000" data-author-affiliation="'+author.index+'" aria-label="'+esc(author.name)+' 的论文署名机构" placeholder="未识别，可手动补充">'+esc(author.affiliation||'')+'</textarea><small class="affiliation-source" data-affiliation-source>'+sources.map(source=>'<a href="'+esc(source.url)+'" target="_blank" rel="noopener noreferrer">'+esc(source.name)+(source.year?' · '+source.year:'')+'</a>').join('<br>')+'</small><small data-affiliation-note>'+(author.affiliationEdited?'已保存的手动核对值。':!author.affiliation?'未识别到机构，可手动补充；不影响继续导入。':'')+'</small>';
+        return '<tr data-author-row="'+author.index+'"><td data-label="作者"><b>'+esc(author.name)+'</b>'+(author.orcid?'<small>ORCID '+esc(author.orcid)+'</small>':'')+'</td><td data-label="论文署名机构">'+affiliation+'</td><td data-label="匹配人物档案"><select data-author-index="'+author.index+'" aria-label="'+esc(author.name)+' 的人物档案" aria-describedby="author-match-note-'+author.index+'">'+options+'</select><small id="author-match-note-'+author.index+'" data-match-note>'+esc(note)+'</small>'+search+'</td></tr>';
       }).join('')+'</tbody></table></div>'+
       '<p class="source-note">机构按论文发表时的信息显示；确认匹配后保留已有主姓名，记住论文署名及无冲突的 ORCID。当前职位和导师关系沿用已有档案。</p>'+
       '<div class="paper-source-links">'+(paper.sources||[]).filter(source=>safeURL(source.url)).map(source=>'<a class="evidence-link" href="'+esc(safeURL(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(source.name||source.title||'论文来源')+' ↗</a>').join(' · ')+'</div>';
     const notes=[...(review.warnings||[]),...(review.issues||[]).map(issue=>issue.message||String(issue))];
     if(notes.length){const p=document.createElement('p');p.className='source-note';p.textContent=notes.join(' ');$('#paper-authors').append(p);}
-    updateNext();
+    updateAffiliationSummary();updateNext();
   }
   async function lookup(){
     const input=$('#paper-query').value.trim();if(!input)return status('请输入论文标题或链接。',true);
     if(request)request.abort();request=new AbortController();setBusy(true);review=null;selected=null;
     $('#paper-candidates').hidden=true;$('#paper-authors').hidden=true;
-    status('正在检索论文与作者…');
+    status('正在检索论文、作者与论文署名机构…');
     try{
       const parsedInput=parsePaperInput(input),titleHint=['scholar','unsupported-url'].includes(parsedInput.kind)?$('#paper-title-hint').value.trim():'';
       inputInfo=parsedInput;
@@ -123,7 +143,13 @@ export function setupPaperManager({getBaseGraph,dataManager}){
       const orcid=node?(normalizeORCID(node.orcid)||(node.records||[]).map(r=>normalizeORCID(r.fields?.Q)).find(Boolean)||''):'';
       matches['0:'+select.dataset.authorIndex]=select.value==='new'?'new':{nodeId:select.value,identity:{name:node?.name||'',orcid}};
     }
-    const paper={...selected,sources:[...(selected.sources||[])]};
+    const authors=selected.authors.map((original,index)=>{
+      const author=review.authors[index],affiliation=dialog.querySelector('[data-author-affiliation="'+index+'"]').value.trim(),out={...original};
+      delete out.affiliation;delete out.affiliationSources;delete out.affiliationEdited;
+      if(affiliation){out.affiliation=affiliation;if(author.affiliationEdited||affiliation!==(author.affiliation||''))out.affiliationEdited=true;else{const sources=sanitizeAffiliationSources(author.affiliationSources);if(sources.length)out.affiliationSources=sources;}}
+      return out;
+    });
+    const paper={...selected,authors,sources:[...(selected.sources||[])]};
     const aliasURL=inputInfo?.kind==='scholar'?safeURL(inputInfo.inputUrl):'';
     if(aliasURL&&!paper.sources.some(source=>source.url===aliasURL))paper.sources.push({name:'Google Scholar · 用户提供条目',url:aliasURL});
     const parsed={kind:'paper',sourceFile:'paper-import.json',sheet:'Papers',papers:[paper],matches,warnings:[]};

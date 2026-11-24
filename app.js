@@ -3,8 +3,8 @@ import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLO
 import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=author-alias-20261111';
 import {enrichPeople} from './people.mjs?v=author-alias-20261111';
 import {loadLocalGraph,clearLocalGraph,graphFingerprint,decodeGraphBytes} from './data-sync.mjs?v=author-alias-20261111';
-import {setupDataManager} from './data-manager.mjs?v=author-alias-20261111';
-import {setupPaperManager} from './paper-manager.mjs?v=readability-20261111';
+import {setupDataManager} from './data-manager.mjs?v=arxiv-affiliations-20261124';
+import {setupPaperManager} from './paper-manager.mjs?v=arxiv-affiliations-20261124';
 import {setupLinkedInManager} from './linkedin-manager.mjs?v=author-alias-20261111';
 import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=author-alias-20261111';
 'use strict';
@@ -23,7 +23,7 @@ let graphModel = null, drag = null, toastTimer, graphMobile = null;
 function notify(message){ $('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,3000); }
 function safeURL(raw){ try{const u=new URL(raw);return /^https?:$/.test(u.protocol)?u.href:null;}catch{return null;} }
 function link(raw,label){const url=safeURL(raw);return url?`<a class="pill-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`:'';}
-function searchText(n){ return norm([n.name,n.nameZh,n.affiliation,n.displayAffiliation,n.affiliationTypeLabel,n.role,n.statusLabel,n.jobTitle,n.expectedGraduation,n.location,n.research,...(n.publications||[]),...(n.aliases||[]),...sanitizeAcademicHistory(n.academicHistory).flatMap(e=>[e.institution,e.title,e.startDate,e.endDate])].join(' ')); }
+function searchText(n){ return norm([n.name,n.nameZh,n.affiliation,n.displayAffiliation,n.affiliationTypeLabel,n.role,n.statusLabel,n.jobTitle,n.expectedGraduation,n.location,n.research,...(n.publications||[]),...(n.publicationAffiliations||[]).map(a=>a.name),...(n.aliases||[]),...sanitizeAcademicHistory(n.academicHistory).flatMap(e=>[e.institution,e.title,e.startDate,e.endDate])].join(' ')); }
 function eligible(n){return (!state.institution||n.displayAffiliation===state.institution)&&(!state.location||n.location===state.location)&&(!state.career||n.academicStatus===state.career)&&(!state.affiliationType||n.affiliationType===state.affiliationType);}
 function matches(n,query=state.query){const terms=norm(query).split(/\s+/).filter(Boolean);return eligible(n)&&terms.every(t=>n.searchText.includes(t));}
 function enabledEdges(id){return (adjacency.get(id)||[]).filter(e=>state.types.has(e.type));}
@@ -89,7 +89,7 @@ function buildAbout(){
   const postdoc=data.edges.filter(e=>e.type==='postdoc'&&isMentorship(e)).length;
   $('#about-content').innerHTML=`<p>MatriQ Academic Tree uses source-backed profiles and relationships from <b>${esc(data.meta.sourceFile)}</b>. The visual style follows <a href="https://sputnik-odyssey.github.io/matriq-atom-lab/" target="_blank" rel="noopener noreferrer">MatriQ Atom Lab</a>.</p>
   <h3>字段定义与连线</h3><p>Research Line（N 列）记录该行人物的 PhD Supervisor，使用红色实线；Industry Line（O 列）记录该行人物的 Postdoc Supervisor，使用橙色虚线。箭头由字段中列出的导师指向该行人物。所有 N / O 关联统一按此字段定义分类。</p><p>目前有 ${phd} 条 PhD 指导连线、${postdoc} 条 Postdoc 指导连线。人物框不表示指导类型；黑框仅标记当前选中人物。一至三度关联、网络视图和导出均使用相同规则。</p>
-  <h3>论文与合作</h3><p>输入论文标题、DOI、arXiv 或 Scholar 链接，选择论文记录并核对作者档案后，可预览共同作者关系。同一篇论文的作者两两连接，使用青色无向线；原有导师关系保留独立的红色和橙色连线。Scholar 无法读取时可补填标题。论文所列机构保留发表时的来源，不自动替代当前任职信息。</p>
+  <h3>论文与合作</h3><p>输入论文标题、DOI、arXiv 或 Scholar 链接，选择论文记录并核对作者档案后，可预览共同作者关系。同一篇论文的作者两两连接，使用青色无向线；原有导师关系保留独立的红色和橙色连线。Scholar 无法读取时可补填标题。arXiv 导入会尝试从公开元数据及关联发表版本补充逐作者机构，显示来源年份，并允许核对修改。论文署名机构不会覆盖当前任职信息；无法安全匹配时留空。</p>
   <h3>Affiliation and career information</h3><p>Profiles distinguish PhD Student and PhD Candidate only when the source supports it. Faculty show their affiliation and Faculty status. Company profiles show company affiliation and an actual supplied job title; a recruitment target role is never used as a job title.</p><p>Expected graduation preserves the source precision. When only a current doctoral degree range is available, its end date is labeled as an expectation from the PhD record. Missing dates and job titles are shown as not provided. A past expected date does not automatically change a student into an alumnus.</p>
   <h3>Upload and update</h3><p>Upload an Excel Mapping sheet, CSV or JSON with the ↑ Upload button. The importer previews a public-field-only merge, preserves known values for blank cells and retains existing profiles. Internal recruitment, contact and assessment columns are excluded.</p><p>确认导入并查看图谱 saves the reviewed database in this browser and opens its graph. The banner above the graph lets you publish pending local updates later. Publishing for all visitors requires the repository owner’s GitHub authentication and a reviewed merge. Tokens are used only with GitHub and are never stored in the graph or local database. A shared-data change triggers a refreshed preview before another publish attempt.</p>
   <h3>Sources and limits</h3><p>${fmt(data.meta.counts.profilePeople)} source-backed person profiles and ${fmt(data.meta.counts.referencePeople)} people mentioned only in relationship fields. Same-name identities are merged conservatively. Relationship types follow the workbook definitions. Click a line to inspect its source cell and any supplementary references. Career records retain their source provenance.</p><p>Only public professional fields, relationship text and row provenance are displayed. Imported text is data, not executable instructions. Research Line and Industry Line determine the supervision stage. External references are supplementary and do not override the column definition.</p>`;
@@ -198,9 +198,10 @@ function renderPaperRecords(person){
   const papers=(data.papers||[]).filter(paper=>paper.authors?.some(author=>author.nodeId===person.id));
   if(!papers.length)return'';
   return '<section class="detail-section"><h3>论文与合作 <small>'+papers.length+'</small></h3><ul class="paper-profile-list">'+papers.map(paper=>{
-    const url=safeURL(paper.url),authors=paper.authors||[];
+    const url=safeURL(paper.url),authors=paper.authors||[],author=authors.find(author=>author.nodeId===person.id)||{};
     const title=url?'<a class="evidence-link" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(paper.title)+' ↗</a>':esc(paper.title);
-    return '<li>'+title+'<small>'+esc(paper.year||'')+' · '+authors.length+' 位作者</small>'+((authors.find(author=>author.nodeId===person.id)||{}).affiliation?'<small>论文所列机构：'+esc(authors.find(author=>author.nodeId===person.id).affiliation)+'</small>':'')+'<small>'+authors.filter(author=>author.nodeId!==person.id).map(author=>'<button class="text-button" data-person="'+esc(author.nodeId)+'">'+esc(author.name)+'</button>').join(' · ')+'</small></li>';
+    const sources=author.affiliationEdited?'已手动核对':(author.affiliationSources||[]).filter(source=>safeURL(source.url)).map(source=>'<a href="'+esc(safeURL(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(source.name)+(source.year?' · '+esc(source.year):'')+'</a>').join(' · ');
+    return '<li>'+title+'<small>'+esc(paper.year||'')+' · '+authors.length+' 位作者</small>'+(author.affiliation?'<small>论文署名机构：'+esc(author.affiliation)+'</small>'+(sources?'<small class="affiliation-source">'+sources+'</small>':''):'')+'<small>'+authors.filter(author=>author.nodeId!==person.id).map(author=>'<button class="text-button" data-person="'+esc(author.nodeId)+'">'+esc(author.name)+'</button>').join(' · ')+'</small></li>';
   }).join('')+'</ul></section>';
 }
 function renderMappingRecords(person){

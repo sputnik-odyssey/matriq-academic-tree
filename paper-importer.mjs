@@ -15,6 +15,36 @@ const fileName=value=>text(value,200).split(/[\\/]/).pop()||'paper-import.json';
 const person=node=>node?.entityType==='person'&&!node.stub;
 const names=node=>[node.name,node.nameZh,...(Array.isArray(node.aliases)?node.aliases:[])].filter(Boolean).map(norm);
 function safeURL(value){try{const url=new URL(text(value,3000));return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}}
+function publicAffiliationURL(value){
+  if(typeof value!=='string')return '';
+  try{
+    const url=new URL(text(value,3000)),host=url.hostname.toLowerCase().replace(/\.$/,'');
+    if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.port)return '';
+    // Provenance is published with the dataset. Keep only public domain URLs,
+    // excluding local hosts, IP literals, and links carrying credentials.
+    if(!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(host)||/(?:^|\.)(?:localhost|local|localdomain|internal|lan|home|corp|test|invalid|example|onion)$/.test(host))return '';
+    if([...url.searchParams.keys()].some(key=>/^(?:api[-_]?key|access[-_]?token|token|authorization|auth|password|passwd|secret|key)$/i.test(key)))return '';
+    url.hostname=host;url.hash='';return url.href;
+  }catch{return '';}
+}
+export function sanitizeAffiliationSources(value){
+  const sources=[];
+  for(const source of Array.isArray(value)?value.slice(0,30):[]){
+    const url=publicAffiliationURL(source?.url);if(!url||sources.some(item=>item.url===url))continue;
+    const name=typeof source?.name==='string'?source.name.replace(/<[^>]*>/g,'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,200):'';
+    const year=Number(source?.year);
+    sources.push({name:name||new URL(url).hostname,url,...(source?.year!==null&&source?.year!==''&&Number.isInteger(year)&&year>=1500&&year<=2200?{year}:{})});
+    if(sources.length===5)break;
+  }
+  return sources;
+}
+function affiliationFields(author){
+  if(!author?.affiliation)return {};
+  const out={affiliation:author.affiliation};
+  if(author.affiliationEdited===true)out.affiliationEdited=true;
+  else{const sources=sanitizeAffiliationSources(author.affiliationSources);if(sources.length)out.affiliationSources=sources;}
+  return out;
+}
 
 export function normalizeORCID(value){
   let id=text(value,300).toLowerCase();
@@ -40,7 +70,7 @@ export function sanitizePaper(input,{keepNodeIds=false}={}){
     if(typeof author==='string')author={name:author};
     const name=text(author?.name,300);if(!name)throw Error(`Author ${index+1} needs a name.`);
     const out={name},orcid=normalizeORCID(author.orcid),affiliation=text(author.affiliation,1000),externalId=text(author.externalId,300);
-    if(orcid)out.orcid=orcid;if(affiliation)out.affiliation=affiliation;if(externalId)out.externalId=externalId;
+    if(orcid)out.orcid=orcid;Object.assign(out,affiliationFields({...author,affiliation}));if(externalId)out.externalId=externalId;
     if(keepNodeIds&&typeof author.nodeId==='string')out.nodeId=text(author.nodeId,200);
     return out;
   });
@@ -159,7 +189,7 @@ export function rebuildPaperGraph(graph,inputPapers=graph.papers||[]){
   for(const raw of inputPapers){const paper=sanitizePaper(raw,{keepNodeIds:true});if(paper.authors.some(a=>!compatible(nodes.get(a.nodeId),a)))throw Error(`Paper author identities need review: ${paper.title}`);papers.set(paper.id,paper);}
   graph.papers=[...papers.values()];graph.edges=graph.edges.filter(e=>!['coauthor','collaboration'].includes(e.type));
   for(const node of graph.nodes)delete node.publicationAffiliations;
-  for(const paper of graph.papers)for(const author of paper.authors)if(author.affiliation){const node=nodes.get(author.nodeId);node.publicationAffiliations=node.publicationAffiliations||[];node.publicationAffiliations.push({name:author.affiliation,paperId:paper.id,...(paper.year?{year:paper.year}:{}),url:paper.url});}
+  for(const paper of graph.papers)for(const author of paper.authors)if(author.affiliation){const node=nodes.get(author.nodeId);node.publicationAffiliations=node.publicationAffiliations||[];const {affiliation,...provenance}=affiliationFields(author);node.publicationAffiliations.push({name:affiliation,paperId:paper.id,...(paper.year?{year:paper.year}:{}),url:paper.url,...provenance});}
   const ids=new Set(graph.edges.map(e=>e.id)),pairs=new Map();
   for(const paper of graph.papers){const authors=[...new Set(paper.authors.map(a=>a.nodeId))].sort();for(let i=0;i<authors.length;i++)for(let j=i+1;j<authors.length;j++){
     const source=authors[i],target=authors[j],key=source+'|'+target;let edge=pairs.get(key);
@@ -217,7 +247,13 @@ export function previewPaperImport(base,rawDocument){
       const record={row:author.index+1,sourceFile:`paper-${hash(paper.id)}.json`,fields};
       if(!node.records.some(r=>r.row===record.row&&r.sourceFile===record.sourceFile&&JSON.stringify(r.fields)===JSON.stringify(fields)))node.records.push(record);
       node.rows=[...new Set(node.records.map(r=>r.row))].sort((a,b)=>a-b);if(JSON.stringify(node)!==before)changed.add(node.id);subjects.add(node.id);
-      resolved.push({name:author.name,...(author.orcid?{orcid:author.orcid}:{}),...(author.affiliation?{affiliation:author.affiliation}:{}),...(author.externalId?{externalId:author.externalId}:{}),nodeId:node.id});
+      const previousAuthors=(prior?.authors||[]).filter(a=>a.nodeId===node.id&&(!a.orcid||!author.orcid||a.orcid===author.orcid)),previousAuthor=previousAuthors.length===1?previousAuthors[0]:null;
+      // Missing metadata does not erase a reviewed affiliation. A manual
+      // correction also survives later automatic lookups of the same paper.
+      const chosenAffiliation=previousAuthor?.affiliation&&(!author.affiliation||previousAuthor.affiliationEdited===true&&author.affiliationEdited!==true)?previousAuthor:author;
+      const affiliation=affiliationFields(chosenAffiliation);
+      if(previousAuthor&&author.affiliation&&chosenAffiliation===author&&!author.affiliationEdited&&previousAuthor.affiliation===author.affiliation&&!previousAuthor.affiliationEdited){const sources=sanitizeAffiliationSources([...(author.affiliationSources||[]),...(previousAuthor.affiliationSources||[])]);if(sources.length)affiliation.affiliationSources=sources;}
+      resolved.push({name:author.name,...(author.orcid?{orcid:author.orcid}:{}),...affiliation,...(author.externalId?{externalId:author.externalId}:{}),nodeId:node.id});
     }
     const resolvedPaper={...paper,authors:resolved},previous=paperMap.get(paper.id);if(!previous)papersAdded++;else if(JSON.stringify(previous)!==JSON.stringify(resolvedPaper))papersUpdated++;
     paperMap.set(paper.id,resolvedPaper);focusPersonId=focusPersonId||resolved[0]?.nodeId||null;

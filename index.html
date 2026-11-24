@@ -7,8 +7,8 @@
   <meta name="description" content="量子物理人物、机构、职业信息与学术关系数据库。">
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=readability-20261111">
-  <script type="module" src="app.js?v=readability-20261111"></script>
+  <link rel="stylesheet" href="style.css?v=arxiv-affiliations-20261124">
+  <script type="module" src="app.js?v=arxiv-affiliations-20261124"></script>
 </head>
 <body>
 <header class="topbar">
@@ -71,7 +71,7 @@
   <form id="paper-lookup">
     <div class="form-field"><label for="paper-query">论文标题、DOI、arXiv 或 Google Scholar 链接</label><input id="paper-query" type="search" autocomplete="off" maxlength="2000" placeholder="输入论文标题或链接"></div>
     <details id="paper-fallback"><summary>补充论文标题</summary><div class="form-field"><label for="paper-title-hint">Google Scholar 无法读取时，用标题定位公开论文记录</label><input id="paper-title-hint" type="text" maxlength="2000" placeholder="完整论文标题"></div></details>
-    <div class="paper-actions"><button class="primary-button" id="find-paper" type="submit">识别论文作者</button><button class="secondary-button" id="paper-example" type="button">载入本次论文示例</button></div>
+    <div class="paper-actions"><button class="primary-button" id="find-paper" type="submit">识别作者与论文机构</button><button class="secondary-button" id="paper-example" type="button">载入本次论文示例</button></div>
   </form>
   <p class="source-note">标题、DOI 和 arXiv 通过公开论文记录检索。Google Scholar 限制自动读取时，可补填标题。</p>
   <div id="paper-status" class="sync-status" role="status">输入论文信息后开始检索。合作关系使用青色无向连线。</div>

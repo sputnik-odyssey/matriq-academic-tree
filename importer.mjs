@@ -2,7 +2,7 @@
 import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory,sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=author-alias-20261111';
 import {sanitizeNameAliases,serializeNameAliases} from './public-aliases.mjs?v=author-alias-20261111';
 import {normalizeMappingEdges} from './mentorship.mjs?v=author-alias-20261111';
-import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=author-alias-20261111';
+import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=arxiv-affiliations-20261124';
 export const PUBLIC_COLUMNS=Object.freeze([
   {key:'A',label:'Legal Name'},{key:'B',label:'中文名'},{key:'C',label:'PhD'},
   {key:'D',label:'Bachelor location'},{key:'E',label:'Bachelor'},
