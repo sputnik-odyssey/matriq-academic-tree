@@ -10,6 +10,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   const $=s=>document.querySelector(s),dialog=$('#paper-modal');
   let candidates=[],selected=null,review=null,busy=false,request=null,inputInfo=null;
   const status=(message,error=false)=>{const element=$('#paper-status');element.textContent=message;element.className=error?'notice import-error':'sync-status';};
+  function sizeAffiliationField(field){field.style.height='auto';field.style.height=Math.min(320,field.scrollHeight+2)+'px';}
   function updateAffiliationSummary(){
     const fields=[...dialog.querySelectorAll('[data-author-affiliation]')],count=fields.filter(field=>field.value.trim()).length,summary=$('#paper-affiliation-summary');
     if(summary)summary.textContent='已填写 '+count+' / '+fields.length+' 位作者的论文署名机构。可核对、修改或补充；相关发表版本的机构可能与 arXiv 版本不同。留空不会删除已保存的论文机构。';
@@ -33,6 +34,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
     if($('#data-modal').open)$('#data-modal').close();
     if(selected&&!preserveReview)renderAuthors(selected);
     dialog.showModal();
+    dialog.querySelectorAll('[data-author-affiliation]').forEach(sizeAffiliationField);
     $('#paper-query').focus();
   }
   document.querySelectorAll('[data-open-paper]').forEach(button=>button.addEventListener('click',()=>open()));
@@ -58,6 +60,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
   $('#paper-authors').addEventListener('input',event=>{
     const affiliation=event.target.closest('[data-author-affiliation]');
     if(affiliation&&review){
+      sizeAffiliationField(affiliation);
       const author=review.authors.find(a=>String(a.index)===affiliation.dataset.authorAffiliation),cell=affiliation.closest('td'),changed=affiliation.value.trim()!==(author?.affiliation||'');
       cell.querySelector('[data-affiliation-source]').hidden=changed;
       cell.querySelector('[data-affiliation-note]').textContent=changed?(affiliation.value.trim()?'已手动修改；确认后保存核对结果。':'留空将保留此前保存的机构（如有）。'):author?.affiliationEdited?'已保存的手动核对值。':!author?.affiliation?'未识别到机构，可手动补充；不影响继续导入。':'';
@@ -114,6 +117,7 @@ export function setupPaperManager({getBaseGraph,dataManager}){
       '<div class="paper-source-links">'+(paper.sources||[]).filter(source=>safeURL(source.url)).map(source=>'<a class="evidence-link" href="'+esc(safeURL(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(source.name||source.title||'论文来源')+' ↗</a>').join(' · ')+'</div>';
     const notes=[...(review.warnings||[]),...(review.issues||[]).map(issue=>issue.message||String(issue))];
     if(notes.length){const p=document.createElement('p');p.className='source-note';p.textContent=notes.join(' ');$('#paper-authors').append(p);}
+    if(dialog.open)dialog.querySelectorAll('[data-author-affiliation]').forEach(sizeAffiliationField);
     updateAffiliationSummary();updateNext();
   }
   async function lookup(){
