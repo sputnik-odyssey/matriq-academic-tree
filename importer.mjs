@@ -1,5 +1,5 @@
 /* Local-only structured-file import. Uploaded text is data, never executable instructions. */
-import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory,sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=author-alias-20261111';
+import {sanitizeAcademicHistory,mergeAcademicHistory,serializeAcademicHistory,sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=career-refresh-20261125';
 import {sanitizeNameAliases,serializeNameAliases} from './public-aliases.mjs?v=author-alias-20261111';
 import {normalizeMappingEdges} from './mentorship.mjs?v=author-alias-20261111';
 import {sanitizePaper,sanitizePaperDocument,previewPaperImport,rebuildPaperGraph} from './paper-importer.mjs?v=arxiv-affiliations-20261124';

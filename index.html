@@ -7,8 +7,8 @@
   <meta name="description" content="量子物理人物、机构、职业信息与学术关系数据库。">
   <title>MatriQ · 量子学术图谱</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=arxiv-affiliations-20261124">
-  <script type="module" src="app.js?v=arxiv-affiliations-20261124b"></script>
+  <link rel="stylesheet" href="style.css?v=career-refresh-20261125">
+  <script type="module" src="app.js?v=career-refresh-20261125"></script>
 </head>
 <body>
 <header class="topbar">
@@ -78,15 +78,15 @@
   <div id="paper-candidates" hidden></div>
   <section id="paper-authors" hidden></section>
 </div><div class="workflow-footer"><p id="paper-next-hint" role="status" aria-live="polite">识别论文后，核对作者并进入确认导入。</p><div id="paper-pending" class="paper-pending" aria-label="待选择作者" hidden></div><div class="workflow-buttons"><button class="secondary-button" id="paper-next-unresolved" type="button" hidden>定位下一位待选择作者</button><button class="secondary-button" data-close>取消</button><button class="primary-button" id="preview-paper" disabled>下一步：确认导入 →</button></div></div></dialog>
-<dialog id="linkedin-modal" class="modal linkedin-modal" aria-labelledby="linkedin-title"><div class="modal-head"><div><h2 id="linkedin-title">导入 LinkedIn 学术履历</h2><p class="import-step">1 获取履历 → 2 核对 PhD / Postdoc → 3 确认导入</p></div><button class="icon-button" data-close aria-label="关闭 LinkedIn 导入">×</button></div><div class="modal-body">
+<dialog id="linkedin-modal" class="modal linkedin-modal" aria-labelledby="linkedin-title"><div class="modal-head"><div><h2 id="linkedin-title">导入 LinkedIn 学术履历</h2><p class="import-step">1 获取履历 → 2 核对教育与任职 → 3 确认导入</p></div><button class="icon-button" data-close aria-label="关闭 LinkedIn 导入">×</button></div><div class="modal-body">
   <form id="linkedin-fetch-form">
     <div class="form-field"><label for="linkedin-url">LinkedIn 人物链接</label><input id="linkedin-url" type="url" maxlength="2000" placeholder="https://www.linkedin.com/in/…" autocomplete="off"></div>
     <div class="linkedin-api-settings"><div class="form-field"><label for="linkedin-api-token">Apify API Token</label><input id="linkedin-api-token" type="password" autocomplete="off" spellcheck="false" placeholder="输入 Apify API Token"><small>密钥仅用于本次请求，关闭窗口即清空。每次仅抓取一位人物，每任务费用上限 US$0.10；实际费用以 Apify 服务为准。</small></div><p class="source-note"><a class="evidence-link" id="linkedin-provider-link" target="_blank" rel="noopener noreferrer">查看抓取服务 ↗</a> · <a class="evidence-link" href="https://console.apify.com/settings/integrations" target="_blank" rel="noopener noreferrer">获取 Apify Token ↗</a></p></div>
     <details><summary>继续已有 Apify 任务（可选）</summary><div class="form-field"><label for="linkedin-run-id">Apify Run ID</label><input id="linkedin-run-id" type="text" autocomplete="off" maxlength="64" placeholder="从 Apify 控制台复制任务编号"></div></details>
     <div class="paper-actions"><button class="primary-button" id="fetch-linkedin" type="submit">抓取 LinkedIn 履历</button><button class="secondary-button" id="new-linkedin-run" type="button" hidden>创建新的抓取任务</button><button class="secondary-button" id="stop-linkedin" type="button" hidden>停止等待</button></div>
   </form>
-  <details id="linkedin-fallback"><summary>备用：粘贴履历文字</summary><div class="form-field"><label for="linkedin-text">LinkedIn Education / Experience 文字</label><textarea id="linkedin-text" rows="7" maxlength="150000" placeholder="粘贴姓名、Education 和 Experience。只提取博士及博后条目。"></textarea></div><button class="secondary-button" id="parse-linkedin-text">识别粘贴履历</button></details>
-  <div id="linkedin-status" class="sync-status" role="status">输入人物链接和 Apify Token 后抓取。博士从 Education 识别，博后同时检查 Experience。</div>
+  <details id="linkedin-fallback"><summary>备用：粘贴履历文字</summary><div class="form-field"><label for="linkedin-text">LinkedIn Education / Experience 文字</label><textarea id="linkedin-text" rows="7" maxlength="150000" placeholder="粘贴姓名、Education 和 Experience。可识别博士与博后。任职条目可手动补充。"></textarea></div><button class="secondary-button" id="parse-linkedin-text">识别粘贴履历</button> <button class="secondary-button" id="manual-linkedin-entry" type="button" hidden>手动填写履历</button></details>
+  <div id="linkedin-status" class="sync-status" role="status">输入人物链接和 Apify Token 后抓取。从 Education 读取博士履历，从 Experience 读取博后与任职履历。</div>
   <section id="linkedin-review" hidden>
     <div class="linkedin-identity"><div class="form-field"><label for="linkedin-name">人物姓名（请核对）</label><input id="linkedin-name" type="text" maxlength="300"></div><div class="form-field"><label for="linkedin-match">对应人物档案</label><select id="linkedin-match"></select><small id="linkedin-match-note"></small></div></div>
     <div id="linkedin-history-entries"></div>

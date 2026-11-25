@@ -1,5 +1,5 @@
-import {sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=author-alias-20261111';
-import {previewImport,sanitizePublicImportFields} from './importer.mjs?v=arxiv-affiliations-20261124';
+import {sanitizeLinkedInProfileMatch} from './academic-history.mjs?v=career-refresh-20261125';
+import {previewImport,sanitizePublicImportFields} from './importer.mjs?v=career-refresh-20261125';
 import {previewPaperImport,sanitizePaper,sanitizePaperDocument} from './paper-importer.mjs?v=arxiv-affiliations-20261124';
 
 export function queueUpload(parsed,staged=[]){

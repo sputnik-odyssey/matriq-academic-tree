@@ -17,14 +17,22 @@ function sourceURL(value){
 }
 function section(value){const v=norm(value);return['education','教育','教育经历','教育經歷'].includes(v)?'Education':['experience','工作经历','工作經歷','经历','經歷'].includes(v)?'Experience':'';}
 function entry(input){
-  if(!input||typeof input!=='object'||Array.isArray(input)||!['phd','postdoc'].includes(input.type))return null;
+  if(!input||typeof input!=='object'||Array.isArray(input)||!['phd','postdoc','employment'].includes(input.type))return null;
   const institution=text(input.institution,300),title=text(input.title,300),startDate=normalizeAcademicDate(input.startDate),ongoing=input.ongoing===true||input.endDateType==='ongoing',endDate=ongoing?'':normalizeAcademicDate(input.endDate);
   if(!institution&&!title&&!startDate&&!endDate&&!ongoing)return null;
-  const endDateType=ongoing?'ongoing':['expected','unspecified'].includes(input.endDateType)?input.endDateType:'unspecified';
-  return{type:input.type,institution,title,startDate,endDate,ongoing,endDateType,sourceSection:section(input.sourceSection),sourceUrl:sourceURL(input.sourceUrl),retrievedAt:day(input.retrievedAt)};
+  const endDateType=ongoing?'ongoing':['expected','unspecified','actual'].includes(input.endDateType)?input.endDateType:'unspecified';
+  const currentStatus=institution&&(ongoing||input.type==='phd'&&endDateType==='expected'&&endDate)&&statesForType(input.type).includes(input.currentStatus)?input.currentStatus:'';
+  return{type:input.type,...(currentStatus?{currentStatus}:{}),institution,title,startDate,endDate,ongoing,endDateType,sourceSection:section(input.sourceSection),sourceUrl:sourceURL(input.sourceUrl),retrievedAt:day(input.retrievedAt)};
 }
+export function statesForType(type){
+  if(type==='phd')return ['phd_student','phd_candidate'];
+  if(type==='postdoc')return ['postdoc'];
+  return type==='employment'?['faculty','industry','other']:[];
+}
+export function academicHistoryLabel(type){return {phd:'PhD',postdoc:'Postdoc',employment:'任职'}[type]||'履历';}
 function identity(a,b){
   if(a.type!==b.type||norm(a.institution)!==norm(b.institution))return false;
+  if(a.type==='employment'&&norm(a.title)!==norm(b.title))return false;
   if(a.startDate&&b.startDate)return a.startDate===b.startDate||a.startDate.slice(0,4)===b.startDate.slice(0,4)&&(a.startDate.length===4||b.startDate.length===4);
   if(a.endDate&&b.endDate&&a.endDate.slice(0,4)!==b.endDate.slice(0,4))return false;
   return true;
@@ -33,9 +41,11 @@ function refinedDate(previous,incoming){return previous&&incoming&&previous.star
 function mergeEntry(previous,incoming){
   const out={...previous};
   for(const key of ['institution','title','sourceSection','sourceUrl','retrievedAt'])if(incoming[key])out[key]=incoming[key];
+  if(incoming.currentStatus)out.currentStatus=incoming.currentStatus;
+  else if(incoming.endDate&&incoming.endDateType!=='expected')delete out.currentStatus;
   out.startDate=refinedDate(previous.startDate,incoming.startDate);
   if(incoming.ongoing){out.ongoing=true;out.endDate='';out.endDateType='ongoing';}
-  else if(incoming.endDate){out.ongoing=false;out.endDate=refinedDate(previous.endDate,incoming.endDate);out.endDateType=incoming.endDateType==='expected'?'expected':previous.endDateType==='expected'&&incoming.endDate===previous.endDate?'expected':'unspecified';}
+  else if(incoming.endDate){out.ongoing=false;out.endDate=refinedDate(previous.endDate,incoming.endDate);out.endDateType=incoming.endDateType==='actual'?'actual':incoming.endDateType==='expected'?'expected':previous.endDateType==='expected'&&incoming.endDate===previous.endDate?'expected':'unspecified';}
   return out;
 }
 function read(value){
@@ -47,8 +57,12 @@ export function mergeAcademicHistory(existing,incoming){
   for(const raw of [...read(existing),...read(incoming)]){
     const next=entry(raw);if(!next)continue;
     const candidates=result.map((old,index)=>identity(old,next)?index:-1).filter(index=>index>=0);
+    if(next.currentStatus) for(const [index,old] of result.entries()) if(index!==candidates[0])delete old.currentStatus;
     if(candidates.length===1)result[candidates[0]]=mergeEntry(result[candidates[0]],next);
-    else if(!result.some(old=>JSON.stringify(old)===JSON.stringify(next))&&result.length<MAX_ACADEMIC_HISTORY)result.push(next);
+    else if(!result.some(old=>JSON.stringify(old)===JSON.stringify(next))&&(result.length<MAX_ACADEMIC_HISTORY||next.currentStatus)){
+      if(result.length===MAX_ACADEMIC_HISTORY)result.pop();
+      result.push(next);
+    }
   }
   return result;
 }

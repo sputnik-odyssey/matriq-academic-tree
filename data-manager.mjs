@@ -1,7 +1,7 @@
-import {parseUpload} from './importer.mjs?v=arxiv-affiliations-20261124';
-import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=arxiv-affiliations-20261124';
-import {enrichPerson} from './people.mjs?v=author-alias-20261111';
-import {sanitizeAcademicHistory,formatAcademicDate} from './academic-history.mjs?v=author-alias-20261111';
+import {parseUpload} from './importer.mjs?v=career-refresh-20261125';
+import {queueUpload,mergePendingDocuments} from './import-queue.mjs?v=career-refresh-20261125';
+import {enrichPerson} from './people.mjs?v=career-refresh-20261125';
+import {sanitizeAcademicHistory,formatAcademicDate,academicHistoryLabel} from './academic-history.mjs?v=career-refresh-20261125';
 import {sanitizeAffiliationSources} from './paper-importer.mjs?v=arxiv-affiliations-20261124';
 import {saveLocalGraph,clearLocalGraph,graphFingerprint,loadGitHubGraph,verifyRepositoryOwner,publishGitHubGraph} from './data-sync.mjs?v=author-alias-20261111';
 
@@ -70,7 +70,7 @@ export function setupDataManager({getBaseGraph,getPublishedGraph,getActiveInfo,o
     renderPaperSummary();
     if(upload?.kind==='linkedin'){
       const section=document.createElement('section');section.className='linkedin-profile-history paper-import-list';
-      section.innerHTML='<h3>博士与博后履历</h3>'+upload.rows.map(row=>'<b>'+esc(row.fields.A)+'</b><ul class="academic-history-list">'+sanitizeAcademicHistory(row.fields.academicHistory).map(entry=>'<li><b>'+esc(entry.type==='phd'?'PhD':'Postdoc')+' · '+esc(entry.institution)+'</b><span>'+esc(entry.title)+'</span><span>开始：'+esc(formatAcademicDate(entry.startDate))+' · '+(entry.endDateType==='expected'?'预计结束：':'结束：')+esc(formatAcademicDate(entry.endDate,{present:entry.ongoing}))+'</span></li>').join('')+'</ul>').join('');
+      section.innerHTML='<h3>教育与任职履历</h3>'+upload.rows.map(row=>'<b>'+esc(row.fields.A)+'</b><ul class="academic-history-list">'+sanitizeAcademicHistory(row.fields.academicHistory).map(entry=>'<li><b>'+esc(academicHistoryLabel(entry.type))+' · '+esc(entry.institution)+(entry.currentStatus?' · 更新为当前状态':'')+'</b><span>'+esc(entry.title)+'</span><span>开始：'+esc(formatAcademicDate(entry.startDate))+' · '+(entry.endDateType==='expected'?'预计结束：':'结束：')+esc(formatAcademicDate(entry.endDate,{present:entry.ongoing}))+'</span></li>').join('')+'</ul>').join('');
       $('#import-preview').prepend(section);
     }
   }

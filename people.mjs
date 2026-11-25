@@ -1,3 +1,4 @@
+import {sanitizeAcademicHistory} from './academic-history.mjs?v=career-refresh-20261125';
 // Public, source-based career display. Recruitment Position/Notes/Progress fields are never read.
 const EMPTY=/^(?:\s*|\/|none|null|n\/?a|not\s+(?:provided|available|specified)|unknown|undefined|-|—|待确认|未知|不详)$/i;
 const text=value=>value==null?'':String(value).trim();
@@ -132,10 +133,24 @@ export function enrichPerson(node,{asOf='2026-11-11'}={}){
   }
   // Faculty is the display classification, while an explicit rank remains available as a title.
   if(!jobTitle&&academicStatus==='faculty'&&role&&!/^faculty$/i.test(role)){jobTitle=role;jobTitleSource='affiliation_type_record';}
+  const current=person?sanitizeAcademicHistory(node.academicHistory).find(entry=>entry.currentStatus):null;
+  if(current){
+    academicStatus=current.currentStatus;
+    affiliationType=inferAffiliationType(current.institution);
+    if(affiliationType==='unknown'&&academicStatus==='industry')affiliationType='company';
+    jobTitle=current.type==='phd'?'':current.title;
+    jobTitleSource=jobTitle?'reviewed_history':'';
+  }
   const isDoctoral=person&&['phd_student','phd_candidate'].includes(academicStatus);
   let expectedGraduation='',expectedGraduationSource='',expectedGraduationSourceDetail='';
   const explicitExpected=expectedValue(node);
-  if(isDoctoral){
+  if(isDoctoral&&current){
+    if(current.endDateType==='expected'){
+      expectedGraduation=current.endDate;
+      expectedGraduationSource='reviewed_history';
+      expectedGraduationSourceDetail=current.sourceUrl;
+    }
+  }else if(isDoctoral){
     if(explicitExpected.raw){
       expectedGraduation=normaliseExpected(explicitExpected.raw);
       if(expectedGraduation){expectedGraduationSource='explicit';expectedGraduationSourceDetail=explicitExpected.source;}
@@ -158,6 +173,7 @@ export function enrichPerson(node,{asOf='2026-11-11'}={}){
     const degreeAffiliation=degreeInstitution(phd);
     if(degreeAffiliation){displayAffiliation=degreeAffiliation;displayAffiliationSource='degree_record';if(affiliationType==='unknown')affiliationType=inferAffiliationType(degreeAffiliation);}
   }
+  if(current){displayAffiliation=current.institution;displayAffiliationSource='reviewed_history';}
   let statusLabel=statusLabels[academicStatus];
   if(academicStatus==='other'&&role)statusLabel=role;
   if(!person)statusLabel=node.entityType==='institution'||node.kind==='organization'?'Organization':node.entityType==='group'||node.kind==='group'?'Research group':node.entityType==='publication'||node.kind==='publication'?'Publication':'Other';
@@ -167,7 +183,7 @@ export function enrichPerson(node,{asOf='2026-11-11'}={}){
     affiliationType:affiliationType||'unknown',
     affiliationTypeLabel:labels[affiliationType]||labels.unknown,
     affiliationTypeSource:suppliedAffiliationType?'explicit':roleAffiliationType?'source_role':inferredAffiliationType!=='unknown'?'affiliation_name':displayAffiliationSource==='degree_record'&&affiliationType!=='unknown'?'degree_record':academicStatus==='industry'?'source_role':'unknown',
-    academicStatus,statusLabel,jobTitle,jobTitleSource,
+    academicStatus,statusLabel,jobTitle,jobTitleSource,careerStartDate:current?.startDate||'',careerSourceUrl:current?.sourceUrl||'',careerRetrievedAt:current?.retrievedAt||'',
     expectedGraduation,expectedGraduationLabel,expectedGraduationSource,expectedGraduationSourceDetail,
     expectedGraduationRelevant:isDoctoral,graduationNeedsUpdate,
     displayAffiliation,displayAffiliationSource,displayRole,profileNotes

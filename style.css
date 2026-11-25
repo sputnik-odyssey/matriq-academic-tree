@@ -827,3 +827,7 @@ input::placeholder, textarea::placeholder { color: #586e80; opacity: 1; }
 .no-results, .sidebar-footer p, .zoom-controls #zoom-label, .pill-link { color: #455e72; }
 .badge:not(.mentorship-tag):not(.coauthor-tag) { color: #3d566b; }
 .badge.stub { color: #705626; }
+
+.directory-page-size { display: inline-flex; align-items: center; gap: 8px; }
+.directory-page-size select { width: auto; min-width: 70px; }
+.refresh-person { white-space: nowrap; }

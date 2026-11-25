@@ -1,6 +1,6 @@
 // One-profile Apify client. Tokens stay in request memory and never enter URLs or data.
 import {normalizeLinkedInURL} from './linkedin-parser.mjs?v=linkedin-history-20261111';
-import {sanitizeAcademicHistory,normalizeAcademicDate} from './academic-history.mjs?v=linkedin-history-20261111';
+import {sanitizeAcademicHistory,normalizeAcademicDate} from './academic-history.mjs?v=career-refresh-20261125';
 
 const API='https://api.apify.com/v2';
 export const APIFY_ACTOR=Object.freeze({
@@ -67,16 +67,18 @@ export function adaptLinkedInProfile(profile,requestedURL,{asOf=new Date().toISO
     if(type)entries.push(academicEntry(r,type,'Education',linkedin,asOf));
   }
   for(const r of (Array.isArray(profile.experience)?profile.experience:[]).slice(0,200)){
-    if(!r||typeof r!=='object'||!POSTDOC.test(clean(r.position||r.title,300)))continue;
-    entries.push(academicEntry(r,'postdoc','Experience',linkedin,asOf));
+    if(!r||typeof r!=='object'||!clean(r.position||r.title,300))continue;
+    const type=POSTDOC.test(clean(r.position||r.title,300))?'postdoc':'employment';
+    const entry=academicEntry(r,type,'Experience',linkedin,asOf);
+    if(type==='postdoc'||entry.institution)entries.push(entry);
   }
   for(const r of entries){
     if(r.startDate&&r.endDate&&(r.startDate.slice(0,4)>r.endDate.slice(0,4)||(r.startDate.length===7&&r.endDate.length===7&&r.startDate>r.endDate))){r.startDate='';r.endDate='';r.endDateType='unspecified';warnings.push('一条履历的起止日期顺序异常，已清空日期，请手动核对。');}
-    if(!r.institution)warnings.push('一条博士或博后履历未提供机构，请核对后补充。');
+    if(!r.institution)warnings.push('一条履历未提供机构，请核对后补充。');
     if(!r.startDate||!r.endDate&&!r.ongoing)warnings.push('部分履历日期缺失；未根据任职时长推算。');
   }
   const safe=sanitizeAcademicHistory(entries);
-  if(!safe.length)warnings.push('未识别到明确的 PhD 学位或 Postdoc 职位，可核对原始页面后补充。');
+  if(!safe.length)warnings.push('未识别到明确的博士、博后或任职记录，可核对原始页面后补充。');
   return{name,linkedin,entries:safe,warnings:[...new Set(warnings)],source:'apify'};
 }
 
