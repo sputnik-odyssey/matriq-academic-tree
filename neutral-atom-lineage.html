@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#001689">
+  <meta name="description" content="中性原子量子计算研究导师、研究负责人及其博士与博后师承，附公开出处。">
+  <title>中性原子师承 · MatriQ Academic Tree</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=arxiv-affiliations-20261124">
+  <style>
+    [hidden] { display: none !important; }
+    .lineage { max-width: 1230px; margin: auto; font-size: 1rem; }
+    .lineage a { color: #194c86; text-underline-offset: .2em; }
+    .lineage-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px clamp(14px, 4vw, 42px); background: #eaf0f5; border-bottom: 1px solid #c5d6e6; font-size: .9rem; }
+    .lineage-header .brand { color: #1b3348; }
+    .lineage-intro { margin-bottom: 25px; }
+    .lineage h1 { font-size: clamp(1.9rem, 5vw, 3.4rem); color: #162f53; line-height: 1.18; }
+    .lineage .summary { max-width: 52rem; margin: 14px 0; }
+    .lineage h2 { font-size: 1.42rem; margin: 0 0 10px; }
+    .overview { margin: 0 0 25px; padding: 18px clamp(12px, 3vw, 25px); border: 1px solid #c5d6e6; border-radius: 9px; background: #edf4fa; }
+    .featured-paths { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+    .featured-path { display: flex; flex-wrap: wrap; align-items: center; gap: .27rem .62rem; }
+    .connector { display: inline-flex; align-items: center; gap: .3rem; color: #435a6f; }
+    .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 0 0 8px; }
+    .controls label { display: grid; font-weight: 600; gap: 5px; font-size: .94rem; }
+    .controls input, .controls select { box-sizing: border-box; width: 100%; min-height: 43px; border: 1px solid #a8c0d6; border-radius: 6px; padding: 7px 10px; color: inherit; background: #fff; font: inherit; }
+    .count { color: #435a6f; margin: 8px 0 20px; font-size: .94rem; }
+    .region { margin: 0 0 30px; }
+    .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+    .person { min-width: 0; display: flex; flex-direction: column; background: #f9fcff; border: 1px solid #c5d6e6; border-radius: 8px; padding: 16px 18px; scroll-margin: 18px; }
+    .person:target { outline: 2px solid #295b94; outline-offset: 2px; }
+    .person h3 { font-size: 1.35rem; line-height: 1.18; color: #16345d; margin: 3px 0; }
+    .person p { margin: 0; }
+    .person header p, .lineage .note, .unconfirmed { color: #435a6f; font-size: .94rem; }
+    .role { color: #3f5b75; font-size: .84rem; }
+    .person .topic { margin: 8px 0 11px; }
+    .mentors { border-top: 1px solid #c5d6e6; padding-top: 8px; }
+    .mentors h4 { margin: 0 0 5px; font-size: .94rem; }
+    .mentors ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 5px; }
+    .stage { white-space: nowrap; display: inline-block; padding: 0 6px; margin-right: 3px; border-radius: 3px; font-size: .85rem; line-height: 1.45; border: 1px solid currentColor; }
+    .stage.phd { color: #8f2633; background: #faeaed; }
+    .stage.postdoc { color: #834313; background: #fff1df; border-style: dashed; }
+    .stage.group { color: #405970; background: #eaf1f8; }
+    .citation { font-size: .88rem; }
+    .person .note { margin-top: 9px; }
+    .person footer { margin-top: auto; padding-top: 11px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .94rem; }
+    .methodology { border-top: 1px solid #a8c0d6; padding-top: 16px; }
+    @media (max-width: 620px) { .controls { grid-template-columns: 1fr 1fr; } .controls label:first-child { grid-column: 1 / -1; } }
+  </style>
+</head>
+<body>
+  <header class="lineage-header">
+    <a class="brand" href="./" aria-label="MatriQ 图谱首页"><span>MatriQ <small>ACADEMIC TREE</small></span></a>
+    <nav aria-label="主导航"><a href="./">返回关系图谱</a></nav>
+  </header>
+  <main class="lineage">
+    <header class="lineage-intro">
+      <h1>中性原子量子计算师承</h1>
+      <p class="summary">查阅中性原子量子计算、相关量子模拟与控制方向的导师、研究负责人与代表性研究者。每条关系附公开出处，可按姓名、机构、导师或方向检索。</p>
+    </header>
+    <section class="overview" aria-labelledby="featured-heading">
+      <h2 id="featured-heading">代表性师承路径</h2>
+      <ul class="featured-paths">
+        <li class="featured-path"><a href="#scully">Marlan Scully</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage phd">博士</span></span> <a href="#lukin">Mikhail Lukin</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage phd">博士</span></span> <a href="#thompson">Jeff Thompson</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage postdoc">博后</span></span> <a href="#bichen">Bichen Zhang</a></li>
+        <li class="featured-path"><a href="#greiner">Markus Greiner</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage postdoc">博后</span></span> <a href="#kaufman">Adam Kaufman</a></li>
+        <li class="featured-path"><a href="#browaeys">Antoine Browaeys</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage postdoc">博后</span></span> <a href="#leseleuc">Sylvain de Léséleuc</a></li>
+        <li class="featured-path"><a href="#pfau">Tilman Pfau</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage postdoc">博后</span></span> <a href="#lahaye">Thierry Lahaye</a> <span class="connector"><span aria-hidden="true">→</span><span class="stage phd">博士</span></span> <a href="#bornet">Guillaume Bornet</a></li>
+      </ul>
+    </section>
+    <section aria-label="师承名录">
+      <div class="controls" id="filters" hidden>
+        <label>检索<input type="search" id="query" placeholder="例如 Bichen Zhang、镱原子、Lukin" autocomplete="off"></label>
+        <label>团队所在地区<select id="region"><option value="">全部地区</option><option>北美</option><option>欧洲</option><option>亚太</option></select></label>
+        <label>人物类别<select id="role"><option value="">全部类别</option><option>导师与研究负责人</option><option>研究者</option><option>上游师承</option></select></label>
+      </div>
+      <p class="count" id="count" role="status">共 56 位人物 · 61 条博士及博后关系</p>
+      <section class="region" aria-labelledby="heading-0">
+        <h2 id="heading-0">北美</h2>
+        <div class="people">
+        <article class="person" id="lukin" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Mikhail Lukin</h3><p>Harvard · QuEra</p></header>
+          <p class="topic">Rydberg 阵列、逻辑处理器、容错架构</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#scully">Marlan Scully</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">人物资料</a> <a href="./#person=p5368">在主图谱中查看</a></footer>
+        </article>
+        <article class="person" id="thompson" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Jeff Thompson</h3><p>Princeton</p></header>
+          <p class="topic">镱原子、擦除转换、量子纠错</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          <p class="note">博士毕业后在 MIT 和 Harvard 联合任博后，见 Princeton 任职公告。 <a href="https://ece.princeton.edu/news/ee-department-welcomes-two-new-assistant-professors" title="Princeton ECE · Jeff Thompson 任职公告">出处</a></p>
+          <footer><a href="https://sites.google.com/site/thompsonlabq/people" title="Princeton · Thompson 实验室成员">人物资料</a> <a href="./#person=p5304">在主图谱中查看</a></footer>
+        </article>
+        <article class="person" id="vuletic" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Vladan Vuletić</h3><p>MIT · QuEra</p></header>
+          <p class="topic">原子阵列、腔 QED、量子控制</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Theodor W. Hänsch <span class="citation"><a href="https://eapg.mit.edu/wp-content/uploads/2024/12/CV-2024.pdf" title="MIT · Vuletić 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> Steven Chu <span class="citation"><a href="https://eapg.mit.edu/wp-content/uploads/2024/12/CV-2024.pdf" title="MIT · Vuletić 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://eapg.mit.edu/wp-content/uploads/2024/12/CV-2024.pdf" title="MIT · Vuletić 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="greiner" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Markus Greiner</h3><p>Harvard · QuEra</p></header>
+          <p class="topic">量子气体显微镜、光晶格和光镊阵列</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage postdoc">博后</span> Deborah S. Jin <span class="citation"><a href="https://greiner.physics.harvard.edu/people/mgreiner.html" title="Harvard · Greiner 履历与论文">出处</a></span></li></ul>
+          </div>
+          <p class="note">博士阶段在 Theodor W. Hänsch 课题组，见本人履历。</p>
+          <footer><a href="https://greiner.physics.harvard.edu/people/mgreiner.html" title="Harvard · Greiner 履历与论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="endres" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Manuel Endres</h3><p>Caltech</p></header>
+          <p class="topic">锶原子光镊、可扩展阵列和擦除探测</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#bloch">Immanuel Bloch</a> <small>(共同指导)</small> <span class="citation"><a href="https://www.endreslab.com/manuel-endres.html" title="Endres Lab · 履历">出处</a></span></li><li><span class="stage phd">博士</span> Stefan Kuhr <small>(共同指导)</small> <span class="citation"><a href="https://www.endreslab.com/manuel-endres.html" title="Endres Lab · 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> J. Ignacio Cirac <span class="citation"><a href="https://www.endreslab.com/manuel-endres.html" title="Endres Lab · 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.endreslab.com/manuel-endres.html" title="Endres Lab · 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="kaufman" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Adam Kaufman</h3><p>JILA · University of Colorado Boulder</p></header>
+          <p class="topic">镱原子阵列、原子钟、量子信息</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#regal">Cindy Regal</a> <span class="citation"><a href="https://jila.colorado.edu/sites/default/files/group-files/2025-10/AMK_cv_2025_Sept.pdf" title="JILA · Kaufman 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#greiner">Markus Greiner</a> <span class="citation"><a href="https://jila.colorado.edu/sites/default/files/group-files/2025-10/AMK_cv_2025_Sept.pdf" title="JILA · Kaufman 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://jila.colorado.edu/sites/default/files/group-files/2025-10/AMK_cv_2025_Sept.pdf" title="JILA · Kaufman 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="regal" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Cindy Regal</h3><p>JILA · University of Colorado Boulder</p></header>
+          <p class="topic">单原子操控、激光冷却、原子纠缠</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://jila.colorado.edu/sites/default/files/group-files/2024-08/2024_Aug_Regal_cv.pdf" title="JILA · Regal 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="covey" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Jacob Covey</h3><p>University of Illinois Urbana-Champaign</p></header>
+          <p class="topic">中性原子量子网络和可扩展处理器</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#ye">Jun Ye</a> <small>(共同指导)</small> <span class="citation"><a href="https://grainger.illinois.edu/about/directory/faculty/jcovey" title="Illinois · Jacob Covey 官方履历">出处</a></span></li><li><span class="stage phd">博士</span> Deborah S. Jin <small>(共同指导)</small> <span class="citation"><a href="https://grainger.illinois.edu/about/directory/faculty/jcovey" title="Illinois · Jacob Covey 官方履历">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#endres">Manuel Endres</a> <span class="citation"><a href="https://grainger.illinois.edu/about/directory/faculty/jcovey" title="Illinois · Jacob Covey 官方履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://grainger.illinois.edu/about/directory/faculty/jcovey" title="Illinois · Jacob Covey 官方履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="ye" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Jun Ye</h3><p>JILA · NIST</p></header>
+          <p class="topic">光晶格原子钟、冷原子精密操控</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> John L. (Jan) Hall <span class="citation"><a href="https://www.nist.gov/people/jun-ye" title="NIST · Jun Ye 官方简介">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.nist.gov/people/jun-ye" title="NIST · Jun Ye 官方简介">人物资料</a></footer>
+        </article>
+        <article class="person" id="saffman" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Mark Saffman</h3><p>UW–Madison · Infleqtion</p></header>
+          <p class="topic">铯原子阵列、Rydberg 门和规模化</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Dana Anderson <small>(二手来源)</small> <span class="citation"><a href="https://en.wikipedia.org/wiki/Mark_Saffman" title="Mark Saffman · 博士导师记录">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.physics.wisc.edu/directory/saffman-mark/" title="UW–Madison · Mark Saffman">人物资料</a></footer>
+        </article>
+        <article class="person" id="weiss" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>David S. Weiss</h3><p>Penn State</p></header>
+          <p class="topic">三维光晶格量子计算和单点寻址</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Steven Chu <span class="citation"><a href="https://bpb-us-e1.wpmucdn.com/sites.psu.edu/dist/9/85709/files/2023/10/Weiss-CV-2023.pdf" title="Penn State · David Weiss 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://bpb-us-e1.wpmucdn.com/sites.psu.edu/dist/9/85709/files/2023/10/Weiss-CV-2023.pdf" title="Penn State · David Weiss 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="bernien" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Hannes Bernien</h3><p>University of Chicago</p></header>
+          <p class="topic">复合原子阵列、量子网络</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Ronald Hanson <span class="citation"><a href="https://repository.tudelft.nl/record/uuid%3A75130c37-edb5-4a34-ac2f-c156d377ca55" title="TU Delft · Bernien 博士论文">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://repository.tudelft.nl/record/uuid%3A75130c37-edb5-4a34-ac2f-c156d377ca55" title="TU Delft · Bernien 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="semeghini" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Giulia Semeghini</h3><p>Harvard</p></header>
+          <p class="topic">Rydberg 阵列、量子模拟和纠错</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Giovanni Modugno <span class="citation"><a href="https://mphq.physics.harvard.edu/people/giulia-semeghini" title="Max Planck–Harvard · Semeghini 简介">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://mphq.physics.harvard.edu/people/giulia-semeghini" title="Max Planck–Harvard · Semeghini 简介">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://mphq.physics.harvard.edu/people/giulia-semeghini" title="Max Planck–Harvard · Semeghini 简介">人物资料</a></footer>
+        </article>
+        <article class="person" id="simon" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Jonathan Simon</h3><p>Stanford</p></header>
+          <p class="topic">冷原子量子模拟、原子与光子接口</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#vuletic">Vladan Vuletić</a> <span class="citation"><a href="https://simonlab.stanford.edu/CVs/250302_SimonCV.pdf" title="Stanford · Jonathan Simon 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#greiner">Markus Greiner</a> <span class="citation"><a href="https://simonlab.stanford.edu/CVs/250302_SimonCV.pdf" title="Stanford · Jonathan Simon 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://simonlab.stanford.edu/CVs/250302_SimonCV.pdf" title="Stanford · Jonathan Simon 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="choi" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Joonhee Choi</h3><p>Stanford</p></header>
+          <p class="topic">量子多体动力学、原子量子模拟</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://profiles.stanford.edu/joonhee-choi" title="Stanford · Joonhee Choi">人物资料</a></footer>
+        </article>
+        <article class="person" id="gorshkov" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Alexey Gorshkov</h3><p>NIST · JQI</p></header>
+          <p class="topic">中性原子量子信息和多体模拟理论</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://rqs.umd.edu/people/alexey-gorshkov" title="UMD RQS · Alexey Gorshkov">人物资料</a></footer>
+        </article>
+        <article class="person" id="cooper" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Alexandre Cooper-Roy</h3><p>University of Waterloo · IQC</p></header>
+          <p class="topic">可编程 Rydberg 阵列</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://uwaterloo.ca/institute-for-quantum-computing/profiles/alexandre-cooper-roy" title="Waterloo IQC · Alexandre Cooper-Roy">人物资料</a></footer>
+        </article>
+        <article class="person" id="bloom" data-region="北美" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Ben Bloom</h3><p>Atom Computing</p></header>
+          <p class="topic">核自旋中性原子、逻辑比特</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          <p class="note">产业研发负责人。</p>
+          <footer><a href="https://atom-computing.com/about-us/" title="Atom Computing · 团队官方简介">人物资料</a></footer>
+        </article>
+        <article class="person" id="bichen" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Bichen Zhang</h3><p>Princeton · Thompson Lab；Duke 博士阶段</p></header>
+          <p class="topic">亚稳态镱原子、擦除纠错和逻辑比特</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage group">课题组</span> <a href="#brown">Kenneth R. Brown</a> <small>(Duke 博士阶段课题组)</small> <span class="citation"><a href="https://brownlab.pratt.duke.edu/people/bichen-zhang" title="Duke · Brown Lab 的 Bichen Zhang 档案">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#thompson">Jeff Thompson</a> <small>(Princeton 博后)</small> <span class="citation"><a href="https://sites.google.com/site/thompsonlabq/people" title="Princeton · Thompson 实验室成员">出处</a></span></li></ul>
+          </div>
+          <p class="note">Duke Brown Lab 的个人档案记载了其 2021 年博士履历。页面按课题组记录呈现 Kenneth Brown，正式论文导师姓名仍待明确的学位记录。 <a href="https://brownlab.pratt.duke.edu/people/bichen-zhang" title="Duke · Brown Lab 的 Bichen Zhang 档案">出处</a></p>
+          <footer><a href="https://rqs.umd.edu/people/bichen-zhang" title="UMD RQS · Bichen Zhang">人物资料</a> <a href="./#person=p5195">在主图谱中查看</a></footer>
+        </article>
+        <article class="person" id="bluvstein" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Dolev Bluvstein</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">中性原子纠错与逻辑处理器</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="cain" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Madelyn Cain</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">中性原子算法、量子纠错</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="levine" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Harry Levine</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">Rydberg 量子门和量子处理器</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="keesling" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Alexander Keesling</h3><p>Harvard 博士阶段 · QuEra</p></header>
+          <p class="topic">Rydberg 阵列、量子模拟与硬件</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.physics.harvard.edu/sites/g/files/omnuum6476/files/2025-06/Lukin_CV.pdf" title="Harvard Physics · Lukin 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="genyue" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Genyue Liu</h3><p>Princeton 博士阶段</p></header>
+          <p class="topic">镱原子控制、纠错与逻辑比特</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#thompson">Jeff Thompson</a> <span class="citation"><a href="https://ece.princeton.edu/news/age-abundant-intelligence-graduate-commencement-speaker-stresses-service-and-wisdom" title="Princeton ECE · 博士毕业记录">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://ece.princeton.edu/news/age-abundant-intelligence-graduate-commencement-speaker-stresses-service-and-wisdom" title="Princeton ECE · 博士毕业记录">人物资料</a> <a href="./#person=p5519">在主图谱中查看</a></footer>
+        </article>
+        <article class="person" id="madjarov" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Ivaylo Madjarov</h3><p>Caltech 博士阶段</p></header>
+          <p class="topic">锶原子光镊和纠缠门</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#endres">Manuel Endres</a> <span class="citation"><a href="https://thesis.caltech.edu/view/advisor/Endres-M.html" title="CaltechTHESIS · Endres 指导的博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thesis.caltech.edu/view/advisor/Endres-M.html" title="CaltechTHESIS · Endres 指导的博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="shaw" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Adam Shaw</h3><p>Caltech 博士阶段</p></header>
+          <p class="topic">可编程原子模拟器与擦除纠错</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#endres">Manuel Endres</a> <span class="citation"><a href="https://thesis.caltech.edu/view/advisor/Endres-M.html" title="CaltechTHESIS · Endres 指导的博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thesis.caltech.edu/view/advisor/Endres-M.html" title="CaltechTHESIS · Endres 指导的博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="manetsch" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Hannah Manetsch</h3><p>Caltech 博士阶段</p></header>
+          <p class="topic">6,100 原子光镊阵列</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#endres">Manuel Endres</a> <span class="citation"><a href="https://thesis.caltech.edu/view/advisor/Endres-M.html" title="CaltechTHESIS · Endres 指导的博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thesis.caltech.edu/view/advisor/Endres-M.html" title="CaltechTHESIS · Endres 指导的博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="chiu" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Neng-Chun (Allen) Chiu</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">中性原子阵列持续相干运行</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage group">课题组</span> <a href="#lukin">Mikhail Lukin</a> <small>(Lukin Group 论文名录)</small> <span class="citation"><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="evered" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Simon Evered</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">原子处理器上的数字量子模拟与纠错</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage group">课题组</span> <a href="#lukin">Mikhail Lukin</a> <small>(Lukin Group 论文名录)</small> <span class="citation"><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="guo" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Jinen (Tim) Guo</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">中性原子处理器的规模化</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage group">课题组</span> <a href="#lukin">Mikhail Lukin</a> <small>(Lukin Group 论文名录)</small> <span class="citation"><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="stroganov" data-region="北美" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Pavel Stroganov</h3><p>Harvard 博士阶段</p></header>
+          <p class="topic">连续运行原子阵列的控制系统</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage group">课题组</span> <a href="#lukin">Mikhail Lukin</a> <small>(Lukin Group 论文名录)</small> <span class="citation"><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://lukin.physics.harvard.edu/resources" title="Harvard · Lukin Group 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="brown" data-region="北美" data-role="上游师承" tabindex="-1">
+          <header><span class="role">上游师承</span><h3>Kenneth R. Brown</h3><p>Duke</p></header>
+          <p class="topic">离子阱量子计算和量子纠错</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> K. Birgitta Whaley <span class="citation"><a href="https://www.media.mit.edu/quanta/people/kenbrown/index.html" title="MIT · Kenneth Brown 自述">出处</a></span></li><li><span class="stage postdoc">博后</span> Isaac Chuang <span class="citation"><a href="https://www.media.mit.edu/quanta/people/kenbrown/index.html" title="MIT · Kenneth Brown 自述">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.media.mit.edu/quanta/people/kenbrown/index.html" title="MIT · Kenneth Brown 自述">人物资料</a></footer>
+        </article>
+        <article class="person" id="scully" data-region="北美" data-role="上游师承" tabindex="-1">
+          <header><span class="role">上游师承</span><h3>Marlan Scully</h3><p>Texas A&amp;M</p></header>
+          <p class="topic">量子光学与相干效应</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Willis Lamb <span class="citation"><a href="https://history.aip.org/history/catalog/icos/47513.html" title="AIP · Scully 口述史">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://history.aip.org/history/catalog/icos/47513.html" title="AIP · Scully 口述史">人物资料</a></footer>
+        </article>
+        </div>
+      </section>
+      <section class="region" aria-labelledby="heading-1">
+        <h2 id="heading-1">欧洲</h2>
+        <div class="people">
+        <article class="person" id="browaeys" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Antoine Browaeys</h3><p>Institut d’Optique · CNRS · Pasqal</p></header>
+          <p class="topic">Rydberg 阵列和可编程模拟</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Alain Aspect <span class="citation"><a href="https://www.simonsfoundation.org/people/antoine-browaeys/" title="Simons Foundation · Browaeys 官方简介">出处</a></span></li><li><span class="stage postdoc">博后</span> William D. Phillips <span class="citation"><a href="https://www.simonsfoundation.org/people/antoine-browaeys/" title="Simons Foundation · Browaeys 官方简介">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.simonsfoundation.org/people/antoine-browaeys/" title="Simons Foundation · Browaeys 官方简介">人物资料</a></footer>
+        </article>
+        <article class="person" id="lahaye" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Thierry Lahaye</h3><p>Institut d’Optique · CNRS</p></header>
+          <p class="topic">Rydberg 自旋模型、可重构光镊阵列</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> David Guéry-Odelin <small>(共同指导)</small> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li><li><span class="stage phd">博士</span> Jean Dalibard <small>(共同指导)</small> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#pfau">Tilman Pfau</a> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">人物资料</a></footer>
+        </article>
+        <article class="person" id="henriet" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Loïc Henriet</h3><p>Pasqal</p></header>
+          <p class="topic">中性原子处理器与产业研发</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          <p class="note">产业研发负责人。</p>
+          <footer><a href="https://www.pasqal.com/about-us/leadership/loic-henriet/" title="Pasqal · Loïc Henriet">人物资料</a></footer>
+        </article>
+        <article class="person" id="pritchard" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Jonathan Pritchard</h3><p>University of Strathclyde</p></header>
+          <p class="topic">Rydberg 多比特门、低温双原子种平台</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage postdoc">博后</span> Erling Riis <small>(博士后阶段所在课题组)</small> <span class="citation"><a href="https://pure.strath.ac.uk/ws/portalfiles/portal/cv/008bd57e-d66e-42e0-b090-b6f44d1c982e?locale=en_GB" title="Strathclyde · Pritchard 官方履历">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#saffman">Mark Saffman</a> <small>(博士后阶段所在课题组)</small> <span class="citation"><a href="https://pure.strath.ac.uk/ws/portalfiles/portal/cv/008bd57e-d66e-42e0-b090-b6f44d1c982e?locale=en_GB" title="Strathclyde · Pritchard 官方履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://pure.strath.ac.uk/ws/portalfiles/portal/cv/008bd57e-d66e-42e0-b090-b6f44d1c982e?locale=en_GB" title="Strathclyde · Pritchard 官方履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="adams" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Charles S. Adams</h3><p>Durham University</p></header>
+          <p class="topic">Rydberg 阻塞、冷原子量子光学</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://physics.aps.org/authors/charles_adams" title="APS · Charles Adams">人物资料</a></footer>
+        </article>
+        <article class="person" id="whitlock" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Shannon Whitlock</h3><p>Université de Strasbourg · aQCess</p></header>
+          <p class="topic">Rydberg 处理器和中性原子量子软件</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Andrei Sidorov <small>(主要导师)</small> <span class="citation"><a href="https://www.swinburne.edu.au/caous/theses/Whitlock%20Thesis.pdf" title="Swinburne · Whitlock 博士论文">出处</a></span></li><li><span class="stage phd">博士</span> Peter Hannaford <small>(第二导师)</small> <span class="citation"><a href="https://www.swinburne.edu.au/caous/theses/Whitlock%20Thesis.pdf" title="Swinburne · Whitlock 博士论文">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://whitlockscientific.eu/" title="Shannon Whitlock · aQCess 项目">人物资料</a></footer>
+        </article>
+        <article class="person" id="hofferberth" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Sebastian Hofferberth</h3><p>MIT–Harvard CUA 博后阶段</p></header>
+          <p class="topic">Rydberg 光学和量子非线性</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Jörg Schmiedmayer <span class="citation"><a href="https://cua.mit.edu/people/sebastian-hofferberth" title="MIT–Harvard CUA · Hofferberth 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://cua.mit.edu/people/sebastian-hofferberth" title="MIT–Harvard CUA · Hofferberth 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://cua.mit.edu/people/sebastian-hofferberth" title="MIT–Harvard CUA · Hofferberth 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="pfau" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Tilman Pfau</h3><p>University of Stuttgart · QRydDemo</p></header>
+          <p class="topic">Rydberg 原子与中性原子处理器</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://www.project.uni-stuttgart.de/qryddemo/team/" title="Stuttgart · QRydDemo 团队">人物资料</a></footer>
+        </article>
+        <article class="person" id="zeiher" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Johannes Zeiher</h3><p>Munich 研究团队；UC Berkeley 博后阶段</p></header>
+          <p class="topic">光晶格、原子显微镜及 Rydberg 相互作用</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://ultracold.physics.berkeley.edu/johannes-zeiher" title="UC Berkeley · Johannes Zeiher">人物资料</a></footer>
+        </article>
+        <article class="person" id="bloch" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Immanuel Bloch</h3><p>LMU Munich · MPQ</p></header>
+          <p class="topic">超冷原子、光晶格量子模拟</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://www.leopoldina.org/fileadmin/Migrierte_Daten/Publikationen/Dokumente/JB-2011_web_neu.pdf" title="Leopoldina · Immanuel Bloch 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="zoller" data-region="欧洲" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Peter Zoller</h3><p>Innsbruck · IQOQI</p></header>
+          <p class="topic">冷原子量子模拟和量子计算理论</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Franz Ehlotzky <span class="citation"><a href="https://www.lincei.it/sites/default/files/2024-10/3092_CV.pdf" title="Accademia dei Lincei · Peter Zoller 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> Peter Lambropoulos <small>(Max Kade 博后阶段)</small> <span class="citation"><a href="https://www.lincei.it/sites/default/files/2024-10/3092_CV.pdf" title="Accademia dei Lincei · Peter Zoller 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.lincei.it/sites/default/files/2024-10/3092_CV.pdf" title="Accademia dei Lincei · Peter Zoller 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="barredo" data-region="欧洲" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Daniel Barredo</h3><p>Institut d’Optique 博后阶段</p></header>
+          <p class="topic">三维光镊阵列与可重构原子排布</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage postdoc">博后</span> <a href="#lahaye">Thierry Lahaye</a> <small>(共同指导)</small> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://atom-tweezers-io.org/people/" title="Institut d’Optique · 原子光镊团队">人物资料</a></footer>
+        </article>
+        <article class="person" id="bornet" data-region="欧洲" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Guillaume Bornet</h3><p>Institut d’Optique 博士阶段 · Princeton 博后阶段</p></header>
+          <p class="topic">Rydberg 自旋模拟、镱原子逻辑比特</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lahaye">Thierry Lahaye</a> <small>(共同指导)</small> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#thompson">Jeff Thompson</a> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">人物资料</a></footer>
+        </article>
+        <article class="person" id="lienhard" data-region="欧洲" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Vincent Lienhard</h3><p>Institut d’Optique 博士阶段</p></header>
+          <p class="topic">Rydberg 阵列多体动力学</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lahaye">Thierry Lahaye</a> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">人物资料</a></footer>
+        </article>
+        <article class="person" id="scholl" data-region="欧洲" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Pascal Scholl</h3><p>Institut d’Optique 博士阶段 · Pasqal</p></header>
+          <p class="topic">大规模 Rydberg 阵列量子模拟</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lahaye">Thierry Lahaye</a> <small>(共同指导)</small> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">人物资料</a></footer>
+        </article>
+        <article class="person" id="ravets" data-region="欧洲" data-role="研究者" tabindex="-1">
+          <header><span class="role">研究者</span><h3>Sylvain Ravets</h3><p>CNRS · C2N</p></header>
+          <p class="topic">单原子操控、Rydberg 相互作用</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lahaye">Thierry Lahaye</a> <small>(共同指导)</small> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">人物资料</a></footer>
+        </article>
+        </div>
+      </section>
+      <section class="region" aria-labelledby="heading-2">
+        <h2 id="heading-2">亚太</h2>
+        <div class="people">
+        <article class="person" id="bekenstein" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Rivka Bekenstein</h3><p>Hebrew University of Jerusalem</p></header>
+          <p class="topic">量子光学和原子阵列</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> Mordechai Segev <span class="citation"><a href="https://adams.academy.ac.il/wp-content/uploads/2014/06/Bekenstein-Rivka-CV-April-2021.pdf" title="Israel Academy · Bekenstein 履历">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#lukin">Mikhail Lukin</a> <span class="citation"><a href="https://adams.academy.ac.il/wp-content/uploads/2014/06/Bekenstein-Rivka-CV-April-2021.pdf" title="Israel Academy · Bekenstein 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://adams.academy.ac.il/wp-content/uploads/2014/06/Bekenstein-Rivka-CV-April-2021.pdf" title="Israel Academy · Bekenstein 履历">人物资料</a></footer>
+        </article>
+        <article class="person" id="ohmori" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Kenji Ohmori</h3><p>Institute for Molecular Science · JST Moonshot</p></header>
+          <p class="topic">中性原子容错硬件、超快门和光镊阵列</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://www.jst.go.jp/moonshot/en/program/goal6/6D_ohmori.html" title="JST · Ohmori 中性原子计算项目">人物资料</a></footer>
+        </article>
+        <article class="person" id="leseleuc" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Sylvain de Léséleuc</h3><p>Institut d’Optique 博士阶段 · IMS</p></header>
+          <p class="topic">Rydberg 阵列和自旋量子模拟</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> <a href="#lahaye">Thierry Lahaye</a> <span class="citation"><a href="https://thierry-lahaye.org/wp-content/uploads/2025/11/cv-thierry-lahaye-september-2025.pdf" title="Thierry Lahaye · 履历与指导名单">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#browaeys">Antoine Browaeys</a> <span class="citation"><a href="https://ohmori.ims.ac.jp/en/students/" title="IMS · Sylvain de Léséleuc 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://atom-tweezers-io.org/wp-content/uploads/2019/01/phd_thesis_deleseleuc_sylvain.pdf" title="Institut d’Optique · de Léséleuc 博士论文">人物资料</a></footer>
+        </article>
+        <article class="person" id="ahn" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Jaewook Ahn</h3><p>KAIST</p></header>
+          <p class="topic">Rydberg 原子阵列、量子连线</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://pure.kaist.ac.kr/en/persons/jaewook-ahn/" title="KAIST · Jaewook Ahn">人物资料</a></footer>
+        </article>
+        <article class="person" id="lin" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Yiheng Lin</h3><p>中国科学技术大学</p></header>
+          <p class="topic">原子量子操控和量子信息</p>
+          <div class="mentors"><h4>师承</h4>
+            <ul><li><span class="stage phd">博士</span> David Wineland <span class="citation"><a href="https://www.hfnl.ustc.edu.cn/2022/0905/c36716a705588/page.htm" title="中国科大 · 林毅恒官方简介">出处</a></span></li><li><span class="stage postdoc">博后</span> <a href="#regal">Cindy Regal</a> <span class="citation"><a href="https://jila.colorado.edu/sites/default/files/group-files/2024-08/2024_Aug_Regal_cv.pdf" title="JILA · Regal 履历">出处</a></span></li></ul>
+          </div>
+          
+          <footer><a href="https://www.hfnl.ustc.edu.cn/2022/0905/c36716a705588/page.htm" title="中国科大 · 林毅恒官方简介">人物资料</a></footer>
+        </article>
+        <article class="person" id="li" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Xiaopeng Li</h3><p>复旦大学 · 上海期智研究院</p></header>
+          <p class="topic">原子量子计算、量子模拟与理论</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://quantumcomputing.fudan.edu.cn/People/list.htm" title="复旦大学 · 原子量子科学实验室">人物资料</a></footer>
+        </article>
+        <article class="person" id="yuan" data-region="亚太" data-role="导师与研究负责人" tabindex="-1">
+          <header><span class="role">导师与研究负责人</span><h3>Zhen-Sheng Yuan</h3><p>中国科学技术大学</p></header>
+          <p class="topic">光晶格原子的自旋纠缠与量子模拟</p>
+          <div class="mentors"><h4>师承</h4>
+            <p class="unconfirmed">导师姓名待核实</p>
+          </div>
+          
+          <footer><a href="https://quantum.ustc.edu.cn/index.php/en/node/45" title="中国科大 · 袁震生官方简介">人物资料</a></footer>
+        </article>
+        </div>
+      </section>
+    </section>
+    <section class="methodology" aria-labelledby="scope-heading">
+      <h2 id="scope-heading">收录与核对</h2>
+      <p>这是截至 <time datetime="2026-11-25">2026 年 11 月 25 日</time> 的公开资料目录，主要覆盖北美、欧洲和亚太的代表性团队。机构栏注明博士、博后阶段的条目按对应阶段归类。人物卡片的博士、博后及课题组标签分别对应来源所能支持的关系。共同指导按已查到的出处列示。条目仍可补充，欢迎通过 <a href="https://github.com/sputnik-odyssey/matriq-academic-tree/issues">GitHub Issues</a> 提交公开资料。</p>
+    </section>
+  </main>
+  <script>
+    const query = document.getElementById('query');
+    const region = document.getElementById('region');
+    const role = document.getElementById('role');
+    const count = document.getElementById('count');
+    const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+    const profiles = [...document.querySelectorAll('.person')].map(card => ({
+      card, searchText: normalize(card.textContent)
+    }));
+    const sections = [...document.querySelectorAll('.region')];
+
+    function filterProfiles() {
+      const terms = normalize(query.value.trim()).split(/\s+/).filter(Boolean);
+      const filtering = terms.length > 0 || region.value || role.value;
+      let matches = 0;
+      for (const {card, searchText} of profiles) {
+        const visible = (!region.value || card.dataset.region === region.value)
+          && (!role.value || card.dataset.role === role.value)
+          && terms.every(term => searchText.includes(term));
+        card.hidden = !visible;
+        if (visible) matches += 1;
+      }
+      for (const section of sections) section.hidden = !section.querySelector('.person:not([hidden])');
+      count.textContent = filtering
+        ? (matches ? '显示 ' + matches + ' 位人物，共 ' + profiles.length + ' 位' : '没有匹配人物，请修改检索条件')
+        : '共 ' + profiles.length + ' 位人物 · 61 条博士及博后关系';
+    }
+
+    function revealProfile() {
+      const id = location.hash.slice(1);
+      const target = document.getElementById(id);
+      if (!target?.matches('.person')) return;
+      if (target.hidden) {
+        query.value = '';
+        region.value = '';
+        role.value = '';
+        filterProfiles();
+      }
+      target.focus({preventScroll: true});
+      target.scrollIntoView({block: 'start'});
+    }
+
+    query.addEventListener('input', filterProfiles);
+    for (const select of [region, role]) select.addEventListener('change', filterProfiles);
+    window.addEventListener('hashchange', revealProfile);
+    document.addEventListener('click', event => {
+      if (event.target.closest('a[href^="#"]')?.hash === location.hash) revealProfile();
+    });
+    document.getElementById('filters').hidden = false;
+    filterProfiles();
+    revealProfile();
+  </script>
+</body>
+</html>
