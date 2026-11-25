@@ -831,3 +831,6 @@ input::placeholder, textarea::placeholder { color: #586e80; opacity: 1; }
 .directory-page-size { display: inline-flex; align-items: center; gap: 8px; }
 .directory-page-size select { width: auto; min-width: 70px; }
 .refresh-person { white-space: nowrap; }
+
+.directory-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.directory-heading button { flex-shrink: 0; }
