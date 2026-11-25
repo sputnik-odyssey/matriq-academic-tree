@@ -1,4 +1,4 @@
-import {directoryWorkbook} from './directory-export.mjs';
+import {directoryWorkbook} from './directory-export.mjs?v=mapping-columns-20261125';
 /* MatriQ Academic Tree — dependency-free, source-backed relationship explorer. */
 import {applyColumnMentorships,isMentorship,isVerifiedMentorship,MENTORSHIP_COLORS} from './mentorship.mjs?v=author-alias-20261111';
 import {renderGraphSVG,GRAPH_BACKGROUND,COLLABORATION_COLOR} from './graph-render.mjs?v=author-alias-20261111';

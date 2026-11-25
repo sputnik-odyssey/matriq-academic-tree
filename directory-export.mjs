@@ -61,19 +61,47 @@ function zip(files) {
   });
 }
 
+const headers = [
+  'Legal Name', '中文名', 'PhD', 'Bachelor location', 'Bachelor', 'High School',
+  'CurrentAffiliation', 'AffiliationType', 'Location', '匹配方向', '匹配度', '周期',
+  '回国展望', 'Research Line', 'Industry Line', 'Website', 'ORCID', 'LinkedIn',
+  'Status', 'Scholar', 'Citation Count', 'Paper', 'Citation Count', 'Year Cited',
+  'Notes', 'Position', 'Progress', 'Source'
+];
+const missing = /^(?:\s*|\/|[-–—]|none|null|undefined|n\/?a|not provided|unknown)$/i;
+function firstValue(...values) {
+  return values.find(value => (typeof value === 'string' || typeof value === 'number') && !missing.test(String(value).trim())) ?? 'None';
+}
+
+function columnName(index) {
+  if (index < 26) return String.fromCharCode(65 + index);
+  return 'A' + String.fromCharCode(65 + index - 26);
+}
+
+function exportRow(person) {
+  const records = (person.records || []).map(record => record.fields || {});
+  const field = key => firstValue(...records.map(record => record[key]));
+  const paperRecord = records.find(record => firstValue(record.V) !== 'None');
+  const paper = firstValue(paperRecord?.V, ...(person.publications || []));
+  const reviewed = person.displayAffiliationSource === 'reviewed_history';
+  return [
+    firstValue(person.name, field('A')), firstValue(person.nameZh, field('B')),
+    firstValue(person.phd, field('C')), field('D'), firstValue(person.bachelor, field('E')), 'None',
+    firstValue(person.displayAffiliation, person.affiliation, field('G')),
+    reviewed ? firstValue(person.jobTitle, person.statusLabel) : firstValue(person.jobTitle, person.role, field('H'), person.statusLabel),
+    firstValue(person.location, field('I')), firstValue(person.research), 'None', 'None', 'None',
+    field('N'), field('O'), firstValue(person.website, field('P')), firstValue(person.orcid, field('Q')),
+    firstValue(person.linkedin, field('R')), 'None', firstValue(person.scholar, field('T')), field('U'),
+    paper, firstValue(paperRecord?.W), firstValue(paperRecord?.X), 'None', 'None', 'None', field('AB')
+  ];
+}
+
 export function directoryWorkbook(people) {
-  const rows = [[
-    '姓名', '中文名', '机构', '机构类别', '国家 / 地区', '人物状态', '职位',
-    '入学日期', '预计毕业日期', '入职日期', '直接关联数'
-  ], ...people.map(person => [
-    person.name, person.nameZh, person.displayAffiliation, person.affiliationTypeLabel, person.location,
-    person.statusLabel, person.jobTitle, person.expectedGraduationRelevant ? person.careerStartDate : '',
-    person.expectedGraduation, person.expectedGraduationRelevant ? '' : person.careerStartDate, person.degree || 0
-  ])];
+  const rows = [headers, ...people.map(exportRow)];
   const sheetData = rows.map((row, index) => {
     const number = index + 1;
     const cells = row.map((value, column) => {
-      const ref = String.fromCharCode(65 + column) + number;
+      const ref = columnName(column) + number;
       return typeof value === 'number' && Number.isFinite(value)
         ? '<c r="' + ref + '"><v>' + value + '</v></c>'
         : '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + escapeXML(value) + '</t></is></c>';
@@ -87,6 +115,6 @@ export function directoryWorkbook(people) {
     '_rels/.rels': relationship('xl/workbook.xml', 'officeDocument'),
     'xl/workbook.xml': '<workbook xmlns="' + spreadsheetNS + '" xmlns:r="' + relationshipsNS + '"><sheets><sheet name="人物名录" sheetId="1" r:id="rId1"/></sheets></workbook>',
     'xl/_rels/workbook.xml.rels': relationship('worksheets/sheet1.xml', 'worksheet'),
-    'xl/worksheets/sheet1.xml': '<worksheet xmlns="' + spreadsheetNS + '"><sheetData>' + sheetData + '</sheetData><autoFilter ref="A1:K' + rows.length + '"/></worksheet>'
+    'xl/worksheets/sheet1.xml': '<worksheet xmlns="' + spreadsheetNS + '"><sheetData>' + sheetData + '</sheetData><autoFilter ref="A1:AB' + rows.length + '"/></worksheet>'
   });
 }
